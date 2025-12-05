@@ -1,0 +1,23 @@
+# Core Django dependencies
+Django>=5.0,<5.1
+djangorestframework>=3.14.0
+drf-spectacular>=0.27.0  # API documentation (Swagger/OpenAPI)
+django-filter>=23.5  # Filtering support for DRF
+django-cors-headers>=4.3.0  # CORS handling for frontend integration
+
+# Database
+psycopg2-binary>=2.9.9  # PostgreSQL adapter
+dj-database-url>=2.1.0  # Database URL parser
+
+# Environment variables
+python-decouple>=3.8
+
+# WSGI server for production
+gunicorn>=21.2.0
+pillow
+
+# Development tools
+ipython>=8.18.0
+django-extensions>=3.2.0  # Development utilities (shell_plus, etc.)
+django-cors-headers
+dj-rest-auth
