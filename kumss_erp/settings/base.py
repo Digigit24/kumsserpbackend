@@ -2,6 +2,7 @@
 Django settings for kumss_erp project.
 Base settings shared across all environments.
 """
+import os
 import sys
 from pathlib import Path
 from decouple import config
@@ -47,6 +48,9 @@ INSTALLED_APPS = [
     'apps.students',
     'apps.teachers',
     'apps.attendance',
+    'apps.fees',
+    'apps.accounting',
+    'apps.examinations',
 ]
 
 MIDDLEWARE = [
@@ -93,6 +97,21 @@ DATABASES = {
         conn_health_checks=True,
     )
 }
+
+# Use a local SQLite database when running tests to avoid touching Postgres
+TESTING = any(arg in sys.argv for arg in ('test', 'pytest'))
+if TESTING:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        "NAME": ":memory:",
+    }
+
+# Use local SQLite for tests to avoid touching remote Postgres and ensure NAME is a string
+DATABASES['default']['TEST'] = {
+    'ENGINE': 'django.db.backends.sqlite3',
+    'NAME': str(BASE_DIR / 'test_db.sqlite3'),
+}
+
 
 
 # Password validation
@@ -177,6 +196,25 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
     'x-tenant-id',
     'x-college-id',
+]
+
+# Allow frontend apps (React/Vite/Next/etc.) to call the API locally
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+]
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
 ]
 
 SPECTACULAR_SETTINGS = {

@@ -26,6 +26,9 @@ urlpatterns = [
     path('api/v1/students/', include('apps.students.urls')),
     path('api/v1/teachers/', include('apps.teachers.urls')),
     path('api/v1/attendance/', include('apps.attendance.urls')),
+    path('api/v1/fees/', include('apps.fees.urls')),
+    path('api/v1/accounting/', include('apps.accounting.urls')),
+    path('api/v1/examinations/', include('apps.examinations.urls')),
     path('api/v1/auth/', include('dj_rest_auth.urls')),
 
     # API Documentation
