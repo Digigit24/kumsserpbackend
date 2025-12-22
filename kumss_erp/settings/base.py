@@ -26,6 +26,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'grappelli',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,6 +43,8 @@ INSTALLED_APPS = [
     'drf_spectacular',  # API documentation
     'django_filters',
 
+    'django_extensions',
+
     # Local apps
     'apps.core',
     'apps.accounts',
@@ -51,6 +55,16 @@ INSTALLED_APPS = [
     'apps.fees',
     'apps.accounting',
     'apps.examinations',
+    'apps.online_exam',
+    'apps.hostel',
+    'apps.library',
+    'apps.store',
+    'apps.hr',
+    'apps.communication',
+    'apps.reports',
+
+    'debug_toolbar',
+
 ]
 
 MIDDLEWARE = [
@@ -63,6 +77,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'apps.core.middleware.TenantMiddleware',  # Multi-tenant support
+
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+
+]
+# Debug Toolbar
+INTERNAL_IPS = [
+    "127.0.0.1",
 ]
 
 ROOT_URLCONF = 'kumss_erp.urls'

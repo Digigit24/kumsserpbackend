@@ -9,9 +9,9 @@ DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
 
 # Development-specific installed apps
-INSTALLED_APPS += [
-    'django_extensions',  # If you want to use shell_plus and other tools
-]
+# INSTALLED_APPS += [
+#     'django_extensions',  # If you want to use shell_plus and other tools
+# ]
 
 # Database - can override if needed for local development
 # DATABASES['default']['NAME'] = 'kumss_erp_dev'
