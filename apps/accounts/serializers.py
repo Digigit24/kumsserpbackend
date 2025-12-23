@@ -4,6 +4,7 @@ DRF Serializers for Accounts app models.
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
+from dj_rest_auth.serializers import TokenSerializer as DRATokenSerializer
 
 from .models import (
     User,
@@ -195,6 +196,22 @@ class PasswordChangeSerializer(serializers.Serializer):
         if not user.check_password(value):
             raise serializers.ValidationError("Old password is incorrect.")
         return value
+
+
+class TokenWithUserSerializer(DRATokenSerializer):
+    """
+    Token serializer that also returns user details and college identifier
+    for frontend consumption after login/registration.
+    """
+    user = UserListSerializer(read_only=True)
+    college_id = serializers.SerializerMethodField()
+
+    class Meta(DRATokenSerializer.Meta):
+        fields = ['key', 'user', 'college_id']
+
+    def get_college_id(self, obj):
+        user = getattr(obj, 'user', None)
+        return getattr(user, 'college_id', None)
 
 
 # ============================================================================

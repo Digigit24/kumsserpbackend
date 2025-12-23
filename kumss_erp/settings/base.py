@@ -198,6 +198,11 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
+# dj-rest-auth
+REST_AUTH_SERIALIZERS = {
+    'TOKEN_SERIALIZER': 'apps.accounts.serializers.TokenWithUserSerializer',
+}
+
 # Custom user model
 AUTH_USER_MODEL = 'accounts.User'
 
