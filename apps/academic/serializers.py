@@ -157,7 +157,8 @@ class SectionSerializer(TenantAuditMixin, serializers.ModelSerializer):
             from apps.core.utils import get_current_college_id
             college_id = get_current_college_id()
             if college_id and college_id != 'all':
-                self.fields['class_obj'].queryset = Class.objects.filter(college_id=college_id)
+                # Use all_colleges() first to bypass default manager scoping, then filter
+                self.fields['class_obj'].queryset = Class.objects.all_colleges().filter(college_id=college_id)
             elif college_id == 'all':
                 # Superuser mode - show all colleges
                 self.fields['class_obj'].queryset = Class.objects.all_colleges()
@@ -219,8 +220,9 @@ class OptionalSubjectSerializer(TenantAuditMixin, serializers.ModelSerializer):
             from apps.core.utils import get_current_college_id
             college_id = get_current_college_id()
             if college_id and college_id != 'all':
-                self.fields['class_obj'].queryset = Class.objects.filter(college_id=college_id)
-                self.fields['subjects'].queryset = Subject.objects.filter(college_id=college_id)
+                # Use all_colleges() first to bypass default manager scoping, then filter
+                self.fields['class_obj'].queryset = Class.objects.all_colleges().filter(college_id=college_id)
+                self.fields['subjects'].queryset = Subject.objects.all_colleges().filter(college_id=college_id)
             elif college_id == 'all':
                 self.fields['class_obj'].queryset = Class.objects.all_colleges()
                 self.fields['subjects'].queryset = Subject.objects.all_colleges()
@@ -269,8 +271,9 @@ class SubjectAssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer)
             from apps.core.utils import get_current_college_id
             college_id = get_current_college_id()
             if college_id and college_id != 'all':
-                self.fields['subject'].queryset = Subject.objects.filter(college_id=college_id)
-                self.fields['class_obj'].queryset = Class.objects.filter(college_id=college_id)
+                # Use all_colleges() first to bypass default manager scoping, then filter
+                self.fields['subject'].queryset = Subject.objects.all_colleges().filter(college_id=college_id)
+                self.fields['class_obj'].queryset = Class.objects.all_colleges().filter(college_id=college_id)
                 self.fields['section'].queryset = Section.objects.filter(class_obj__college_id=college_id)
             elif college_id == 'all':
                 self.fields['subject'].queryset = Subject.objects.all_colleges()
@@ -373,11 +376,12 @@ class TimetableSerializer(TenantAuditMixin, serializers.ModelSerializer):
             from apps.core.utils import get_current_college_id
             college_id = get_current_college_id()
             if college_id and college_id != 'all':
-                self.fields['class_obj'].queryset = Class.objects.filter(college_id=college_id)
+                # Use all_colleges() first to bypass default manager scoping, then filter
+                self.fields['class_obj'].queryset = Class.objects.all_colleges().filter(college_id=college_id)
                 self.fields['section'].queryset = Section.objects.filter(class_obj__college_id=college_id)
                 self.fields['subject_assignment'].queryset = SubjectAssignment.objects.filter(class_obj__college_id=college_id)
-                self.fields['class_time'].queryset = ClassTime.objects.filter(college_id=college_id)
-                self.fields['classroom'].queryset = Classroom.objects.filter(college_id=college_id)
+                self.fields['class_time'].queryset = ClassTime.objects.all_colleges().filter(college_id=college_id)
+                self.fields['classroom'].queryset = Classroom.objects.all_colleges().filter(college_id=college_id)
             elif college_id == 'all':
                 self.fields['class_obj'].queryset = Class.objects.all_colleges()
                 self.fields['section'].queryset = Section.objects.all()
@@ -415,9 +419,10 @@ class LabScheduleSerializer(TenantAuditMixin, serializers.ModelSerializer):
             from apps.core.utils import get_current_college_id
             college_id = get_current_college_id()
             if college_id and college_id != 'all':
+                # Use all_colleges() first to bypass default manager scoping, then filter
                 self.fields['subject_assignment'].queryset = SubjectAssignment.objects.filter(class_obj__college_id=college_id)
                 self.fields['section'].queryset = Section.objects.filter(class_obj__college_id=college_id)
-                self.fields['classroom'].queryset = Classroom.objects.filter(college_id=college_id)
+                self.fields['classroom'].queryset = Classroom.objects.all_colleges().filter(college_id=college_id)
             elif college_id == 'all':
                 self.fields['subject_assignment'].queryset = SubjectAssignment.objects.all()
                 self.fields['section'].queryset = Section.objects.all()
@@ -452,7 +457,8 @@ class ClassTeacherSerializer(TenantAuditMixin, serializers.ModelSerializer):
             from apps.core.utils import get_current_college_id
             college_id = get_current_college_id()
             if college_id and college_id != 'all':
-                self.fields['class_obj'].queryset = Class.objects.filter(college_id=college_id)
+                # Use all_colleges() first to bypass default manager scoping, then filter
+                self.fields['class_obj'].queryset = Class.objects.all_colleges().filter(college_id=college_id)
                 self.fields['section'].queryset = Section.objects.filter(class_obj__college_id=college_id)
             elif college_id == 'all':
                 self.fields['class_obj'].queryset = Class.objects.all_colleges()
