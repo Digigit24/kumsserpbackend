@@ -291,6 +291,27 @@ class SectionViewSet(CollegeScopedModelViewSet):
     ordering_fields = ['name', 'created_at']
     ordering = ['name']
 
+    def get_queryset(self):
+        """Override to filter sections by college through class_obj relationship."""
+        queryset = Section.objects.all()
+        college_id = self.get_college_id(required=False)
+
+        # Check if college_id is 'all' (superuser/staff global view)
+        if college_id == 'all':
+            return queryset
+
+        # Superusers/staff without any header also get all records
+        user = getattr(self.request, 'user', None)
+        if user and (user.is_superuser or user.is_staff) and not college_id:
+            return queryset
+
+        # Regular users need a valid college_id
+        if not college_id:
+            college_id = self.get_college_id(required=True)
+
+        # Filter sections by college through class_obj relationship
+        return queryset.filter(class_obj__college_id=college_id)
+
     def perform_destroy(self, instance):
         instance.soft_delete()
 
@@ -416,6 +437,23 @@ class OptionalSubjectViewSet(CollegeScopedModelViewSet):
     ordering_fields = ['name', 'created_at']
     ordering = ['name']
 
+    def get_queryset(self):
+        """Override to filter optional subjects by college through class_obj relationship."""
+        queryset = OptionalSubject.objects.all()
+        college_id = self.get_college_id(required=False)
+
+        if college_id == 'all':
+            return queryset
+
+        user = getattr(self.request, 'user', None)
+        if user and (user.is_superuser or user.is_staff) and not college_id:
+            return queryset
+
+        if not college_id:
+            college_id = self.get_college_id(required=True)
+
+        return queryset.filter(class_obj__college_id=college_id)
+
     def perform_destroy(self, instance):
         instance.soft_delete()
 
@@ -479,6 +517,23 @@ class SubjectAssignmentViewSet(CollegeScopedModelViewSet):
     search_fields = ['subject__name', 'teacher__username']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+
+    def get_queryset(self):
+        """Override to filter subject assignments by college through class_obj relationship."""
+        queryset = SubjectAssignment.objects.all()
+        college_id = self.get_college_id(required=False)
+
+        if college_id == 'all':
+            return queryset
+
+        user = getattr(self.request, 'user', None)
+        if user and (user.is_superuser or user.is_staff) and not college_id:
+            return queryset
+
+        if not college_id:
+            college_id = self.get_college_id(required=True)
+
+        return queryset.filter(class_obj__college_id=college_id)
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -671,6 +726,23 @@ class TimetableViewSet(CollegeScopedModelViewSet):
     ordering_fields = ['day_of_week', 'class_time', 'created_at']
     ordering = ['day_of_week', 'class_time__period_number']
 
+    def get_queryset(self):
+        """Override to filter timetables by college through class_obj relationship."""
+        queryset = Timetable.objects.all()
+        college_id = self.get_college_id(required=False)
+
+        if college_id == 'all':
+            return queryset
+
+        user = getattr(self.request, 'user', None)
+        if user and (user.is_superuser or user.is_staff) and not college_id:
+            return queryset
+
+        if not college_id:
+            college_id = self.get_college_id(required=True)
+
+        return queryset.filter(class_obj__college_id=college_id)
+
     def get_serializer_class(self):
         if self.action == 'list':
             return TimetableListSerializer
@@ -737,6 +809,23 @@ class LabScheduleViewSet(CollegeScopedModelViewSet):
     ordering_fields = ['day_of_week', 'start_time', 'created_at']
     ordering = ['day_of_week', 'start_time']
 
+    def get_queryset(self):
+        """Override to filter lab schedules by college through section's class_obj relationship."""
+        queryset = LabSchedule.objects.all()
+        college_id = self.get_college_id(required=False)
+
+        if college_id == 'all':
+            return queryset
+
+        user = getattr(self.request, 'user', None)
+        if user and (user.is_superuser or user.is_staff) and not college_id:
+            return queryset
+
+        if not college_id:
+            college_id = self.get_college_id(required=True)
+
+        return queryset.filter(section__class_obj__college_id=college_id)
+
     def perform_destroy(self, instance):
         instance.soft_delete()
 
@@ -798,6 +887,23 @@ class ClassTeacherViewSet(CollegeScopedModelViewSet):
     filterset_fields = ['class_obj', 'section', 'teacher', 'is_current', 'is_active']
     ordering_fields = ['assigned_from', 'created_at']
     ordering = ['-assigned_from']
+
+    def get_queryset(self):
+        """Override to filter class teachers by college through class_obj relationship."""
+        queryset = ClassTeacher.objects.all()
+        college_id = self.get_college_id(required=False)
+
+        if college_id == 'all':
+            return queryset
+
+        user = getattr(self.request, 'user', None)
+        if user and (user.is_superuser or user.is_staff) and not college_id:
+            return queryset
+
+        if not college_id:
+            college_id = self.get_college_id(required=True)
+
+        return queryset.filter(class_obj__college_id=college_id)
 
     def perform_destroy(self, instance):
         instance.soft_delete()
