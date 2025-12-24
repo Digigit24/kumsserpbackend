@@ -149,6 +149,19 @@ class SectionSerializer(TenantAuditMixin, serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'class_name', 'created_by', 'updated_by', 'created_at', 'updated_at']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Scope class_obj queryset by college if context provides request
+        request = self.context.get('request')
+        if request:
+            from apps.core.utils import get_current_college_id
+            college_id = get_current_college_id()
+            if college_id and college_id != 'all':
+                self.fields['class_obj'].queryset = Class.objects.filter(college_id=college_id)
+            elif college_id == 'all':
+                # Superuser mode - show all colleges
+                self.fields['class_obj'].queryset = Class.objects.all_colleges()
+
 
 # ============================================================================
 # SUBJECT SERIALIZERS
@@ -199,6 +212,19 @@ class OptionalSubjectSerializer(TenantAuditMixin, serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'class_name', 'subjects_list', 'created_by', 'updated_by', 'created_at', 'updated_at']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request:
+            from apps.core.utils import get_current_college_id
+            college_id = get_current_college_id()
+            if college_id and college_id != 'all':
+                self.fields['class_obj'].queryset = Class.objects.filter(college_id=college_id)
+                self.fields['subjects'].queryset = Subject.objects.filter(college_id=college_id)
+            elif college_id == 'all':
+                self.fields['class_obj'].queryset = Class.objects.all_colleges()
+                self.fields['subjects'].queryset = Subject.objects.all_colleges()
+
 
 # ============================================================================
 # SUBJECT ASSIGNMENT SERIALIZERS
@@ -235,6 +261,21 @@ class SubjectAssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer)
             'created_by', 'updated_by', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'subject_details', 'class_name', 'section_name', 'teacher_details', 'lab_instructor_details', 'created_by', 'updated_by', 'created_at', 'updated_at']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request:
+            from apps.core.utils import get_current_college_id
+            college_id = get_current_college_id()
+            if college_id and college_id != 'all':
+                self.fields['subject'].queryset = Subject.objects.filter(college_id=college_id)
+                self.fields['class_obj'].queryset = Class.objects.filter(college_id=college_id)
+                self.fields['section'].queryset = Section.objects.filter(class_obj__college_id=college_id)
+            elif college_id == 'all':
+                self.fields['subject'].queryset = Subject.objects.all_colleges()
+                self.fields['class_obj'].queryset = Class.objects.all_colleges()
+                self.fields['section'].queryset = Section.objects.all()
 
 
 # ============================================================================
@@ -325,6 +366,25 @@ class TimetableSerializer(TenantAuditMixin, serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'class_name', 'section_name', 'subject_details', 'teacher_details', 'classroom_details', 'time_details', 'created_by', 'updated_by', 'created_at', 'updated_at']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request:
+            from apps.core.utils import get_current_college_id
+            college_id = get_current_college_id()
+            if college_id and college_id != 'all':
+                self.fields['class_obj'].queryset = Class.objects.filter(college_id=college_id)
+                self.fields['section'].queryset = Section.objects.filter(class_obj__college_id=college_id)
+                self.fields['subject_assignment'].queryset = SubjectAssignment.objects.filter(class_obj__college_id=college_id)
+                self.fields['class_time'].queryset = ClassTime.objects.filter(college_id=college_id)
+                self.fields['classroom'].queryset = Classroom.objects.filter(college_id=college_id)
+            elif college_id == 'all':
+                self.fields['class_obj'].queryset = Class.objects.all_colleges()
+                self.fields['section'].queryset = Section.objects.all()
+                self.fields['subject_assignment'].queryset = SubjectAssignment.objects.all()
+                self.fields['class_time'].queryset = ClassTime.objects.all_colleges()
+                self.fields['classroom'].queryset = Classroom.objects.all_colleges()
+
 
 # ============================================================================
 # LAB SCHEDULE SERIALIZERS
@@ -348,6 +408,21 @@ class LabScheduleSerializer(TenantAuditMixin, serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'section_name', 'subject_name', 'teacher_name', 'classroom_name', 'created_by', 'updated_by', 'created_at', 'updated_at']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request:
+            from apps.core.utils import get_current_college_id
+            college_id = get_current_college_id()
+            if college_id and college_id != 'all':
+                self.fields['subject_assignment'].queryset = SubjectAssignment.objects.filter(class_obj__college_id=college_id)
+                self.fields['section'].queryset = Section.objects.filter(class_obj__college_id=college_id)
+                self.fields['classroom'].queryset = Classroom.objects.filter(college_id=college_id)
+            elif college_id == 'all':
+                self.fields['subject_assignment'].queryset = SubjectAssignment.objects.all()
+                self.fields['section'].queryset = Section.objects.all()
+                self.fields['classroom'].queryset = Classroom.objects.all_colleges()
+
 
 # ============================================================================
 # CLASS TEACHER SERIALIZERS
@@ -369,6 +444,19 @@ class ClassTeacherSerializer(TenantAuditMixin, serializers.ModelSerializer):
             'created_by', 'updated_by', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'class_name', 'section_name', 'teacher_details', 'created_by', 'updated_by', 'created_at', 'updated_at']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request:
+            from apps.core.utils import get_current_college_id
+            college_id = get_current_college_id()
+            if college_id and college_id != 'all':
+                self.fields['class_obj'].queryset = Class.objects.filter(college_id=college_id)
+                self.fields['section'].queryset = Section.objects.filter(class_obj__college_id=college_id)
+            elif college_id == 'all':
+                self.fields['class_obj'].queryset = Class.objects.all_colleges()
+                self.fields['section'].queryset = Section.objects.all()
 
 
 # ============================================================================
