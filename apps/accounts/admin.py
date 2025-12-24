@@ -6,6 +6,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 from .models import User, Role, UserRole, Department, UserProfile
+from apps.core.models import College
 
 
 class CollegeAwareAdmin(admin.ModelAdmin):
@@ -116,6 +117,15 @@ class UserAdmin(BaseUserAdmin):
             ),
         }),
     )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """
+        Show an explicit "No college (0)" choice so superadmins/staff can be unscoped.
+        """
+        if db_field.name == 'college':
+            kwargs['queryset'] = College.objects.all()
+            kwargs['empty_label'] = 'No college (0 - super admin/global)'
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 @admin.register(Role)

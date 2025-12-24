@@ -211,7 +211,12 @@ class TokenWithUserSerializer(DRATokenSerializer):
 
     def get_college_id(self, obj):
         user = getattr(obj, 'user', None)
-        return getattr(user, 'college_id', None)
+        if not user:
+            return None
+        if not getattr(user, 'college_id', None) and (user.is_superuser or user.is_staff):
+            # Superusers/staff without a college get sentinel 0 for frontend handling
+            return 0
+        return user.college_id
 
 
 # ============================================================================
