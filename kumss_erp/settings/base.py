@@ -198,9 +198,16 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
-# dj-rest-auth
+# dj-rest-auth configuration
+REST_AUTH = {
+    'TOKEN_SERIALIZER': 'apps.accounts.serializers.TokenWithUserSerializer',
+    'USER_DETAILS_SERIALIZER': 'apps.accounts.serializers.UserListSerializer',
+}
+
+# Legacy support (for older dj-rest-auth versions)
 REST_AUTH_SERIALIZERS = {
     'TOKEN_SERIALIZER': 'apps.accounts.serializers.TokenWithUserSerializer',
+    'USER_DETAILS_SERIALIZER': 'apps.accounts.serializers.UserListSerializer',
 }
 
 # Custom user model
