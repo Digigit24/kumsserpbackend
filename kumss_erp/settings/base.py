@@ -268,14 +268,21 @@ SPECTACULAR_SETTINGS = {
     # Security scheme
     'APPEND_COMPONENTS': {
         'securitySchemes': {
+            'CollegeID': {
+                'type': 'apiKey',
+                'in': 'header',
+                'name': 'X-College-ID',
+                'description': 'College identifier for college-scoped access (required for most endpoints)'
+            },
             'TenantID': {
                 'type': 'apiKey',
                 'in': 'header',
                 'name': 'X-Tenant-ID',
-                'description': 'Tenant identifier for multi-tenant access'
+                'description': '[LEGACY] Tenant identifier - use X-College-ID instead'
             }
         }
     },
+    'SECURITY': [{'CollegeID': []}],  # Make X-College-ID globally available
 
     # Auto-generate IDs
     'CAMELIZE_NAMES': False,
