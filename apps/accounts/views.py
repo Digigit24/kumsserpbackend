@@ -138,7 +138,7 @@ class UserViewSet(CollegeScopedModelViewSet):
 
     Provides CRUD operations and custom actions for user management.
     """
-    queryset = User.objects.all_colleges()
+    queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
