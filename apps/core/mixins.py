@@ -105,8 +105,9 @@ class CollegeScopedMixin:
         model = getattr(getattr(serializer, 'Meta', None), 'model', None)
 
         save_kwargs = {}
-        # Don't set college_id when it's 'all' (superuser global mode)
-        if college and college != 'all' and model and self._supports_college_filter(model) and 'college' in serializer.fields:
+        # Set college_id for models that support it, regardless of whether it's in serializer fields
+        # This ensures the college_id is ALWAYS set from the request header
+        if college and college != 'all' and model and self._supports_college_filter(model):
             save_kwargs['college_id'] = college
 
         save_kwargs.update(self._audit_kwargs(serializer, include_created=include_created))
