@@ -53,8 +53,59 @@ class LoginViewNoAuth(DRALoginView):
     """
     Override login to ignore incoming Authorization headers so stale tokens
     don't trigger TokenAuthentication before credentials are checked.
+    Enhanced to log comprehensive user details to console on successful login.
     """
     authentication_classes = []
+
+    def post(self, request, *args, **kwargs):
+        """Override post to log user details to console after successful login."""
+        import logging
+        import json
+
+        logger = logging.getLogger(__name__)
+
+        # Call the parent login method
+        response = super().post(request, *args, **kwargs)
+
+        # Log user details to console if login was successful
+        if response.status_code == 200 and response.data:
+            user_data = response.data
+
+            logger.info("=" * 80)
+            logger.info("LOGIN SUCCESSFUL")
+            logger.info("=" * 80)
+
+            # Log the complete response data
+            logger.info("Complete Response Data:")
+            logger.info(json.dumps(user_data, indent=2, default=str))
+
+            # Log user object details if present
+            if 'user' in user_data:
+                logger.info("-" * 80)
+                logger.info("USER DETAILS:")
+                logger.info("-" * 80)
+                user = user_data['user']
+                for key, value in user.items():
+                    logger.info(f"  {key}: {value}")
+
+            # Log authentication token
+            if 'key' in user_data:
+                logger.info("-" * 80)
+                logger.info(f"Authentication Token: {user_data['key']}")
+
+            # Log college information
+            if 'college_id' in user_data:
+                logger.info("-" * 80)
+                logger.info(f"Primary College ID: {user_data['college_id']}")
+
+            if 'accessible_colleges' in user_data:
+                logger.info("Accessible Colleges:")
+                for college in user_data['accessible_colleges']:
+                    logger.info(f"  - {college}")
+
+            logger.info("=" * 80)
+
+        return response
 
 
 # ============================================================================

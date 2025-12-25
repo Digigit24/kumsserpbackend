@@ -202,15 +202,29 @@ class TokenWithUserSerializer(DRATokenSerializer):
     """
     Enhanced token serializer that returns comprehensive user details,
     primary college ID, and all accessible college IDs for multi-tenancy support.
+    Includes user roles, permissions, and complete profile information.
     """
     message = serializers.SerializerMethodField()
     user = UserSerializer(read_only=True)
     college_id = serializers.SerializerMethodField()
     tenant_ids = serializers.SerializerMethodField()
     accessible_colleges = serializers.SerializerMethodField()
+    user_roles = serializers.SerializerMethodField()
+    user_permissions = serializers.SerializerMethodField()
+    user_profile = serializers.SerializerMethodField()
 
     class Meta(DRATokenSerializer.Meta):
-        fields = ['key', 'message', 'user', 'college_id', 'tenant_ids', 'accessible_colleges']
+        fields = [
+            'key',
+            'message',
+            'user',
+            'college_id',
+            'tenant_ids',
+            'accessible_colleges',
+            'user_roles',
+            'user_permissions',
+            'user_profile'
+        ]
 
     def get_message(self, obj):
         """Return a success message."""
@@ -284,6 +298,99 @@ class TokenWithUserSerializer(DRATokenSerializer):
             is_active=True
         )
         return CollegeBasicSerializer(colleges, many=True).data
+
+    def get_user_roles(self, obj):
+        """
+        Return all active roles assigned to the user.
+        """
+        user = getattr(obj, 'user', None)
+        if not user:
+            return []
+
+        # Get all active roles for the user (using all_colleges to bypass scoping)
+        user_roles = UserRole.objects.all_colleges().filter(
+            user=user,
+            is_active=True
+        ).select_related('role', 'college')
+
+        roles_data = []
+        for user_role in user_roles:
+            roles_data.append({
+                'id': user_role.id,
+                'role_id': user_role.role.id,
+                'role_name': user_role.role.name,
+                'role_code': user_role.role.code,
+                'college_id': user_role.college_id,
+                'college_name': user_role.college.short_name if user_role.college else None,
+                'assigned_at': user_role.assigned_at,
+                'expires_at': user_role.expires_at,
+                'is_expired': user_role.is_expired,
+            })
+
+        return roles_data
+
+    def get_user_permissions(self, obj):
+        """
+        Return aggregated permissions from all user's roles.
+        """
+        user = getattr(obj, 'user', None)
+        if not user:
+            return []
+
+        # If superuser, they have all permissions
+        if user.is_superuser:
+            return ['*']  # Wildcard indicates all permissions
+
+        # Aggregate permissions from all active roles
+        permissions = set()
+        user_roles = UserRole.objects.all_colleges().filter(
+            user=user,
+            is_active=True
+        ).select_related('role')
+
+        for user_role in user_roles:
+            if user_role.role.permissions:
+                # Permissions stored as JSONField
+                if isinstance(user_role.role.permissions, list):
+                    permissions.update(user_role.role.permissions)
+                elif isinstance(user_role.role.permissions, dict):
+                    permissions.update(user_role.role.permissions.keys())
+
+        return sorted(list(permissions))
+
+    def get_user_profile(self, obj):
+        """
+        Return the user's profile information if it exists.
+        """
+        user = getattr(obj, 'user', None)
+        if not user:
+            return None
+
+        try:
+            profile = UserProfile.objects.all_colleges().get(user=user, is_active=True)
+            return {
+                'id': profile.id,
+                'department_id': profile.department_id,
+                'department_name': profile.department.name if profile.department else None,
+                'address_line1': profile.address_line1,
+                'address_line2': profile.address_line2,
+                'city': profile.city,
+                'state': profile.state,
+                'pincode': profile.pincode,
+                'country': profile.country,
+                'emergency_contact_name': profile.emergency_contact_name,
+                'emergency_contact_phone': profile.emergency_contact_phone,
+                'emergency_contact_relation': profile.emergency_contact_relation,
+                'blood_group': profile.blood_group,
+                'nationality': profile.nationality,
+                'religion': profile.religion,
+                'caste': profile.caste,
+                'linkedin_url': profile.linkedin_url,
+                'website_url': profile.website_url,
+                'bio': profile.bio,
+            }
+        except UserProfile.DoesNotExist:
+            return None
 
 
 # ============================================================================
