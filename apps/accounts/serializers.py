@@ -356,6 +356,7 @@ class TokenWithUserSerializer(serializers.Serializer):
     def get_user_profile(self, obj):
         """
         Return the user's profile information if it exists.
+        Uses UserProfileSerializer to ensure consistent format.
         """
         user = getattr(obj, 'user', None)
         if not user:
@@ -363,27 +364,7 @@ class TokenWithUserSerializer(serializers.Serializer):
 
         try:
             profile = UserProfile.objects.all_colleges().get(user=user, is_active=True)
-            return {
-                'id': profile.id,
-                'department_id': profile.department_id,
-                'department_name': profile.department.name if profile.department else None,
-                'address_line1': profile.address_line1,
-                'address_line2': profile.address_line2,
-                'city': profile.city,
-                'state': profile.state,
-                'pincode': profile.pincode,
-                'country': profile.country,
-                'emergency_contact_name': profile.emergency_contact_name,
-                'emergency_contact_phone': profile.emergency_contact_phone,
-                'emergency_contact_relation': profile.emergency_contact_relation,
-                'blood_group': profile.blood_group,
-                'nationality': profile.nationality,
-                'religion': profile.religion,
-                'caste': profile.caste,
-                'linkedin_url': profile.linkedin_url,
-                'website_url': profile.website_url,
-                'bio': profile.bio,
-            }
+            return UserProfileSerializer(profile).data
         except UserProfile.DoesNotExist:
             return None
 
