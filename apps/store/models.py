@@ -147,7 +147,7 @@ class StockReceive(AuditModel):
             raise ValidationError("Total amount cannot be negative.")
 
 
-class StoreSale(AuditModel):
+class StoreSale(CollegeScopedModel):
     college = models.ForeignKey(
         College,
         on_delete=models.CASCADE,
@@ -234,7 +234,7 @@ class SaleItem(AuditModel):
             raise ValidationError("Prices must be non-negative.")
 
 
-class PrintJob(AuditModel):
+class PrintJob(CollegeScopedModel):
     college = models.ForeignKey(
         College,
         on_delete=models.CASCADE,

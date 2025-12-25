@@ -10,7 +10,7 @@ from apps.academic.models import Faculty, Subject, Class, Section
 from apps.students.models import Student
 
 
-class Teacher(AuditModel):
+class Teacher(CollegeScopedModel):
     """
     Represents a teacher in the system.
     Qualifications and experience are stored as JSON arrays.
@@ -101,7 +101,7 @@ class Teacher(AuditModel):
         return f"{self.first_name} {self.last_name}"
 
 
-class StudyMaterial(AuditModel):
+class StudyMaterial(CollegeScopedModel):
     """
     Represents study materials uploaded by teachers.
     """
@@ -156,7 +156,7 @@ class StudyMaterial(AuditModel):
         return f"{self.title} - {self.subject.short_name}"
 
 
-class Assignment(AuditModel):
+class Assignment(CollegeScopedModel):
     """
     Represents assignments given by teachers.
     """
@@ -274,7 +274,7 @@ class AssignmentSubmission(TimeStampedModel):
         return f"{self.assignment.title} - {self.student.get_full_name()}"
 
 
-class Homework(AuditModel):
+class Homework(CollegeScopedModel):
     """
     Represents homework assigned by teachers.
     """
