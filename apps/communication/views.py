@@ -104,7 +104,7 @@ class MessageTemplateViewSet(CollegeScopedModelViewSet):
 
 
 class BulkMessageViewSet(CollegeScopedModelViewSet):
-    queryset = BulkMessage.objects.select_related('template', 'college').all_colleges()
+    queryset = BulkMessage.objects.all_colleges().select_related('template', 'college')
     serializer_class = BulkMessageSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -124,7 +124,7 @@ class MessageLogViewSet(RelatedCollegeScopedModelViewSet):
 
 
 class NotificationRuleViewSet(CollegeScopedModelViewSet):
-    queryset = NotificationRule.objects.select_related('template', 'college').all_colleges()
+    queryset = NotificationRule.objects.all_colleges().select_related('template', 'college')
     serializer_class = NotificationRuleSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

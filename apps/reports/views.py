@@ -56,7 +56,7 @@ class GeneratedReportViewSet(RelatedCollegeScopedModelViewSet):
 
 
 class SavedReportViewSet(CollegeScopedModelViewSet):
-    queryset = SavedReport.objects.select_related('college', 'user').all_colleges()
+    queryset = SavedReport.objects.all_colleges().select_related('college', 'user')
     serializer_class = SavedReportSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
