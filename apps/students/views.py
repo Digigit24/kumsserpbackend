@@ -580,7 +580,7 @@ class StudentDocumentViewSet(CollegeScopedModelViewSet):
 )
 class StudentMedicalRecordViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing student medical records."""
-    queryset = StudentMedicalRecord.objects.all_colleges()
+    queryset = StudentMedicalRecord.objects.all()
     serializer_class = StudentMedicalRecordSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -639,7 +639,7 @@ class StudentMedicalRecordViewSet(CollegeScopedModelViewSet):
 )
 class PreviousAcademicRecordViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing previous academic records."""
-    queryset = PreviousAcademicRecord.objects.all_colleges()
+    queryset = PreviousAcademicRecord.objects.all()
     serializer_class = PreviousAcademicRecordSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -698,7 +698,7 @@ class PreviousAcademicRecordViewSet(CollegeScopedModelViewSet):
 )
 class StudentPromotionViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing student promotions."""
-    queryset = StudentPromotion.objects.all_colleges()
+    queryset = StudentPromotion.objects.all()
     serializer_class = StudentPromotionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -757,7 +757,7 @@ class StudentPromotionViewSet(CollegeScopedModelViewSet):
 )
 class CertificateViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing certificates."""
-    queryset = Certificate.objects.all_colleges()
+    queryset = Certificate.objects.all()
     serializer_class = CertificateSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -817,7 +817,7 @@ class CertificateViewSet(CollegeScopedModelViewSet):
 )
 class StudentIDCardViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing student ID cards."""
-    queryset = StudentIDCard.objects.all_colleges()
+    queryset = StudentIDCard.objects.all()
     serializer_class = StudentIDCardSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

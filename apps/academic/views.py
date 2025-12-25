@@ -428,7 +428,7 @@ class SubjectViewSet(CollegeScopedModelViewSet):
 )
 class OptionalSubjectViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing optional subject groups."""
-    queryset = OptionalSubject.objects.all_colleges()
+    queryset = OptionalSubject.objects.all()
     serializer_class = OptionalSubjectSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -509,7 +509,7 @@ class OptionalSubjectViewSet(CollegeScopedModelViewSet):
 )
 class SubjectAssignmentViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing subject assignments."""
-    queryset = SubjectAssignment.objects.all_colleges()
+    queryset = SubjectAssignment.objects.all()
     serializer_class = SubjectAssignmentSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -718,7 +718,7 @@ class ClassTimeViewSet(CollegeScopedModelViewSet):
 )
 class TimetableViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing timetable entries."""
-    queryset = Timetable.objects.all_colleges()
+    queryset = Timetable.objects.all()
     serializer_class = TimetableSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -801,7 +801,7 @@ class TimetableViewSet(CollegeScopedModelViewSet):
 )
 class LabScheduleViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing lab schedules."""
-    queryset = LabSchedule.objects.all_colleges()
+    queryset = LabSchedule.objects.all()
     serializer_class = LabScheduleSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -880,7 +880,7 @@ class LabScheduleViewSet(CollegeScopedModelViewSet):
 )
 class ClassTeacherViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing class teacher assignments."""
-    queryset = ClassTeacher.objects.all_colleges()
+    queryset = ClassTeacher.objects.all()
     serializer_class = ClassTeacherSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
