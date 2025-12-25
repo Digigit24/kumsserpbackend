@@ -212,6 +212,7 @@ class College(CollegeScopedModel):
 
     class Meta:
         db_table = 'college'
+        app_label = 'core'
         verbose_name = 'College'
         verbose_name_plural = 'Colleges'
         ordering = ['display_order', 'name']
@@ -254,6 +255,8 @@ class AcademicYear(CollegeScopedModel):
 
     class Meta:
         db_table = 'academic_year'
+        app_label = 'core'  # Explicitly declare the app name
+
         verbose_name = 'Academic Year'
         verbose_name_plural = 'Academic Years'
         ordering = ['-start_date']
@@ -316,6 +319,7 @@ class AcademicSession(CollegeScopedModel):
 
     class Meta:
         db_table = 'academic_session'
+        app_label = 'core'
         verbose_name = 'Academic Session'
         verbose_name_plural = 'Academic Sessions'
         ordering = ['-start_date']
@@ -382,6 +386,8 @@ class Holiday(CollegeScopedModel):
 
     class Meta:
         db_table = 'holiday'
+        app_label = 'core'  # Explicitly declare the app name
+
         verbose_name = 'Holiday'
         verbose_name_plural = 'Holidays'
         ordering = ['date']
@@ -422,6 +428,8 @@ class Weekend(CollegeScopedModel):
 
     class Meta:
         db_table = 'weekend'
+        app_label = 'core'  # Explicitly declare the app name
+
         verbose_name = 'Weekend'
         verbose_name_plural = 'Weekends'
         ordering = ['day']
@@ -457,6 +465,8 @@ class SystemSetting(CollegeScopedModel):
     class Meta:
         db_table = 'system_setting'
         verbose_name = 'System Setting'
+        app_label = 'core'  # Explicitly declare the app name
+
         verbose_name_plural = 'System Settings'
         indexes = [
             models.Index(fields=['college']),
@@ -567,6 +577,8 @@ class NotificationSetting(CollegeScopedModel):
     class Meta:
         db_table = 'notification_setting'
         verbose_name = 'Notification Setting'
+        app_label = 'core'  # Explicitly declare the app name
+
         verbose_name_plural = 'Notification Settings'
         indexes = [
             models.Index(fields=['college']),
@@ -652,6 +664,8 @@ class ActivityLog(models.Model):
     class Meta:
         db_table = 'activity_log'
         verbose_name = 'Activity Log'
+        app_label = 'core'  # Explicitly declare the app name
+
         verbose_name_plural = 'Activity Logs'
         ordering = ['-timestamp']
         indexes = [
