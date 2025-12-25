@@ -213,8 +213,9 @@ class TokenWithUserSerializer(DRATokenSerializer):
     user_permissions = serializers.SerializerMethodField()
     user_profile = serializers.SerializerMethodField()
 
-    class Meta(DRATokenSerializer.Meta):
-        fields = [
+    class Meta:
+        model = DRATokenSerializer.Meta.model
+        fields = (
             'key',
             'message',
             'user',
@@ -224,7 +225,7 @@ class TokenWithUserSerializer(DRATokenSerializer):
             'user_roles',
             'user_permissions',
             'user_profile'
-        ]
+        )
 
     def get_message(self, obj):
         """Return a success message."""
