@@ -200,16 +200,27 @@ class PasswordChangeSerializer(serializers.Serializer):
 
 class TokenWithUserSerializer(DRATokenSerializer):
     """
-    Token serializer that also returns user details and college identifier
-    for frontend consumption after login/registration.
+    Enhanced token serializer that returns comprehensive user details,
+    primary college ID, and all accessible college IDs for multi-tenancy support.
     """
-    user = UserListSerializer(read_only=True)
+    message = serializers.SerializerMethodField()
+    user = UserSerializer(read_only=True)
     college_id = serializers.SerializerMethodField()
+    tenant_ids = serializers.SerializerMethodField()
+    accessible_colleges = serializers.SerializerMethodField()
 
     class Meta(DRATokenSerializer.Meta):
-        fields = ['key', 'user', 'college_id']
+        fields = ['key', 'message', 'user', 'college_id', 'tenant_ids', 'accessible_colleges']
+
+    def get_message(self, obj):
+        """Return a success message."""
+        user = getattr(obj, 'user', None)
+        if user:
+            return f"Welcome back, {user.get_full_name()}! Login successful."
+        return "Login successful"
 
     def get_college_id(self, obj):
+        """Return the user's primary college ID."""
         user = getattr(obj, 'user', None)
         if not user:
             return None
@@ -217,6 +228,62 @@ class TokenWithUserSerializer(DRATokenSerializer):
             # Superusers/staff without a college get sentinel 0 for frontend handling
             return 0
         return user.college_id
+
+    def get_tenant_ids(self, obj):
+        """
+        Return list of all college IDs the user has access to.
+        - For superusers/staff: returns [0] to indicate access to all colleges
+        - For regular users: returns their primary college + colleges where they have roles
+        """
+        user = getattr(obj, 'user', None)
+        if not user:
+            return []
+
+        # Superusers and staff have access to all colleges
+        if user.is_superuser or user.is_staff:
+            if not user.college_id:
+                return [0]  # Sentinel value for "all colleges"
+
+        # Get user's primary college
+        tenant_ids = []
+        if user.college_id:
+            tenant_ids.append(user.college_id)
+
+        # Get colleges where user has active roles (using all_colleges to bypass scoping)
+        from .models import UserRole
+        role_college_ids = UserRole.objects.all_colleges().filter(
+            user=user,
+            is_active=True
+        ).values_list('college_id', flat=True).distinct()
+
+        # Add role college IDs that aren't already in the list
+        for college_id in role_college_ids:
+            if college_id and college_id not in tenant_ids:
+                tenant_ids.append(college_id)
+
+        return tenant_ids if tenant_ids else [0] if (user.is_superuser or user.is_staff) else []
+
+    def get_accessible_colleges(self, obj):
+        """
+        Return detailed information about all colleges the user can access.
+        """
+        user = getattr(obj, 'user', None)
+        if not user:
+            return []
+
+        tenant_ids = self.get_tenant_ids(obj)
+
+        # If user has sentinel value 0 (superuser with no college), return all colleges
+        if 0 in tenant_ids and not user.college_id:
+            colleges = College.objects.all_colleges().filter(is_active=True)
+            return CollegeBasicSerializer(colleges, many=True).data
+
+        # Return specific colleges user has access to
+        colleges = College.objects.all_colleges().filter(
+            id__in=[tid for tid in tenant_ids if tid != 0],
+            is_active=True
+        )
+        return CollegeBasicSerializer(colleges, many=True).data
 
 
 # ============================================================================

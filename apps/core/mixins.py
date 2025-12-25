@@ -171,3 +171,39 @@ class CollegeScopedReadOnlyModelViewSet(CollegeScopedMixin, viewsets.ReadOnlyMod
 TenantScopedMixin = CollegeScopedMixin
 TenantScopedModelViewSet = CollegeScopedModelViewSet
 TenantScopedReadOnlyModelViewSet = CollegeScopedReadOnlyModelViewSet
+
+class RelatedCollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet):
+    """
+    Scopes by college via a related lookup path when model lacks direct college FK.
+
+    Use this for models that don't have a direct college ForeignKey but are related
+    to college through another model (e.g., LeaveApplication -> Teacher -> College).
+
+    Set `related_college_lookup` to the path from the model to college_id using
+    Django's double-underscore notation (e.g., 'teacher__college_id').
+    """
+    related_college_lookup = None
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        college_id = self.get_college_id(required=False)
+        user = getattr(self.request, 'user', None)
+
+        # Superuser/staff with 'all' or no header gets all records
+        if college_id == 'all' or (user and (user.is_superuser or user.is_staff) and not college_id):
+            return queryset
+
+        # Regular users need a valid college_id
+        if not college_id:
+            college_id = self.get_college_id(required=True)
+
+        # If no related lookup is defined, return empty queryset
+        if not self.related_college_lookup:
+            return queryset.none()
+
+        # Filter by the related college lookup path
+        return queryset.filter(**{self.related_college_lookup: college_id})
+
+
+# Add alias for backward compatibility
+RelatedTenantScopedModelViewSet = RelatedCollegeScopedModelViewSet

@@ -76,7 +76,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.core.middleware.TenantMiddleware',  # Multi-tenant support
+    'apps.core.middleware.CollegeMiddleware',  # Multi-college support
 
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 

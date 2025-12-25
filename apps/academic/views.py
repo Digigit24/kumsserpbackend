@@ -282,7 +282,7 @@ class ClassViewSet(CollegeScopedModelViewSet):
 )
 class SectionViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing sections."""
-    queryset = Section.objects.all_colleges()
+    queryset = Section.objects.all()
     serializer_class = SectionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
