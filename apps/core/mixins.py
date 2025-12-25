@@ -1,11 +1,9 @@
-"""
-Reusable DRF mixins for college-aware API endpoints.
-"""
+import logging
 from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
-
 from .utils import get_current_college_id
 
+logger = logging.getLogger(__name__)
 
 class CollegeScopedMixin:
     """
@@ -20,7 +18,8 @@ class CollegeScopedMixin:
         """
         super().initial(request, *args, **kwargs)
         if self._requires_college():
-            self.get_college_id(required=True)
+            college_id = self.get_college_id(required=True)
+            logger.debug(f"Received college_id in header: {college_id}")
 
     def _requires_college(self):
         """
@@ -56,8 +55,12 @@ class CollegeScopedMixin:
         user = getattr(self.request, 'user', None)
         college_id = self.get_college_id(required=False)
 
+        # Log the college_id being used
+        logger.debug(f"Filtering by college_id: {college_id}")
+
         # Check if college_id is 'all' (superuser/staff global view)
         if college_id == 'all':
+            logger.debug("Using 'all' mode for superuser/staff")
             manager = queryset.model.objects
             if hasattr(manager, 'all_colleges'):
                 return manager.all_colleges()
@@ -65,6 +68,7 @@ class CollegeScopedMixin:
 
         # Superusers/staff without any header also get all records
         if user and (user.is_superuser or user.is_staff) and not college_id:
+            logger.debug("Superuser/staff detected, no college_id passed")
             manager = queryset.model.objects
             if hasattr(manager, 'all_colleges'):
                 return manager.all_colleges()
@@ -72,14 +76,18 @@ class CollegeScopedMixin:
 
         # Regular users need a valid college_id
         if not college_id:
+            logger.debug("Missing college_id, requiring it")
             college_id = self.get_college_id(required=True)
-        
+
         model = queryset.model
+        logger.debug(f"Filtering for specific college_id: {college_id}")
 
         if model._meta.model_name == 'college':
+            logger.debug(f"Filtering college model with college_id={college_id}")
             return queryset.filter(pk=college_id)
 
         if self._supports_college_filter(model):
+            logger.debug(f"Filtering model with college_id={college_id}")
             return queryset.filter(college_id=college_id)
 
         return queryset.none()
@@ -132,6 +140,9 @@ class CollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet):
         # Get college_id to check if we're in 'all' mode
         college_id = self.get_college_id(required=False)
         
+        # Log the college_id being used
+        logger.debug(f"Filter query with college_id: {college_id}")
+        
         # If we're in 'all' mode (superadmin global view), temporarily patch
         # the related model managers to use all_colleges() for filter validation
         if college_id == 'all':
@@ -166,45 +177,3 @@ class CollegeScopedReadOnlyModelViewSet(CollegeScopedMixin, viewsets.ReadOnlyMod
     def get_queryset(self):
         queryset = super().get_queryset()
         return self.filter_queryset_by_college(queryset)
-
-
-# Backward-compatibility aliases
-TenantScopedMixin = CollegeScopedMixin
-TenantScopedModelViewSet = CollegeScopedModelViewSet
-TenantScopedReadOnlyModelViewSet = CollegeScopedReadOnlyModelViewSet
-
-class RelatedCollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet):
-    """
-    Scopes by college via a related lookup path when model lacks direct college FK.
-
-    Use this for models that don't have a direct college ForeignKey but are related
-    to college through another model (e.g., LeaveApplication -> Teacher -> College).
-
-    Set `related_college_lookup` to the path from the model to college_id using
-    Django's double-underscore notation (e.g., 'teacher__college_id').
-    """
-    related_college_lookup = None
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        college_id = self.get_college_id(required=False)
-        user = getattr(self.request, 'user', None)
-
-        # Superuser/staff with 'all' or no header gets all records
-        if college_id == 'all' or (user and (user.is_superuser or user.is_staff) and not college_id):
-            return queryset
-
-        # Regular users need a valid college_id
-        if not college_id:
-            college_id = self.get_college_id(required=True)
-
-        # If no related lookup is defined, return empty queryset
-        if not self.related_college_lookup:
-            return queryset.none()
-
-        # Filter by the related college lookup path
-        return queryset.filter(**{self.related_college_lookup: college_id})
-
-
-# Add alias for backward compatibility
-RelatedTenantScopedModelViewSet = RelatedCollegeScopedModelViewSet

@@ -289,7 +289,6 @@ SPECTACULAR_SETTINGS = {
 
 # Logging Configuration
 # https://docs.djangoproject.com/en/5.0/topics/logging/
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -337,6 +336,11 @@ LOGGING = {
             'handlers': ['file', 'console'],
             'level': 'DEBUG',
             'propagate': True,
+        },
+        'django.db.backends': { # Log SQL queries
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
         }
     },
     'root': {
