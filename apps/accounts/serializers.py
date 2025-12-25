@@ -198,14 +198,15 @@ class PasswordChangeSerializer(serializers.Serializer):
         return value
 
 
-class TokenWithUserSerializer(DRATokenSerializer):
+class TokenWithUserSerializer(serializers.Serializer):
     """
     Enhanced token serializer that returns comprehensive user details,
     primary college ID, and all accessible college IDs for multi-tenancy support.
     Includes user roles, permissions, and complete profile information.
     """
+    key = serializers.CharField(source='key')
     message = serializers.SerializerMethodField()
-    user = UserSerializer(read_only=True)
+    user = serializers.SerializerMethodField()
     college_id = serializers.SerializerMethodField()
     tenant_ids = serializers.SerializerMethodField()
     accessible_colleges = serializers.SerializerMethodField()
@@ -213,19 +214,12 @@ class TokenWithUserSerializer(DRATokenSerializer):
     user_permissions = serializers.SerializerMethodField()
     user_profile = serializers.SerializerMethodField()
 
-    class Meta:
-        model = DRATokenSerializer.Meta.model
-        fields = (
-            'key',
-            'message',
-            'user',
-            'college_id',
-            'tenant_ids',
-            'accessible_colleges',
-            'user_roles',
-            'user_permissions',
-            'user_profile'
-        )
+    def get_user(self, obj):
+        """Return full user details."""
+        user = getattr(obj, 'user', None)
+        if user:
+            return UserSerializer(user).data
+        return None
 
     def get_message(self, obj):
         """Return a success message."""
