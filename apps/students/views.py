@@ -84,7 +84,7 @@ from apps.core.mixins import CollegeScopedModelViewSet
 )
 class StudentCategoryViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing student categories."""
-    queryset = StudentCategory.objects.all()
+    queryset = StudentCategory.objects.all_colleges()
     serializer_class = StudentCategorySerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -143,7 +143,7 @@ class StudentCategoryViewSet(CollegeScopedModelViewSet):
 )
 class StudentGroupViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing student groups."""
-    queryset = StudentGroup.objects.all()
+    queryset = StudentGroup.objects.all_colleges()
     serializer_class = StudentGroupSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -208,7 +208,7 @@ class StudentGroupViewSet(CollegeScopedModelViewSet):
 )
 class StudentViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing students."""
-    queryset = Student.objects.all()
+    queryset = Student.objects.all_colleges()
     serializer_class = StudentSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -272,7 +272,7 @@ class StudentViewSet(CollegeScopedModelViewSet):
 )
 class GuardianViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing guardians."""
-    queryset = Guardian.objects.all()
+    queryset = Guardian.objects.all_colleges()
     serializer_class = GuardianSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -409,7 +409,7 @@ class StudentIDCardFilter(django_filters.FilterSet):
 )
 class StudentGuardianViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing student-guardian relationships."""
-    queryset = StudentGuardian.objects.all()
+    queryset = StudentGuardian.objects.all_colleges()
     serializer_class = StudentGuardianSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -465,7 +465,7 @@ class StudentGuardianViewSet(CollegeScopedModelViewSet):
 )
 class StudentAddressViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing student addresses."""
-    queryset = StudentAddress.objects.all()
+    queryset = StudentAddress.objects.all_colleges()
     serializer_class = StudentAddressSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -522,7 +522,7 @@ class StudentAddressViewSet(CollegeScopedModelViewSet):
 )
 class StudentDocumentViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing student documents."""
-    queryset = StudentDocument.objects.all()
+    queryset = StudentDocument.objects.all_colleges()
     serializer_class = StudentDocumentSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -580,7 +580,7 @@ class StudentDocumentViewSet(CollegeScopedModelViewSet):
 )
 class StudentMedicalRecordViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing student medical records."""
-    queryset = StudentMedicalRecord.objects.all()
+    queryset = StudentMedicalRecord.objects.all_colleges()
     serializer_class = StudentMedicalRecordSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -639,7 +639,7 @@ class StudentMedicalRecordViewSet(CollegeScopedModelViewSet):
 )
 class PreviousAcademicRecordViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing previous academic records."""
-    queryset = PreviousAcademicRecord.objects.all()
+    queryset = PreviousAcademicRecord.objects.all_colleges()
     serializer_class = PreviousAcademicRecordSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -698,7 +698,7 @@ class PreviousAcademicRecordViewSet(CollegeScopedModelViewSet):
 )
 class StudentPromotionViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing student promotions."""
-    queryset = StudentPromotion.objects.all()
+    queryset = StudentPromotion.objects.all_colleges()
     serializer_class = StudentPromotionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -757,7 +757,7 @@ class StudentPromotionViewSet(CollegeScopedModelViewSet):
 )
 class CertificateViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing certificates."""
-    queryset = Certificate.objects.all()
+    queryset = Certificate.objects.all_colleges()
     serializer_class = CertificateSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -817,7 +817,7 @@ class CertificateViewSet(CollegeScopedModelViewSet):
 )
 class StudentIDCardViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing student ID cards."""
-    queryset = StudentIDCard.objects.all()
+    queryset = StudentIDCard.objects.all_colleges()
     serializer_class = StudentIDCardSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

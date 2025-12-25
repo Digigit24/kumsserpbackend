@@ -34,7 +34,7 @@ from .serializers import (
 
 
 class MarksGradeViewSet(CollegeScopedModelViewSet):
-    queryset = MarksGrade.objects.all()
+    queryset = MarksGrade.objects.all_colleges()
     serializer_class = MarksGradeSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -45,7 +45,7 @@ class MarksGradeViewSet(CollegeScopedModelViewSet):
 
 
 class ExamTypeViewSet(CollegeScopedModelViewSet):
-    queryset = ExamType.objects.all()
+    queryset = ExamType.objects.all_colleges()
     serializer_class = ExamTypeSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -56,7 +56,7 @@ class ExamTypeViewSet(CollegeScopedModelViewSet):
 
 
 class ExamViewSet(CollegeScopedModelViewSet):
-    queryset = Exam.objects.all()
+    queryset = Exam.objects.all_colleges()
     serializer_class = ExamSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

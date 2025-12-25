@@ -15,7 +15,7 @@ from .serializers import (
 
 
 class HostelViewSet(CollegeScopedModelViewSet):
-    queryset = Hostel.objects.all()
+    queryset = Hostel.objects.all_colleges()
     serializer_class = HostelSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

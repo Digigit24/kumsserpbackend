@@ -26,7 +26,7 @@ from .serializers import (
 
 
 class IncomeCategoryViewSet(CollegeScopedModelViewSet):
-    queryset = IncomeCategory.objects.all()
+    queryset = IncomeCategory.objects.all_colleges()
     serializer_class = IncomeCategorySerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -37,7 +37,7 @@ class IncomeCategoryViewSet(CollegeScopedModelViewSet):
 
 
 class ExpenseCategoryViewSet(CollegeScopedModelViewSet):
-    queryset = ExpenseCategory.objects.all()
+    queryset = ExpenseCategory.objects.all_colleges()
     serializer_class = ExpenseCategorySerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -48,7 +48,7 @@ class ExpenseCategoryViewSet(CollegeScopedModelViewSet):
 
 
 class AccountViewSet(CollegeScopedModelViewSet):
-    queryset = Account.objects.all()
+    queryset = Account.objects.all_colleges()
     serializer_class = AccountSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -59,7 +59,7 @@ class AccountViewSet(CollegeScopedModelViewSet):
 
 
 class FinancialYearViewSet(CollegeScopedModelViewSet):
-    queryset = FinancialYear.objects.all()
+    queryset = FinancialYear.objects.all_colleges()
     serializer_class = FinancialYearSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -69,7 +69,7 @@ class FinancialYearViewSet(CollegeScopedModelViewSet):
 
 
 class IncomeViewSet(CollegeScopedModelViewSet):
-    queryset = Income.objects.all()
+    queryset = Income.objects.all_colleges()
     serializer_class = IncomeSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -80,7 +80,7 @@ class IncomeViewSet(CollegeScopedModelViewSet):
 
 
 class ExpenseViewSet(CollegeScopedModelViewSet):
-    queryset = Expense.objects.all()
+    queryset = Expense.objects.all_colleges()
     serializer_class = ExpenseSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -91,7 +91,7 @@ class ExpenseViewSet(CollegeScopedModelViewSet):
 
 
 class VoucherViewSet(CollegeScopedModelViewSet):
-    queryset = Voucher.objects.all()
+    queryset = Voucher.objects.all_colleges()
     serializer_class = VoucherSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

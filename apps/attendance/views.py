@@ -78,7 +78,7 @@ from apps.core.mixins import CollegeScopedModelViewSet
 )
 class StudentAttendanceViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing student attendance."""
-    queryset = StudentAttendance.objects.all()
+    queryset = StudentAttendance.objects.all_colleges()
     serializer_class = StudentAttendanceSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -186,7 +186,7 @@ class StudentAttendanceViewSet(CollegeScopedModelViewSet):
 )
 class SubjectAttendanceViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing subject attendance."""
-    queryset = SubjectAttendance.objects.all()
+    queryset = SubjectAttendance.objects.all_colleges()
     serializer_class = SubjectAttendanceSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -249,7 +249,7 @@ class SubjectAttendanceViewSet(CollegeScopedModelViewSet):
 )
 class StaffAttendanceViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing staff attendance."""
-    queryset = StaffAttendance.objects.all()
+    queryset = StaffAttendance.objects.all_colleges()
     serializer_class = StaffAttendanceSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -313,7 +313,7 @@ class StaffAttendanceViewSet(CollegeScopedModelViewSet):
 )
 class AttendanceNotificationViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing attendance notifications."""
-    queryset = AttendanceNotification.objects.all()
+    queryset = AttendanceNotification.objects.all_colleges()
     serializer_class = AttendanceNotificationSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]

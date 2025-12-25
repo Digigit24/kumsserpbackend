@@ -51,7 +51,7 @@ class RelatedCollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet
 
 
 class StoreCategoryViewSet(CollegeScopedModelViewSet):
-    queryset = StoreCategory.objects.all()
+    queryset = StoreCategory.objects.all_colleges()
     serializer_class = StoreCategorySerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -62,7 +62,7 @@ class StoreCategoryViewSet(CollegeScopedModelViewSet):
 
 
 class StoreItemViewSet(CollegeScopedModelViewSet):
-    queryset = StoreItem.objects.select_related('category', 'college')
+    queryset = StoreItem.objects.select_related('category', 'college').all_colleges()
     serializer_class = StoreItemSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -73,7 +73,7 @@ class StoreItemViewSet(CollegeScopedModelViewSet):
 
 
 class VendorViewSet(CollegeScopedModelViewSet):
-    queryset = Vendor.objects.select_related('college')
+    queryset = Vendor.objects.select_related('college').all_colleges()
     serializer_class = VendorSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -93,7 +93,7 @@ class StockReceiveViewSet(RelatedCollegeScopedModelViewSet):
 
 
 class StoreSaleViewSet(CollegeScopedModelViewSet):
-    queryset = StoreSale.objects.select_related('college', 'student', 'teacher', 'sold_by')
+    queryset = StoreSale.objects.select_related('college', 'student', 'teacher', 'sold_by').all_colleges()
     serializer_class = StoreSaleSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -112,7 +112,7 @@ class SaleItemViewSet(RelatedCollegeScopedModelViewSet):
 
 
 class PrintJobViewSet(CollegeScopedModelViewSet):
-    queryset = PrintJob.objects.select_related('college', 'teacher')
+    queryset = PrintJob.objects.select_related('college', 'teacher').all_colleges()
     serializer_class = PrintJobSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

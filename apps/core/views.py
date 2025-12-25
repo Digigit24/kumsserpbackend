@@ -118,7 +118,7 @@ class CollegeViewSet(CollegeScopedModelViewSet):
 
     Provides CRUD operations and custom actions for college management.
     """
-    queryset = College.objects.all()
+    queryset = College.objects.all_colleges()
     serializer_class = CollegeSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -229,7 +229,7 @@ class CollegeViewSet(CollegeScopedModelViewSet):
 )
 class AcademicYearViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing academic years."""
-    queryset = AcademicYear.objects.all()
+    queryset = AcademicYear.objects.all_colleges()
     serializer_class = AcademicYearSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -307,7 +307,7 @@ class AcademicYearViewSet(CollegeScopedModelViewSet):
 )
 class AcademicSessionViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing academic sessions (semesters)."""
-    queryset = AcademicSession.objects.all()
+    queryset = AcademicSession.objects.all_colleges()
     serializer_class = AcademicSessionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -365,7 +365,7 @@ class AcademicSessionViewSet(CollegeScopedModelViewSet):
 )
 class HolidayViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing holidays."""
-    queryset = Holiday.objects.all()
+    queryset = Holiday.objects.all_colleges()
     serializer_class = HolidaySerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -421,7 +421,7 @@ class HolidayViewSet(CollegeScopedModelViewSet):
 )
 class WeekendViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing weekend configurations."""
-    queryset = Weekend.objects.all()
+    queryset = Weekend.objects.all_colleges()
     serializer_class = WeekendSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -467,7 +467,7 @@ class WeekendViewSet(CollegeScopedModelViewSet):
 )
 class SystemSettingViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing system-wide settings."""
-    queryset = SystemSetting.objects.all()
+    queryset = SystemSetting.objects.all_colleges()
     serializer_class = SystemSettingSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
@@ -515,7 +515,7 @@ class SystemSettingViewSet(CollegeScopedModelViewSet):
 )
 class NotificationSettingViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing notification configurations."""
-    queryset = NotificationSetting.objects.all()
+    queryset = NotificationSetting.objects.all_colleges()
     serializer_class = NotificationSettingSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
@@ -549,7 +549,7 @@ class NotificationSettingViewSet(CollegeScopedModelViewSet):
 )
 class ActivityLogViewSet(CollegeScopedReadOnlyModelViewSet):
     """Read-only ViewSet for viewing activity logs."""
-    queryset = ActivityLog.objects.all()
+    queryset = ActivityLog.objects.all_colleges()
     serializer_class = ActivityLogSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

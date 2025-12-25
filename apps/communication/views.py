@@ -53,7 +53,7 @@ class RelatedCollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet
 
 
 class NoticeViewSet(CollegeScopedModelViewSet):
-    queryset = Notice.objects.all()
+    queryset = Notice.objects.all_colleges()
     serializer_class = NoticeSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -73,7 +73,7 @@ class NoticeVisibilityViewSet(RelatedCollegeScopedModelViewSet):
 
 
 class EventViewSet(CollegeScopedModelViewSet):
-    queryset = Event.objects.all()
+    queryset = Event.objects.all_colleges()
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -93,7 +93,7 @@ class EventRegistrationViewSet(RelatedCollegeScopedModelViewSet):
 
 
 class MessageTemplateViewSet(CollegeScopedModelViewSet):
-    queryset = MessageTemplate.objects.all()
+    queryset = MessageTemplate.objects.all_colleges()
     serializer_class = MessageTemplateSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -104,7 +104,7 @@ class MessageTemplateViewSet(CollegeScopedModelViewSet):
 
 
 class BulkMessageViewSet(CollegeScopedModelViewSet):
-    queryset = BulkMessage.objects.select_related('template', 'college')
+    queryset = BulkMessage.objects.select_related('template', 'college').all_colleges()
     serializer_class = BulkMessageSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -124,7 +124,7 @@ class MessageLogViewSet(RelatedCollegeScopedModelViewSet):
 
 
 class NotificationRuleViewSet(CollegeScopedModelViewSet):
-    queryset = NotificationRule.objects.select_related('template', 'college')
+    queryset = NotificationRule.objects.select_related('template', 'college').all_colleges()
     serializer_class = NotificationRuleSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

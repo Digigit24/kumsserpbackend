@@ -78,7 +78,7 @@ from apps.core.mixins import CollegeScopedModelViewSet
 )
 class TeacherViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing teachers."""
-    queryset = Teacher.objects.all()
+    queryset = Teacher.objects.all_colleges()
     serializer_class = TeacherSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -147,7 +147,7 @@ class TeacherViewSet(CollegeScopedModelViewSet):
 )
 class StudyMaterialViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing study materials."""
-    queryset = StudyMaterial.objects.all()
+    queryset = StudyMaterial.objects.all_colleges()
     serializer_class = StudyMaterialSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -215,7 +215,7 @@ class StudyMaterialViewSet(CollegeScopedModelViewSet):
 )
 class AssignmentViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing assignments."""
-    queryset = Assignment.objects.all()
+    queryset = Assignment.objects.all_colleges()
     serializer_class = AssignmentSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -282,7 +282,7 @@ class AssignmentViewSet(CollegeScopedModelViewSet):
 )
 class AssignmentSubmissionViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing assignment submissions."""
-    queryset = AssignmentSubmission.objects.all()
+    queryset = AssignmentSubmission.objects.all_colleges()
     serializer_class = AssignmentSubmissionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -347,7 +347,7 @@ class AssignmentSubmissionViewSet(CollegeScopedModelViewSet):
 )
 class HomeworkViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing homework."""
-    queryset = Homework.objects.all()
+    queryset = Homework.objects.all_colleges()
     serializer_class = HomeworkSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -413,7 +413,7 @@ class HomeworkViewSet(CollegeScopedModelViewSet):
 )
 class HomeworkSubmissionViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing homework submissions."""
-    queryset = HomeworkSubmission.objects.all()
+    queryset = HomeworkSubmission.objects.all_colleges()
     serializer_class = HomeworkSubmissionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

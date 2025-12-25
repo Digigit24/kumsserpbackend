@@ -55,7 +55,7 @@ class RelatedCollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet
 
 
 class LeaveTypeViewSet(CollegeScopedModelViewSet):
-    queryset = LeaveType.objects.all()
+    queryset = LeaveType.objects.all_colleges()
     serializer_class = LeaveTypeSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -111,7 +111,7 @@ class SalaryComponentViewSet(RelatedCollegeScopedModelViewSet):
 
 
 class DeductionViewSet(CollegeScopedModelViewSet):
-    queryset = Deduction.objects.all()
+    queryset = Deduction.objects.all_colleges()
     serializer_class = DeductionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

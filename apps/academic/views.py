@@ -83,7 +83,7 @@ from apps.core.mixins import CollegeScopedModelViewSet
 )
 class FacultyViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing faculties/departments."""
-    queryset = Faculty.objects.all()
+    queryset = Faculty.objects.all_colleges()
     serializer_class = FacultySerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -150,7 +150,7 @@ class FacultyViewSet(CollegeScopedModelViewSet):
 )
 class ProgramViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing academic programs."""
-    queryset = Program.objects.all()
+    queryset = Program.objects.all_colleges()
     serializer_class = ProgramSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -217,7 +217,7 @@ class ProgramViewSet(CollegeScopedModelViewSet):
 )
 class ClassViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing classes."""
-    queryset = Class.objects.all()
+    queryset = Class.objects.all_colleges()
     serializer_class = ClassSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -282,7 +282,7 @@ class ClassViewSet(CollegeScopedModelViewSet):
 )
 class SectionViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing sections."""
-    queryset = Section.objects.all()
+    queryset = Section.objects.all_colleges()
     serializer_class = SectionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -363,7 +363,7 @@ class SectionViewSet(CollegeScopedModelViewSet):
 )
 class SubjectViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing subjects."""
-    queryset = Subject.objects.all()
+    queryset = Subject.objects.all_colleges()
     serializer_class = SubjectSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -428,7 +428,7 @@ class SubjectViewSet(CollegeScopedModelViewSet):
 )
 class OptionalSubjectViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing optional subject groups."""
-    queryset = OptionalSubject.objects.all()
+    queryset = OptionalSubject.objects.all_colleges()
     serializer_class = OptionalSubjectSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -509,7 +509,7 @@ class OptionalSubjectViewSet(CollegeScopedModelViewSet):
 )
 class SubjectAssignmentViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing subject assignments."""
-    queryset = SubjectAssignment.objects.all()
+    queryset = SubjectAssignment.objects.all_colleges()
     serializer_class = SubjectAssignmentSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -592,7 +592,7 @@ class SubjectAssignmentViewSet(CollegeScopedModelViewSet):
 )
 class ClassroomViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing classrooms."""
-    queryset = Classroom.objects.all()
+    queryset = Classroom.objects.all_colleges()
     serializer_class = ClassroomSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -657,7 +657,7 @@ class ClassroomViewSet(CollegeScopedModelViewSet):
 )
 class ClassTimeViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing class time slots."""
-    queryset = ClassTime.objects.all()
+    queryset = ClassTime.objects.all_colleges()
     serializer_class = ClassTimeSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -718,7 +718,7 @@ class ClassTimeViewSet(CollegeScopedModelViewSet):
 )
 class TimetableViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing timetable entries."""
-    queryset = Timetable.objects.all()
+    queryset = Timetable.objects.all_colleges()
     serializer_class = TimetableSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -801,7 +801,7 @@ class TimetableViewSet(CollegeScopedModelViewSet):
 )
 class LabScheduleViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing lab schedules."""
-    queryset = LabSchedule.objects.all()
+    queryset = LabSchedule.objects.all_colleges()
     serializer_class = LabScheduleSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -880,7 +880,7 @@ class LabScheduleViewSet(CollegeScopedModelViewSet):
 )
 class ClassTeacherViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing class teacher assignments."""
-    queryset = ClassTeacher.objects.all()
+    queryset = ClassTeacher.objects.all_colleges()
     serializer_class = ClassTeacherSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]

@@ -51,7 +51,7 @@ class LibraryScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet):
 
 
 class BookCategoryViewSet(CollegeScopedModelViewSet):
-    queryset = BookCategory.objects.all()
+    queryset = BookCategory.objects.all_colleges()
     serializer_class = BookCategorySerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -62,7 +62,7 @@ class BookCategoryViewSet(CollegeScopedModelViewSet):
 
 
 class BookViewSet(CollegeScopedModelViewSet):
-    queryset = Book.objects.all()
+    queryset = Book.objects.all_colleges()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -73,7 +73,7 @@ class BookViewSet(CollegeScopedModelViewSet):
 
 
 class LibraryMemberViewSet(CollegeScopedModelViewSet):
-    queryset = LibraryMember.objects.all()
+    queryset = LibraryMember.objects.all_colleges()
     serializer_class = LibraryMemberSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

@@ -24,7 +24,7 @@ from .serializers import (
 
 
 class QuestionBankViewSet(CollegeScopedModelViewSet):
-    queryset = QuestionBank.objects.all()
+    queryset = QuestionBank.objects.all_colleges()
     serializer_class = QuestionBankSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -56,7 +56,7 @@ class QuestionOptionViewSet(viewsets.ModelViewSet):
 
 
 class OnlineExamViewSet(CollegeScopedModelViewSet):
-    queryset = OnlineExam.objects.all()
+    queryset = OnlineExam.objects.all_colleges()
     serializer_class = OnlineExamSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

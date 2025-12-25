@@ -138,7 +138,7 @@ class UserViewSet(CollegeScopedModelViewSet):
 
     Provides CRUD operations and custom actions for user management.
     """
-    queryset = User.objects.all()
+    queryset = User.objects.all_colleges()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -343,7 +343,7 @@ class UserViewSet(CollegeScopedModelViewSet):
 )
 class RoleViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing roles."""
-    queryset = Role.objects.all()
+    queryset = Role.objects.all_colleges()
     serializer_class = RoleSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -411,7 +411,7 @@ class RoleViewSet(CollegeScopedModelViewSet):
 )
 class UserRoleViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing user role assignments."""
-    queryset = UserRole.objects.all()
+    queryset = UserRole.objects.all_colleges()
     serializer_class = UserRoleSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -471,7 +471,7 @@ class UserRoleViewSet(CollegeScopedModelViewSet):
 )
 class DepartmentViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing departments."""
-    queryset = Department.objects.all()
+    queryset = Department.objects.all_colleges()
     serializer_class = DepartmentSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -538,7 +538,7 @@ class DepartmentViewSet(CollegeScopedModelViewSet):
 )
 class UserProfileViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing user profiles."""
-    queryset = UserProfile.objects.all()
+    queryset = UserProfile.objects.all_colleges()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
