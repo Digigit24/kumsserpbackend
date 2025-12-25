@@ -6,6 +6,7 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from apps.core.models import CollegeScopedModel, AuditModel, TimeStampedModel, College
+from apps.core.managers import CollegeManager
 from apps.academic.models import Faculty, Subject, Class, Section
 from apps.students.models import Student
 
@@ -216,6 +217,8 @@ class AssignmentSubmission(TimeStampedModel):
     """
     Tracks student submissions for assignments.
     """
+    objects = CollegeManager()
+
     assignment = models.ForeignKey(
         Assignment,
         on_delete=models.CASCADE,
@@ -331,6 +334,8 @@ class HomeworkSubmission(TimeStampedModel):
     """
     Tracks student homework submissions.
     """
+    objects = CollegeManager()
+
     homework = models.ForeignKey(
         Homework,
         on_delete=models.CASCADE,

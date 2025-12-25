@@ -5,6 +5,7 @@ Provides student and staff attendance tracking.
 from django.db import models
 from django.conf import settings
 from apps.core.models import TimeStampedModel
+from apps.core.managers import CollegeManager
 from apps.students.models import Student
 from apps.teachers.models import Teacher
 from apps.academic.models import Class, Section, SubjectAssignment, ClassTime
@@ -14,6 +15,8 @@ class StudentAttendance(TimeStampedModel):
     """
     Tracks daily attendance for students.
     """
+    objects = CollegeManager()
+
     student = models.ForeignKey(
         Student,
         on_delete=models.CASCADE,
@@ -68,6 +71,8 @@ class SubjectAttendance(TimeStampedModel):
     """
     Tracks subject-wise attendance for students.
     """
+    objects = CollegeManager()
+
     student = models.ForeignKey(
         Student,
         on_delete=models.CASCADE,
@@ -121,6 +126,8 @@ class StaffAttendance(TimeStampedModel):
     """
     Tracks daily attendance for staff/teachers.
     """
+    objects = CollegeManager()
+
     teacher = models.ForeignKey(
         Teacher,
         on_delete=models.CASCADE,
@@ -171,6 +178,8 @@ class AttendanceNotification(TimeStampedModel):
     """
     Manages notifications for attendance (to parents, students, etc.).
     """
+    objects = CollegeManager()
+
     attendance = models.ForeignKey(
         StudentAttendance,
         on_delete=models.CASCADE,
