@@ -4,8 +4,8 @@ attrs==25.4.0
 colorama==0.4.6
 decorator==5.2.1
 dj-database-url==3.0.1
-dj-rest-auth==7.0.1
-Django==5.0.14
+dj-rest-auth==6.0.0
+Django==5.1.5
 django-cors-headers==4.9.0
 django-debug-toolbar==6.1.0
 django-extensions==4.1
