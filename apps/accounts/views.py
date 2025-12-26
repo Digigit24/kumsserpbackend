@@ -31,6 +31,7 @@ from .serializers import (
     UserCreateSerializer,
     UserUpdateSerializer,
     PasswordChangeSerializer,
+    TokenWithUserSerializer,
     RoleSerializer,
     RoleListSerializer,
     UserRoleSerializer,
@@ -53,9 +54,14 @@ class LoginViewNoAuth(DRALoginView):
     """
     Override login to ignore incoming Authorization headers so stale tokens
     don't trigger TokenAuthentication before credentials are checked.
-    Enhanced to log comprehensive user details to console on successful login.
+    Enhanced to return comprehensive user details including college info, roles,
+    permissions, and profile data on successful login.
     """
     authentication_classes = []
+
+    def get_response_serializer(self):
+        """Override to use our custom TokenWithUserSerializer."""
+        return TokenWithUserSerializer
 
     def post(self, request, *args, **kwargs):
         """Override post to log user details to console after successful login."""
