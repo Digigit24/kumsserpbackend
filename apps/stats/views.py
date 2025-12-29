@@ -188,10 +188,24 @@ class DashboardStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewS
         # Add overall totals
         result['overall_totals'] = {
             'total_students': Student.objects.all().count(),
+            'total_students_active': Student.objects.filter(is_active=True).count(),
+            'total_students_inactive': Student.objects.filter(is_active=False).count(),
+            'total_students_no_college': Student.objects.filter(college_id__isnull=True).count(),
             'total_teachers': Teacher.objects.all().count(),
             'total_users': User.objects.all().count(),
             'total_classes': Class.objects.all().count(),
         }
+
+        # Show student distribution by college
+        result['student_college_distribution'] = []
+        for student in Student.objects.all().select_related('college')[:10]:
+            result['student_college_distribution'].append({
+                'student_id': student.id,
+                'admission_number': student.admission_number,
+                'college_id': student.college_id,
+                'college_name': student.college.name if student.college else 'No College',
+                'is_active': student.is_active,
+            })
 
         if colleges.exists():
             result['message'] = "✅ Use X-College-ID header with one of the college IDs listed above"
