@@ -237,14 +237,6 @@ class UserViewSet(CollegeScopedModelViewSet):
         summary="Change password",
         description="Change the password for the current user.",
         request=PasswordChangeSerializer,
-        responses={
-            200: {
-                'type': 'object',
-                'properties': {
-                    'message': {'type': 'string'},
-                },
-            }
-        },
         tags=['Users']
     )
     @action(detail=False, methods=['post'])
@@ -264,15 +256,6 @@ class UserViewSet(CollegeScopedModelViewSet):
         summary="Bulk delete users",
         description="Soft delete multiple users at once.",
         request=BulkDeleteSerializer,
-        responses={
-            200: {
-                'type': 'object',
-                'properties': {
-                    'message': {'type': 'string'},
-                    'deleted_ids': {'type': 'array', 'items': {'type': 'string', 'format': 'uuid'}},
-                },
-            }
-        },
         tags=['Users']
     )
     @action(detail=False, methods=['post'])
@@ -296,15 +279,6 @@ class UserViewSet(CollegeScopedModelViewSet):
         summary="Bulk activate/deactivate users",
         description="Activate or deactivate multiple users at once.",
         request=BulkActivateSerializer,
-        responses={
-            200: {
-                'type': 'object',
-                'properties': {
-                    'message': {'type': 'string'},
-                    'updated_ids': {'type': 'array', 'items': {'type': 'string', 'format': 'uuid'}},
-                },
-            }
-        },
         tags=['Users']
     )
     @action(detail=False, methods=['post'])
@@ -331,15 +305,6 @@ class UserViewSet(CollegeScopedModelViewSet):
         summary="Bulk update user types",
         description="Update user type for multiple users at once.",
         request=BulkUserTypeUpdateSerializer,
-        responses={
-            200: {
-                'type': 'object',
-                'properties': {
-                    'message': {'type': 'string'},
-                    'updated_ids': {'type': 'array', 'items': {'type': 'string', 'format': 'uuid'}},
-                },
-            }
-        },
         tags=['Users']
     )
     @action(detail=False, methods=['post'])
