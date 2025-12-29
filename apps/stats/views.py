@@ -196,6 +196,11 @@ class DashboardStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewS
             'total_classes': Class.objects.all().count(),
         }
 
+        # Count students by college_id (group by)
+        from django.db.models import Count
+        students_by_college = Student.objects.values('college_id', 'is_active').annotate(count=Count('id'))
+        result['students_by_college_id'] = list(students_by_college)
+
         # Show student distribution by college
         result['student_college_distribution'] = []
         for student in Student.objects.all().select_related('college')[:10]:
