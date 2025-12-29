@@ -157,8 +157,8 @@ class DashboardStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewS
     @extend_schema(
         summary="DEBUG: Check Database Data",
         description="Diagnostic endpoint to check what data exists in the database and which college ID to use",
-        responses={200: dict},
-        tags=['Statistics - Debug']
+        tags=['Statistics - Debug'],
+        responses={200: None}  # Use None instead of dict for better schema generation
     )
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def debug_data(self, request):
