@@ -39,7 +39,7 @@ class DashboardStatsService:
             is_active=True
         ).count()
 
-        total_staff = User.objects.all_colleges().filter(
+        total_staff = User.objects.filter(
             college_id=self.college_id,
             is_active=True,
             user_type='STAFF'
