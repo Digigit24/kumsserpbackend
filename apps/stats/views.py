@@ -163,8 +163,8 @@ class DashboardStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewS
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def debug_data(self, request):
         """Debug endpoint to check database data"""
-        # Get all colleges
-        colleges = College.objects.all()
+        # Get all colleges - use all_colleges() to bypass scoping
+        colleges = College.objects.all_colleges()
 
         result = {
             'total_colleges': colleges.count(),
@@ -177,33 +177,33 @@ class DashboardStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewS
                 'name': college.name,
                 'code': college.code,
                 'data_summary': {
-                    'students': Student.objects.filter(college_id=college.id).count(),
-                    'teachers': Teacher.objects.filter(college_id=college.id).count(),
-                    'users': User.objects.filter(college_id=college.id).count(),
-                    'classes': Class.objects.filter(college_id=college.id).count(),
+                    'students': Student.objects.all_colleges().filter(college_id=college.id).count(),
+                    'teachers': Teacher.objects.all_colleges().filter(college_id=college.id).count(),
+                    'users': User.objects.all().count(),  # User doesn't have CollegeManager
+                    'classes': Class.objects.all_colleges().filter(college_id=college.id).count(),
                 }
             }
             result['colleges'].append(college_data)
 
-        # Add overall totals
+        # Add overall totals - use all_colleges() to bypass automatic scoping
         result['overall_totals'] = {
-            'total_students': Student.objects.all().count(),
-            'total_students_active': Student.objects.filter(is_active=True).count(),
-            'total_students_inactive': Student.objects.filter(is_active=False).count(),
-            'total_students_no_college': Student.objects.filter(college_id__isnull=True).count(),
-            'total_teachers': Teacher.objects.all().count(),
-            'total_users': User.objects.all().count(),
-            'total_classes': Class.objects.all().count(),
+            'total_students': Student.objects.all_colleges().count(),
+            'total_students_active': Student.objects.all_colleges().filter(is_active=True).count(),
+            'total_students_inactive': Student.objects.all_colleges().filter(is_active=False).count(),
+            'total_students_no_college': Student.objects.all_colleges().filter(college_id__isnull=True).count(),
+            'total_teachers': Teacher.objects.all_colleges().count(),
+            'total_users': User.objects.all().count(),  # User doesn't have CollegeManager
+            'total_classes': Class.objects.all_colleges().count(),
         }
 
-        # Count students by college_id (group by)
+        # Count students by college_id (group by) - use all_colleges()
         from django.db.models import Count
-        students_by_college = Student.objects.values('college_id', 'is_active').annotate(count=Count('id'))
+        students_by_college = Student.objects.all_colleges().values('college_id', 'is_active').annotate(count=Count('id'))
         result['students_by_college_id'] = list(students_by_college)
 
-        # Show student distribution by college
+        # Show student distribution by college - use all_colleges()
         result['student_college_distribution'] = []
-        for student in Student.objects.all().select_related('college')[:10]:
+        for student in Student.objects.all_colleges().select_related('college')[:10]:
             result['student_college_distribution'].append({
                 'student_id': student.id,
                 'admission_number': student.admission_number,
