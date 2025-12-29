@@ -148,7 +148,15 @@ class CollegeViewSet(CollegeScopedModelViewSet):
         summary="Bulk delete colleges",
         description="Soft delete multiple colleges at once.",
         request=BulkDeleteSerializer,
-        responses={200: OpenApiResponse(description="Colleges deleted successfully")},
+        responses={
+            200: {
+                'type': 'object',
+                'properties': {
+                    'message': {'type': 'string'},
+                    'deleted_ids': {'type': 'array', 'items': {'type': 'string', 'format': 'uuid'}},
+                },
+            }
+        },
         tags=['Colleges']
     )
     @action(detail=False, methods=['post'])
@@ -596,7 +604,19 @@ class PermissionViewSet(CollegeScopedModelViewSet):
     @extend_schema(
         summary="Get current user's permissions",
         description="Returns the logged-in user's permission configuration.",
-        responses={200: OpenApiResponse(description="User permissions")},
+        responses={
+            200: {
+                'type': 'object',
+                'properties': {
+                    'user_id': {'type': 'string', 'format': 'uuid'},
+                    'username': {'type': 'string'},
+                    'is_superadmin': {'type': 'boolean'},
+                    'college_id': {'type': 'string', 'nullable': True},
+                    'role': {'type': 'string'},
+                    'permissions': {'type': 'object'},
+                },
+            }
+        },
         tags=['Permissions']
     )
     @action(detail=False, methods=['get'])
@@ -630,7 +650,15 @@ class PermissionViewSet(CollegeScopedModelViewSet):
     @extend_schema(
         summary="Get permission schema",
         description="Returns the permission registry for building UI.",
-        responses={200: OpenApiResponse(description="Permission schema")},
+        responses={
+            200: {
+                'type': 'object',
+                'properties': {
+                    'registry': {'type': 'object'},
+                    'scopes': {'type': 'array', 'items': {'type': 'string'}},
+                },
+            }
+        },
         tags=['Permissions']
     )
     @action(detail=False, methods=['get'])
