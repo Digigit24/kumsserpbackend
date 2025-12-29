@@ -11,7 +11,9 @@ from .models import (
     Weekend,
     SystemSetting,
     NotificationSetting,
-    ActivityLog
+    ActivityLog,
+    Permission,
+    TeamMembership
 )
 
 User = get_user_model()
@@ -331,3 +333,65 @@ class BulkActivateSerializer(serializers.Serializer):
         help_text="List of IDs to activate/deactivate"
     )
     is_active = serializers.BooleanField(help_text="Set active status")
+
+
+# ============================================================================
+# PERMISSION SYSTEM SERIALIZERS
+# ============================================================================
+
+
+class PermissionSerializer(TenantAuditMixin, serializers.ModelSerializer):
+    """Serializer for Permission model."""
+    college_name = serializers.CharField(source='college.name', read_only=True)
+
+    class Meta:
+        model = Permission
+        fields = [
+            'id', 'college', 'college_name', 'role', 'permissions_json',
+            'created_at', 'updated_at', 'created_by', 'updated_by', 'is_active'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at', 'created_by', 'updated_by']
+
+    def validate_permissions_json(self, value):
+        """
+        Validate that permissions_json structure is valid.
+        """
+        from apps.core.permissions.registry import PERMISSION_REGISTRY, AVAILABLE_SCOPES
+
+        for resource, actions in value.items():
+            if resource not in PERMISSION_REGISTRY:
+                raise serializers.ValidationError(f"Invalid resource: {resource}")
+
+            for action, config in actions.items():
+                if action not in PERMISSION_REGISTRY[resource]['actions']:
+                    raise serializers.ValidationError(
+                        f"Invalid action '{action}' for resource '{resource}'"
+                    )
+
+                if 'enabled' not in config or 'scope' not in config:
+                    raise serializers.ValidationError(
+                        f"Missing 'enabled' or 'scope' in {resource}.{action}"
+                    )
+
+                if config['scope'] not in AVAILABLE_SCOPES:
+                    raise serializers.ValidationError(f"Invalid scope: {config['scope']}")
+
+        return value
+
+
+class TeamMembershipSerializer(TenantAuditMixin, serializers.ModelSerializer):
+    """Serializer for TeamMembership model."""
+    college_name = serializers.CharField(source='college.name', read_only=True)
+    leader_name = serializers.CharField(source='leader.get_full_name', read_only=True)
+    member_name = serializers.CharField(source='member.get_full_name', read_only=True)
+
+    class Meta:
+        model = TeamMembership
+        fields = [
+            'id', 'college', 'college_name',
+            'leader', 'leader_name',
+            'member', 'member_name',
+            'relationship_type', 'resource',
+            'created_at', 'updated_at', 'created_by', 'updated_by', 'is_active'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at', 'created_by', 'updated_by']

@@ -12,6 +12,8 @@ from .views import (
     SystemSettingViewSet,
     NotificationSettingViewSet,
     ActivityLogViewSet,
+    PermissionViewSet,
+    TeamMembershipViewSet,
 )
 
 app_name = 'core'
@@ -26,6 +28,8 @@ router.register(r'weekends', WeekendViewSet, basename='weekend')
 router.register(r'system-settings', SystemSettingViewSet, basename='system-setting')
 router.register(r'notification-settings', NotificationSettingViewSet, basename='notification-setting')
 router.register(r'activity-logs', ActivityLogViewSet, basename='activity-log')
+router.register(r'permissions', PermissionViewSet, basename='permission')
+router.register(r'team-memberships', TeamMembershipViewSet, basename='team-membership')
 
 urlpatterns = [
     path('', include(router.urls)),

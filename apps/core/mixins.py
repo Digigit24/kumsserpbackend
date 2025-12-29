@@ -125,11 +125,48 @@ class CollegeScopedMixin:
 class CollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet):
     """
     Base class for college-aware ModelViewSets with audit stamping.
+
+    Optionally supports permission-based scope filtering when resource_name is defined.
     """
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return self.filter_queryset_by_college(queryset)
+
+        # Apply college filtering first
+        queryset = self.filter_queryset_by_college(queryset)
+
+        # If resource_name is defined, apply permission-based scope filtering
+        if hasattr(self, 'resource_name') and self.resource_name:
+            queryset = self._apply_permission_scope_filter(queryset)
+
+        return queryset
+
+    def _apply_permission_scope_filter(self, queryset):
+        """
+        Apply scope-based filtering when resource_name is defined.
+        """
+        from apps.core.permissions.scope_resolver import apply_scope_filter
+        from apps.core.utils import get_current_college_id
+        from apps.core.models import College
+
+        # Superadmin gets unfiltered queryset
+        if getattr(self.request.user, 'is_superadmin', False):
+            model = queryset.model
+            if hasattr(model, 'objects') and hasattr(model.objects, 'all_colleges'):
+                return model.objects.all_colleges()
+            return queryset
+
+        # Get college
+        college = None
+        college_id = get_current_college_id()
+        if college_id and college_id != 'all':
+            try:
+                college = College.objects.filter(id=college_id).first()
+            except Exception:
+                pass
+
+        # Apply scope filtering
+        return apply_scope_filter(self.request.user, self.resource_name, queryset, college)
     
     def filter_queryset(self, queryset):
         """
@@ -172,8 +209,45 @@ class CollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet):
 class CollegeScopedReadOnlyModelViewSet(CollegeScopedMixin, viewsets.ReadOnlyModelViewSet):
     """
     Base class for college-aware read-only ViewSets.
+
+    Optionally supports permission-based scope filtering when resource_name is defined.
     """
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return self.filter_queryset_by_college(queryset)
+
+        # Apply college filtering first
+        queryset = self.filter_queryset_by_college(queryset)
+
+        # If resource_name is defined, apply permission-based scope filtering
+        if hasattr(self, 'resource_name') and self.resource_name:
+            queryset = self._apply_permission_scope_filter(queryset)
+
+        return queryset
+
+    def _apply_permission_scope_filter(self, queryset):
+        """
+        Apply scope-based filtering when resource_name is defined.
+        """
+        from apps.core.permissions.scope_resolver import apply_scope_filter
+        from apps.core.utils import get_current_college_id
+        from apps.core.models import College
+
+        # Superadmin gets unfiltered queryset
+        if getattr(self.request.user, 'is_superadmin', False):
+            model = queryset.model
+            if hasattr(model, 'objects') and hasattr(model.objects, 'all_colleges'):
+                return model.objects.all_colleges()
+            return queryset
+
+        # Get college
+        college = None
+        college_id = get_current_college_id()
+        if college_id and college_id != 'all':
+            try:
+                college = College.objects.filter(id=college_id).first()
+            except Exception:
+                pass
+
+        # Apply scope filtering
+        return apply_scope_filter(self.request.user, self.resource_name, queryset, college)

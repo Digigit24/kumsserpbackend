@@ -133,6 +133,11 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
         default=False,
         help_text="Designates whether the user can log into admin site"
     )
+    is_superadmin = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text="Superadmin has access to all colleges and all permissions"
+    )
     is_verified = models.BooleanField(
         default=False,
         help_text="Indicates if the email/phone is verified"

@@ -24,8 +24,17 @@ class CollegeMiddleware(MiddlewareMixin):
         Extract college_id from request header and store in thread-local storage.
         Also store the request object for use in signals and models.
         Supports special value 'all' for superuser/staff to access all colleges.
+        Superadmins bypass college scoping entirely.
         """
         clear_current_college_id()
+
+        # Superadmin bypasses college scoping
+        user = getattr(request, 'user', None)
+        if user and user.is_authenticated and getattr(user, 'is_superadmin', False):
+            # Don't set college context - superadmin sees everything
+            set_current_request(request)
+            request.current_college = None
+            return
 
         college_header = None
         for header in self.header_candidates:
@@ -37,7 +46,6 @@ class CollegeMiddleware(MiddlewareMixin):
             # Check for special 'all' value for superuser/staff
             if college_header.lower() == 'all':
                 # Only allow 'all' for authenticated superuser/staff
-                user = getattr(request, 'user', None)
                 if user and user.is_authenticated and (user.is_superuser or user.is_staff):
                     set_current_college_id('all')
                     request.current_college = None  # No specific college

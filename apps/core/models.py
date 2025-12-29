@@ -678,3 +678,112 @@ class ActivityLog(models.Model):
 
     def __str__(self):
         return f"{self.action} - {self.model_name} by {self.user} at {self.timestamp}"
+
+
+# ============================================================================
+# PERMISSION SYSTEM MODELS
+# ============================================================================
+
+
+class Permission(CollegeScopedModel):
+    """
+    College-scoped permission configuration.
+    Superadmins don't use this model - they bypass all checks.
+    """
+    college = models.ForeignKey(
+        College,
+        on_delete=models.CASCADE,
+        related_name='permissions',
+        help_text="Associated college"
+    )
+    role = models.CharField(
+        max_length=50,
+        help_text="Role name (e.g., 'admin', 'teacher', 'student', 'hod')"
+    )
+    permissions_json = models.JSONField(
+        default=dict,
+        help_text="Permission configuration as JSON"
+    )
+
+    class Meta:
+        db_table = 'permission'
+        app_label = 'core'
+        verbose_name = 'Permission'
+        verbose_name_plural = 'Permissions'
+        ordering = ['college', 'role']
+        indexes = [
+            models.Index(fields=['college', 'role']),
+            models.Index(fields=['college']),
+            models.Index(fields=['role']),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['college', 'role'],
+                name='unique_college_role_permission'
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.role} - {self.college.short_name}"
+
+
+class TeamMembership(CollegeScopedModel):
+    """
+    Defines team relationships for scope filtering.
+    Examples:
+    - Teacher → Students in their classes
+    - HOD → Faculty and students in their department
+    """
+    college = models.ForeignKey(
+        College,
+        on_delete=models.CASCADE,
+        related_name='team_memberships',
+        help_text="Associated college"
+    )
+    leader = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='team_leader',
+        help_text="Team leader (teacher, HOD, etc.)"
+    )
+    member = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='team_member',
+        help_text="Team member (student, faculty, etc.)"
+    )
+    relationship_type = models.CharField(
+        max_length=50,
+        choices=[
+            ('teacher_student', 'Teacher-Student'),
+            ('hod_faculty', 'HOD-Faculty'),
+            ('hod_student', 'HOD-Student'),
+        ],
+        help_text="Type of relationship"
+    )
+    resource = models.CharField(
+        max_length=50,
+        help_text="Resource this relationship applies to (e.g., 'attendance', 'students')"
+    )
+
+    class Meta:
+        db_table = 'team_membership'
+        app_label = 'core'
+        verbose_name = 'Team Membership'
+        verbose_name_plural = 'Team Memberships'
+        ordering = ['college', 'leader']
+        indexes = [
+            models.Index(fields=['college', 'leader', 'resource']),
+            models.Index(fields=['college', 'member']),
+            models.Index(fields=['leader']),
+            models.Index(fields=['member']),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['college', 'leader', 'member', 'relationship_type', 'resource'],
+                name='unique_team_membership'
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.leader.get_full_name()} -> {self.member.get_full_name()} ({self.relationship_type})"

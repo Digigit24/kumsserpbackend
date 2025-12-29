@@ -23,7 +23,9 @@ from .models import (
     Weekend,
     SystemSetting,
     NotificationSetting,
-    ActivityLog
+    ActivityLog,
+    Permission,
+    TeamMembership
 )
 from .serializers import (
     CollegeSerializer,
@@ -38,6 +40,8 @@ from .serializers import (
     ActivityLogSerializer,
     BulkDeleteSerializer,
     BulkActivateSerializer,
+    PermissionSerializer,
+    TeamMembershipSerializer,
 )
 from .mixins import CollegeScopedModelViewSet, CollegeScopedReadOnlyModelViewSet
 
@@ -118,6 +122,7 @@ class CollegeViewSet(CollegeScopedModelViewSet):
 
     Provides CRUD operations and custom actions for college management.
     """
+    resource_name = 'colleges'
     queryset = College.objects.all_colleges()
     serializer_class = CollegeSerializer
     permission_classes = [IsAuthenticated]
@@ -229,6 +234,7 @@ class CollegeViewSet(CollegeScopedModelViewSet):
 )
 class AcademicYearViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing academic years."""
+    resource_name = 'academic_years'
     queryset = AcademicYear.objects.all_colleges()
     serializer_class = AcademicYearSerializer
     permission_classes = [IsAuthenticated]
@@ -365,6 +371,7 @@ class AcademicSessionViewSet(CollegeScopedModelViewSet):
 )
 class HolidayViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing holidays."""
+    resource_name = 'holidays'
     queryset = Holiday.objects.all_colleges()
     serializer_class = HolidaySerializer
     permission_classes = [IsAuthenticated]
@@ -557,3 +564,188 @@ class ActivityLogViewSet(CollegeScopedReadOnlyModelViewSet):
     search_fields = ['description', 'object_id', 'user__username']
     ordering_fields = ['timestamp']
     ordering = ['-timestamp']
+
+
+# ============================================================================
+# PERMISSION SYSTEM VIEWSETS
+# ============================================================================
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="List permissions",
+        description="Retrieve permission configurations for roles.",
+        parameters=[
+            OpenApiParameter(name='college', type=OpenApiTypes.INT, description='Filter by college ID'),
+            OpenApiParameter(name='role', type=OpenApiTypes.STR, description='Filter by role'),
+        ],
+        responses={200: PermissionSerializer(many=True)},
+        tags=['Permissions']
+    ),
+    retrieve=extend_schema(
+        summary="Get permission details",
+        responses={200: PermissionSerializer},
+        tags=['Permissions']
+    ),
+    create=extend_schema(
+        summary="Create permission configuration",
+        request=PermissionSerializer,
+        responses={201: PermissionSerializer},
+        tags=['Permissions']
+    ),
+    update=extend_schema(
+        summary="Update permission",
+        request=PermissionSerializer,
+        responses={200: PermissionSerializer},
+        tags=['Permissions']
+    ),
+    partial_update=extend_schema(
+        summary="Partially update permission",
+        request=PermissionSerializer,
+        responses={200: PermissionSerializer},
+        tags=['Permissions']
+    ),
+    destroy=extend_schema(
+        summary="Delete permission",
+        responses={204: None},
+        tags=['Permissions']
+    ),
+)
+class PermissionViewSet(CollegeScopedModelViewSet):
+    """
+    ViewSet for managing permissions.
+    Only admins and superadmins can manage permissions.
+    """
+    queryset = Permission.objects.all_colleges()
+    serializer_class = PermissionSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['college', 'role', 'is_active']
+    search_fields = ['role']
+    ordering_fields = ['college', 'role']
+    ordering = ['college', 'role']
+
+    def get_queryset(self):
+        # Superadmin sees all permissions across all colleges
+        if getattr(self.request.user, 'is_superadmin', False):
+            return Permission.objects.using('default').all()
+
+        # Regular users see only their college's permissions
+        return super().get_queryset()
+
+    @extend_schema(
+        summary="Get current user's permissions",
+        description="Returns the logged-in user's permission configuration.",
+        responses={200: OpenApiResponse(description="User permissions")},
+        tags=['Permissions']
+    )
+    @action(detail=False, methods=['get'])
+    def my_permissions(self, request):
+        """
+        GET /api/core/permissions/my-permissions/
+        Returns current user's permissions.
+        """
+        from apps.core.permissions.manager import get_user_permissions
+        from apps.core.utils import get_current_college_id
+
+        college = None
+        college_id = get_current_college_id()
+        if college_id and college_id != 'all':
+            college = College.objects.filter(id=college_id).first()
+
+        permissions = get_user_permissions(request.user, college)
+
+        # Get user's role
+        role = getattr(request.user, 'user_type', 'student')
+
+        return Response({
+            'user_id': str(request.user.id),
+            'username': request.user.username,
+            'is_superadmin': getattr(request.user, 'is_superadmin', False),
+            'college_id': college_id,
+            'role': role,
+            'permissions': permissions,
+        })
+
+    @extend_schema(
+        summary="Get permission schema",
+        description="Returns the permission registry for building UI.",
+        responses={200: OpenApiResponse(description="Permission schema")},
+        tags=['Permissions']
+    )
+    @action(detail=False, methods=['get'])
+    def schema(self, request):
+        """
+        GET /api/core/permissions/schema/
+        Returns permission registry for building UI.
+        """
+        from apps.core.permissions.registry import PERMISSION_REGISTRY, AVAILABLE_SCOPES
+
+        return Response({
+            'resources': PERMISSION_REGISTRY,
+            'scopes': AVAILABLE_SCOPES,
+        })
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="List team memberships",
+        description="Retrieve team membership configurations.",
+        parameters=[
+            OpenApiParameter(name='college', type=OpenApiTypes.INT, description='Filter by college ID'),
+            OpenApiParameter(name='leader', type=OpenApiTypes.UUID, description='Filter by leader user ID'),
+            OpenApiParameter(name='member', type=OpenApiTypes.UUID, description='Filter by member user ID'),
+            OpenApiParameter(name='resource', type=OpenApiTypes.STR, description='Filter by resource'),
+        ],
+        responses={200: TeamMembershipSerializer(many=True)},
+        tags=['Team Memberships']
+    ),
+    retrieve=extend_schema(
+        summary="Get team membership details",
+        responses={200: TeamMembershipSerializer},
+        tags=['Team Memberships']
+    ),
+    create=extend_schema(
+        summary="Create team membership",
+        request=TeamMembershipSerializer,
+        responses={201: TeamMembershipSerializer},
+        tags=['Team Memberships']
+    ),
+    update=extend_schema(
+        summary="Update team membership",
+        request=TeamMembershipSerializer,
+        responses={200: TeamMembershipSerializer},
+        tags=['Team Memberships']
+    ),
+    partial_update=extend_schema(
+        summary="Partially update team membership",
+        request=TeamMembershipSerializer,
+        responses={200: TeamMembershipSerializer},
+        tags=['Team Memberships']
+    ),
+    destroy=extend_schema(
+        summary="Delete team membership",
+        responses={204: None},
+        tags=['Team Memberships']
+    ),
+)
+class TeamMembershipViewSet(CollegeScopedModelViewSet):
+    """
+    ViewSet for managing team memberships.
+    """
+    queryset = TeamMembership.objects.all_colleges()
+    serializer_class = TeamMembershipSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['college', 'leader', 'member', 'relationship_type', 'resource', 'is_active']
+    search_fields = ['leader__username', 'member__username', 'resource']
+    ordering_fields = ['college', 'leader', 'created_at']
+    ordering = ['college', 'leader']
+
+    def get_queryset(self):
+        # Superadmin sees all team memberships
+        if getattr(self.request.user, 'is_superadmin', False):
+            return TeamMembership.objects.using('default').all()
+
+        # Regular users see only their college's team memberships
+        return super().get_queryset()
