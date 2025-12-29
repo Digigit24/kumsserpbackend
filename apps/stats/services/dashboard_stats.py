@@ -52,8 +52,8 @@ class DashboardStatsService:
             is_active=True
         ).count()
 
-        # Today's attendance stats - use all_colleges() to bypass automatic scoping
-        today_student_attendance = StudentAttendance.objects.all_colleges().filter(
+        # Today's attendance stats - filter by relationship (no CollegeManager)
+        today_student_attendance = StudentAttendance.objects.filter(
             student__college_id=self.college_id,
             date=today
         )
@@ -67,7 +67,7 @@ class DashboardStatsService:
             if today_total_student_records > 0 else 0
         )
 
-        today_staff_attendance = StaffAttendance.objects.all_colleges().filter(
+        today_staff_attendance = StaffAttendance.objects.filter(
             teacher__college_id=self.college_id,
             date=today
         )
@@ -80,8 +80,8 @@ class DashboardStatsService:
             if today_total_staff_records > 0 else 0
         )
 
-        # Financial summary - This month - use all_colleges() to bypass automatic scoping
-        fee_collections_this_month = FeeCollection.objects.all_colleges().filter(
+        # Financial summary - This month - filter by relationship (no CollegeManager)
+        fee_collections_this_month = FeeCollection.objects.filter(
             student__college_id=self.college_id,
             status='COMPLETED',
             payment_date__gte=first_day_of_month,
@@ -92,7 +92,7 @@ class DashboardStatsService:
             total=Coalesce(Sum('amount'), Decimal('0'))
         )['total']
 
-        total_fee_outstanding = FeeStructure.objects.all_colleges().filter(
+        total_fee_outstanding = FeeStructure.objects.filter(
             student__college_id=self.college_id,
             student__is_active=True,
             is_paid=False
@@ -108,8 +108,8 @@ class DashboardStatsService:
             total=Coalesce(Sum('amount'), Decimal('0'))
         )['total']
 
-        # Academic summary - use all_colleges() to bypass automatic scoping
-        recent_exam_results = ExamResult.objects.all_colleges().filter(
+        # Academic summary - filter by relationship (no CollegeManager needed)
+        recent_exam_results = ExamResult.objects.filter(
             student__college_id=self.college_id,
             exam__is_published=True
         ).order_by('-created_at')[:100]
@@ -118,25 +118,25 @@ class DashboardStatsService:
             avg=Avg('percentage')
         )['avg'] or 0
 
-        upcoming_exams = Exam.objects.all_colleges().filter(
+        upcoming_exams = Exam.objects.filter(
             class_obj__college_id=self.college_id,
             start_date__gte=today,
             start_date__lte=today + timedelta(days=30)
         ).count()
 
-        pending_assignments = Assignment.objects.all_colleges().filter(
+        pending_assignments = Assignment.objects.filter(
             teacher__college_id=self.college_id,
             is_active=True,
             due_date__gte=today
         ).count()
 
-        # Library summary - use all_colleges() to bypass automatic scoping
-        books_issued_today = BookIssue.objects.all_colleges().filter(
+        # Library summary - filter by relationship (no CollegeManager needed)
+        books_issued_today = BookIssue.objects.filter(
             book__college_id=self.college_id,
             issue_date=today
         ).count()
 
-        overdue_books = BookIssue.objects.all_colleges().filter(
+        overdue_books = BookIssue.objects.filter(
             book__college_id=self.college_id,
             status='ISSUED',
             due_date__lt=today
@@ -150,7 +150,7 @@ class DashboardStatsService:
             admission_date__lte=today
         ).count()
 
-        recent_fee_payments = FeeCollection.objects.all_colleges().filter(
+        recent_fee_payments = FeeCollection.objects.filter(
             student__college_id=self.college_id,
             status='COMPLETED',
             payment_date__gte=seven_days_ago,
