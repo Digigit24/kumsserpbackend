@@ -19,7 +19,7 @@ class FinancialStatsService:
     def get_fee_collection_stats(self):
         """Calculate fee collection statistics"""
         # Base querysets
-        students_qs = Student.objects.filter(college_id=self.college_id, is_active=True)
+        students_qs = Student.objects.all_colleges().filter(college_id=self.college_id, is_active=True)
 
         # Apply filters
         if self.filters.get('program'):
@@ -30,7 +30,7 @@ class FinancialStatsService:
         total_students = students_qs.count()
 
         # Fee structure stats
-        fee_structures = FeeStructure.objects.filter(
+        fee_structures = FeeStructure.objects.all_colleges().filter(
             student__college_id=self.college_id,
             student__is_active=True
         )
@@ -51,7 +51,7 @@ class FinancialStatsService:
         )['total']
 
         # Fee collection stats
-        collections = FeeCollection.objects.filter(
+        collections = FeeCollection.objects.all_colleges().filter(
             student__college_id=self.college_id,
             status='COMPLETED'
         )
@@ -135,7 +135,7 @@ class FinancialStatsService:
 
     def get_expense_stats(self):
         """Calculate expense statistics"""
-        expenses = Expense.objects.filter(
+        expenses = Expense.objects.all_colleges().filter(
             college_id=self.college_id,
             is_active=True
         )
@@ -182,7 +182,7 @@ class FinancialStatsService:
 
     def get_income_stats(self):
         """Calculate income statistics"""
-        income = Income.objects.filter(
+        income = Income.objects.all_colleges().filter(
             college_id=self.college_id,
             is_active=True
         )

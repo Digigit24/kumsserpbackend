@@ -15,7 +15,7 @@ class CommunicationStatsService:
 
     def get_message_stats(self):
         """Calculate message delivery statistics"""
-        messages = BulkMessage.objects.filter(college_id=self.college_id)
+        messages = BulkMessage.objects.all_colleges().filter(college_id=self.college_id)
 
         if self.filters.get('from_date'):
             messages = messages.filter(created_at__gte=self.filters['from_date'])
@@ -27,7 +27,7 @@ class CommunicationStatsService:
         failed_count = messages.aggregate(total=Coalesce(Sum('failed_count'), 0))['total']
 
         # Message logs for detailed stats
-        logs = MessageLog.objects.filter(bulk_message__college_id=self.college_id)
+        logs = MessageLog.objects.all_colleges().filter(bulk_message__college_id=self.college_id)
 
         if self.filters.get('from_date'):
             logs = logs.filter(created_at__gte=self.filters['from_date'])
@@ -51,7 +51,7 @@ class CommunicationStatsService:
 
     def get_event_stats(self):
         """Calculate event statistics"""
-        events = Event.objects.filter(college_id=self.college_id)
+        events = Event.objects.all_colleges().filter(college_id=self.college_id)
 
         if self.filters.get('from_date'):
             events = events.filter(event_date__gte=self.filters['from_date'])
@@ -63,7 +63,7 @@ class CommunicationStatsService:
         completed_events = events.filter(event_date__lt=timezone.now().date()).count()
 
         # Registration stats
-        registrations = EventRegistration.objects.filter(event__college_id=self.college_id)
+        registrations = EventRegistration.objects.all_colleges().filter(event__college_id=self.college_id)
 
         if self.filters.get('from_date'):
             registrations = registrations.filter(event__event_date__gte=self.filters['from_date'])

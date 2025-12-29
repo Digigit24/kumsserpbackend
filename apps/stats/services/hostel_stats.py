@@ -15,14 +15,14 @@ class HostelStatsService:
 
     def get_occupancy_stats(self):
         """Calculate hostel occupancy statistics"""
-        hostels = Hostel.objects.filter(college_id=self.college_id, is_active=True)
+        hostels = Hostel.objects.all_colleges().filter(college_id=self.college_id, is_active=True)
 
         total_hostels = hostels.count()
 
-        rooms = Room.objects.filter(hostel__college_id=self.college_id, hostel__is_active=True)
+        rooms = Room.objects.all_colleges().filter(hostel__college_id=self.college_id, hostel__is_active=True)
         total_rooms = rooms.count()
 
-        beds = Bed.objects.filter(room__hostel__college_id=self.college_id, room__hostel__is_active=True)
+        beds = Bed.objects.all_colleges().filter(room__hostel__college_id=self.college_id, room__hostel__is_active=True)
         total_beds = beds.count()
         occupied_beds = beds.filter(status='OCCUPIED').count()
         vacant_beds = beds.filter(status='VACANT').count()
@@ -30,7 +30,7 @@ class HostelStatsService:
         occupancy_rate = (occupied_beds / total_beds * 100) if total_beds > 0 else 0
 
         # Total students in hostel
-        allocations = HostelAllocation.objects.filter(
+        allocations = HostelAllocation.objects.all_colleges().filter(
             hostel__college_id=self.college_id,
             is_current=True
         )
@@ -49,7 +49,7 @@ class HostelStatsService:
 
     def get_fee_stats(self):
         """Calculate hostel fee statistics"""
-        fees = HostelFee.objects.filter(
+        fees = HostelFee.objects.all_colleges().filter(
             allocation__hostel__college_id=self.college_id
         )
 

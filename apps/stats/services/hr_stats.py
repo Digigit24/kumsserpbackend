@@ -17,7 +17,7 @@ class HRStatsService:
 
     def get_leave_stats(self):
         """Calculate leave statistics"""
-        leaves = LeaveApplication.objects.filter(
+        leaves = LeaveApplication.objects.all_colleges().filter(
             teacher__college_id=self.college_id
         )
 
@@ -70,7 +70,7 @@ class HRStatsService:
     def get_payroll_stats(self):
         """Calculate payroll statistics"""
         # Get payroll data
-        payroll_qs = Payroll.objects.filter(
+        payroll_qs = Payroll.objects.all_colleges().filter(
             teacher__college_id=self.college_id
         )
 
@@ -116,7 +116,7 @@ class HRStatsService:
         from_date = self.filters.get('from_date', timezone.now().replace(day=1).date())
         to_date = self.filters.get('to_date', timezone.now().date())
 
-        attendance_qs = StaffAttendance.objects.filter(
+        attendance_qs = StaffAttendance.objects.all_colleges().filter(
             teacher__college_id=self.college_id,
             date__gte=from_date,
             date__lte=to_date

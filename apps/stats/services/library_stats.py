@@ -16,13 +16,13 @@ class LibraryStatsService:
     def get_circulation_stats(self):
         """Calculate library circulation statistics"""
         # Book stats
-        books = Book.objects.filter(college_id=self.college_id, is_active=True)
+        books = Book.objects.all_colleges().filter(college_id=self.college_id, is_active=True)
         total_books = books.aggregate(total=Coalesce(Sum('quantity'), 0))['total']
         available_books = books.aggregate(total=Coalesce(Sum('available_quantity'), 0))['total']
         issued_books = total_books - available_books
 
         # Issue stats
-        issues = BookIssue.objects.filter(book__college_id=self.college_id)
+        issues = BookIssue.objects.all_colleges().filter(book__college_id=self.college_id)
 
         if self.filters.get('from_date'):
             issues = issues.filter(issue_date__gte=self.filters['from_date'])
@@ -37,7 +37,7 @@ class LibraryStatsService:
         ).count()
 
         # Fine stats
-        fines = LibraryFine.objects.filter(member__college_id=self.college_id)
+        fines = LibraryFine.objects.all_colleges().filter(member__college_id=self.college_id)
 
         if self.filters.get('from_date'):
             fines = fines.filter(fine_date__gte=self.filters['from_date'])
@@ -75,7 +75,7 @@ class LibraryStatsService:
             })
 
         # Active members
-        active_members = LibraryMember.objects.filter(
+        active_members = LibraryMember.objects.all_colleges().filter(
             college_id=self.college_id,
             is_active=True
         ).count()
