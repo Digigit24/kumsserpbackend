@@ -34,6 +34,12 @@ class DashboardStatsService:
             is_active=True
         ).count()
 
+        # Diagnostic: check if issue is with college_id or is_active
+        total_students_any_status = Student.objects.filter(
+            college_id=self.college_id
+        ).count()
+        total_students_all_colleges = Student.objects.filter(is_active=True).count()
+
         total_teachers = Teacher.objects.filter(
             college_id=self.college_id,
             is_active=True
@@ -157,7 +163,7 @@ class DashboardStatsService:
             payment_date__lte=today
         ).count()
 
-        return {
+        result = {
             # Quick stats
             'total_students': total_students,
             'total_teachers': total_teachers,
@@ -190,3 +196,14 @@ class DashboardStatsService:
 
             'generated_at': timezone.now(),
         }
+
+        # Add diagnostic info if no data found
+        if total_students == 0:
+            result['_diagnostic'] = {
+                'college_id_used': self.college_id,
+                'total_students_this_college_any_status': total_students_any_status,
+                'total_students_all_colleges_active': total_students_all_colleges,
+                'message': 'No active students found for this college. Check diagnostic fields above.'
+            }
+
+        return result
