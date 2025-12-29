@@ -694,3 +694,181 @@ class CommunicationStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.V
         cache.set(cache_key, response_data, 60 * 15)
 
         return Response(response_data)
+
+
+# ==================== Student Personal Statistics ViewSet ====================
+
+from .services.student_stats import StudentStatsService
+from .serializers import StudentOverviewStatsSerializer
+from apps.students.models import Student as StudentModel
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="Get My Statistics (Student)",
+        description="Returns personal statistics for the logged-in student",
+        responses={200: StudentOverviewStatsSerializer},
+        tags=['Statistics - Student']
+    )
+)
+class MyStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewSet):
+    """
+    ViewSet for Student Personal Statistics
+    
+    Returns statistics for the currently logged-in student:
+    - Personal attendance
+    - Exam results
+    - Assignment submissions
+    - Fee payments
+    - Library books
+    """
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        """Get my personal statistics"""
+        user = request.user
+        
+        # Get student record for logged-in user
+        try:
+            student = StudentModel.objects.get(user=user)
+        except StudentModel.DoesNotExist:
+            return Response({
+                'error': 'No student record found for this user',
+                'message': 'This endpoint is for students only'
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        # Get statistics
+        service = StudentStatsService(student.id, self.parse_filters(request))
+        stats_data = service.get_my_overview()
+
+        # Serialize response
+        serializer = StudentOverviewStatsSerializer(stats_data)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def attendance(self, request):
+        """Get my attendance details"""
+        user = request.user
+        try:
+            student = StudentModel.objects.get(user=user)
+        except StudentModel.DoesNotExist:
+            return Response({'error': 'Student not found'}, status=status.HTTP_403_FORBIDDEN)
+
+        service = StudentStatsService(student.id, self.parse_filters(request))
+        data = service.get_my_attendance_details()
+        return Response(data)
+
+    @action(detail=False, methods=['get'])
+    def exam_results(self, request):
+        """Get my exam results"""
+        user = request.user
+        try:
+            student = StudentModel.objects.get(user=user)
+        except StudentModel.DoesNotExist:
+            return Response({'error': 'Student not found'}, status=status.HTTP_403_FORBIDDEN)
+
+        service = StudentStatsService(student.id, self.parse_filters(request))
+        data = service.get_my_exam_results()
+        return Response(data)
+
+    @action(detail=False, methods=['get'])
+    def fee_details(self, request):
+        """Get my fee payment details"""
+        user = request.user
+        try:
+            student = StudentModel.objects.get(user=user)
+        except StudentModel.DoesNotExist:
+            return Response({'error': 'Student not found'}, status=status.HTTP_403_FORBIDDEN)
+
+        service = StudentStatsService(student.id, self.parse_filters(request))
+        data = service.get_my_fee_details()
+        return Response(data)
+
+
+# ==================== Teacher Personal Statistics ViewSet ====================
+
+from .services.teacher_stats import TeacherStatsService
+from .serializers import TeacherOverviewStatsSerializer
+from apps.teachers.models import Teacher as TeacherModel
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="Get My Statistics (Teacher)",
+        description="Returns personal statistics for the logged-in teacher",
+        responses={200: TeacherOverviewStatsSerializer},
+        tags=['Statistics - Teacher']
+    )
+)
+class MyTeacherStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewSet):
+    """
+    ViewSet for Teacher Personal Statistics
+    
+    Returns statistics for the currently logged-in teacher:
+    - Classes taught
+    - Assignments created
+    - Student submissions
+    - Attendance
+    - Leave applications
+    """
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        """Get my teacher statistics"""
+        user = request.user
+        
+        # Get teacher record for logged-in user
+        try:
+            teacher = TeacherModel.objects.get(user=user)
+        except TeacherModel.DoesNotExist:
+            return Response({
+                'error': 'No teacher record found for this user',
+                'message': 'This endpoint is for teachers only'
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        # Get statistics
+        service = TeacherStatsService(teacher.id, self.parse_filters(request))
+        stats_data = service.get_my_overview()
+
+        # Serialize response
+        serializer = TeacherOverviewStatsSerializer(stats_data)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def classes(self, request):
+        """Get my classes"""
+        user = request.user
+        try:
+            teacher = TeacherModel.objects.get(user=user)
+        except TeacherModel.DoesNotExist:
+            return Response({'error': 'Teacher not found'}, status=status.HTTP_403_FORBIDDEN)
+
+        service = TeacherStatsService(teacher.id, self.parse_filters(request))
+        data = service.get_my_classes()
+        return Response(data)
+
+    @action(detail=False, methods=['get'])
+    def assignments(self, request):
+        """Get my assignments"""
+        user = request.user
+        try:
+            teacher = TeacherModel.objects.get(user=user)
+        except TeacherModel.DoesNotExist:
+            return Response({'error': 'Teacher not found'}, status=status.HTTP_403_FORBIDDEN)
+
+        service = TeacherStatsService(teacher.id, self.parse_filters(request))
+        data = service.get_my_assignments()
+        return Response(data)
+
+    @action(detail=False, methods=['get'])
+    def attendance(self, request):
+        """Get my attendance"""
+        user = request.user
+        try:
+            teacher = TeacherModel.objects.get(user=user)
+        except TeacherModel.DoesNotExist:
+            return Response({'error': 'Teacher not found'}, status=status.HTTP_403_FORBIDDEN)
+
+        service = TeacherStatsService(teacher.id, self.parse_filters(request))
+        data = service.get_my_attendance()
+        return Response(data)

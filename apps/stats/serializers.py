@@ -344,3 +344,122 @@ class DashboardStatsSerializer(serializers.Serializer):
     recent_fee_payments = serializers.IntegerField()
 
     generated_at = serializers.DateTimeField()
+
+
+# ==================== Student Personal Statistics Serializers ====================
+
+class StudentInfoSerializer(serializers.Serializer):
+    """Student basic information"""
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    admission_number = serializers.CharField()
+    class_name = serializers.CharField(source='class')
+    roll_number = serializers.CharField()
+
+
+class StudentAttendanceStatsSerializer(serializers.Serializer):
+    """Student personal attendance stats"""
+    total_days = serializers.IntegerField()
+    present_days = serializers.IntegerField()
+    absent_days = serializers.IntegerField()
+    late_days = serializers.IntegerField()
+    attendance_percentage = serializers.FloatField()
+
+
+class StudentAcademicStatsSerializer(serializers.Serializer):
+    """Student academic performance stats"""
+    total_exams = serializers.IntegerField()
+    average_percentage = serializers.FloatField()
+    latest_grade = serializers.CharField()
+    latest_percentage = serializers.FloatField()
+
+
+class StudentAssignmentStatsSerializer(serializers.Serializer):
+    """Student assignment stats"""
+    total_assignments = serializers.IntegerField()
+    submitted = serializers.IntegerField()
+    pending = serializers.IntegerField()
+    average_marks = serializers.FloatField()
+
+
+class StudentFeeStatsSerializer(serializers.Serializer):
+    """Student fee stats"""
+    total_fee = serializers.DecimalField(max_digits=10, decimal_places=2)
+    paid = serializers.DecimalField(max_digits=10, decimal_places=2)
+    balance = serializers.DecimalField(max_digits=10, decimal_places=2)
+    payment_status = serializers.CharField()
+
+
+class StudentLibraryStatsSerializer(serializers.Serializer):
+    """Student library stats"""
+    books_issued = serializers.IntegerField()
+    overdue_books = serializers.IntegerField()
+
+
+class StudentOverviewStatsSerializer(serializers.Serializer):
+    """Complete student statistics"""
+    student_info = StudentInfoSerializer()
+    attendance = StudentAttendanceStatsSerializer()
+    academic = StudentAcademicStatsSerializer()
+    assignments = StudentAssignmentStatsSerializer()
+    fees = StudentFeeStatsSerializer()
+    library = StudentLibraryStatsSerializer()
+    generated_at = serializers.DateTimeField()
+
+
+# ==================== Teacher Personal Statistics Serializers ====================
+
+class TeacherInfoSerializer(serializers.Serializer):
+    """Teacher basic information"""
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    employee_id = serializers.CharField()
+    department = serializers.CharField()
+
+
+class TeacherTeachingStatsSerializer(serializers.Serializer):
+    """Teacher teaching stats"""
+    total_subjects = serializers.IntegerField()
+    total_classes = serializers.IntegerField()
+    is_class_teacher = serializers.BooleanField()
+    class_teacher_of = serializers.CharField()
+
+
+class TeacherAssignmentStatsSerializer(serializers.Serializer):
+    """Teacher assignment stats"""
+    total_created = serializers.IntegerField()
+    active_assignments = serializers.IntegerField()
+    total_submissions = serializers.IntegerField()
+    pending_grading = serializers.IntegerField()
+    graded = serializers.IntegerField()
+
+
+class TeacherStudyMaterialStatsSerializer(serializers.Serializer):
+    """Teacher study material stats"""
+    total_uploaded = serializers.IntegerField()
+    total_views = serializers.IntegerField()
+
+
+class TeacherAttendanceStatsSerializer(serializers.Serializer):
+    """Teacher attendance stats"""
+    total_days = serializers.IntegerField()
+    present_days = serializers.IntegerField()
+    attendance_percentage = serializers.FloatField()
+
+
+class TeacherLeaveStatsSerializer(serializers.Serializer):
+    """Teacher leave stats"""
+    total_applications = serializers.IntegerField()
+    approved = serializers.IntegerField()
+    pending = serializers.IntegerField()
+
+
+class TeacherOverviewStatsSerializer(serializers.Serializer):
+    """Complete teacher statistics"""
+    teacher_info = TeacherInfoSerializer()
+    teaching = TeacherTeachingStatsSerializer()
+    assignments = TeacherAssignmentStatsSerializer()
+    study_materials = TeacherStudyMaterialStatsSerializer()
+    attendance = TeacherAttendanceStatsSerializer()
+    leave = TeacherLeaveStatsSerializer()
+    generated_at = serializers.DateTimeField()
