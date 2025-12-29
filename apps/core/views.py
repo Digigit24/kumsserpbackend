@@ -631,9 +631,9 @@ class PermissionViewSet(CollegeScopedModelViewSet):
         tags=['Permissions']
     )
     @action(detail=False, methods=['get'])
-    def schema(self, request):
+    def permission_schema(self, request):
         """
-        GET /api/core/permissions/schema/
+        GET /api/core/permissions/permission-schema/
         Returns permission registry for building UI.
         """
         from apps.core.permissions.registry import PERMISSION_REGISTRY, AVAILABLE_SCOPES
