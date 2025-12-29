@@ -571,46 +571,6 @@ class ActivityLogViewSet(CollegeScopedReadOnlyModelViewSet):
 # ============================================================================
 
 
-@extend_schema_view(
-    list=extend_schema(
-        summary="List permissions",
-        description="Retrieve permission configurations for roles.",
-        parameters=[
-            OpenApiParameter(name='college', type=OpenApiTypes.INT, description='Filter by college ID'),
-            OpenApiParameter(name='role', type=OpenApiTypes.STR, description='Filter by role'),
-        ],
-        responses={200: PermissionSerializer(many=True)},
-        tags=['Permissions']
-    ),
-    retrieve=extend_schema(
-        summary="Get permission details",
-        responses={200: PermissionSerializer},
-        tags=['Permissions']
-    ),
-    create=extend_schema(
-        summary="Create permission configuration",
-        request=PermissionSerializer,
-        responses={201: PermissionSerializer},
-        tags=['Permissions']
-    ),
-    update=extend_schema(
-        summary="Update permission",
-        request=PermissionSerializer,
-        responses={200: PermissionSerializer},
-        tags=['Permissions']
-    ),
-    partial_update=extend_schema(
-        summary="Partially update permission",
-        request=PermissionSerializer,
-        responses={200: PermissionSerializer},
-        tags=['Permissions']
-    ),
-    destroy=extend_schema(
-        summary="Delete permission",
-        responses={204: None},
-        tags=['Permissions']
-    ),
-)
 class PermissionViewSet(CollegeScopedModelViewSet):
     """
     ViewSet for managing permissions.
@@ -687,48 +647,6 @@ class PermissionViewSet(CollegeScopedModelViewSet):
         })
 
 
-@extend_schema_view(
-    list=extend_schema(
-        summary="List team memberships",
-        description="Retrieve team membership configurations.",
-        parameters=[
-            OpenApiParameter(name='college', type=OpenApiTypes.INT, description='Filter by college ID'),
-            OpenApiParameter(name='leader', type=OpenApiTypes.UUID, description='Filter by leader user ID'),
-            OpenApiParameter(name='member', type=OpenApiTypes.UUID, description='Filter by member user ID'),
-            OpenApiParameter(name='resource', type=OpenApiTypes.STR, description='Filter by resource'),
-        ],
-        responses={200: TeamMembershipSerializer(many=True)},
-        tags=['Team Memberships']
-    ),
-    retrieve=extend_schema(
-        summary="Get team membership details",
-        responses={200: TeamMembershipSerializer},
-        tags=['Team Memberships']
-    ),
-    create=extend_schema(
-        summary="Create team membership",
-        request=TeamMembershipSerializer,
-        responses={201: TeamMembershipSerializer},
-        tags=['Team Memberships']
-    ),
-    update=extend_schema(
-        summary="Update team membership",
-        request=TeamMembershipSerializer,
-        responses={200: TeamMembershipSerializer},
-        tags=['Team Memberships']
-    ),
-    partial_update=extend_schema(
-        summary="Partially update team membership",
-        request=TeamMembershipSerializer,
-        responses={200: TeamMembershipSerializer},
-        tags=['Team Memberships']
-    ),
-    destroy=extend_schema(
-        summary="Delete team membership",
-        responses={204: None},
-        tags=['Team Memberships']
-    ),
-)
 class TeamMembershipViewSet(CollegeScopedModelViewSet):
     """
     ViewSet for managing team memberships.
