@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'apps.hr',
     'apps.communication',
     'apps.reports',
+    'apps.stats',
     #'apps.core.apps.CoreConfig',
 
     'debug_toolbar',

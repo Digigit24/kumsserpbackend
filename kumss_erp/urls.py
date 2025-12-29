@@ -40,6 +40,7 @@ urlpatterns = [
     path('api/v1/hr/', include('apps.hr.urls')),
     path('api/v1/communication/', include('apps.communication.urls')),
     path('api/v1/reports/', include('apps.reports.urls')),
+    path('api/v1/stats/', include('apps.stats.urls', namespace='stats')),
     path('api/v1/auth/', include('dj_rest_auth.urls')),
 
     # API Documentation
