@@ -302,10 +302,28 @@ class TokenWithUserSerializer(DRATokenSerializer):
     def get_user_roles(self, obj):
         """
         Return all active roles assigned to the user.
+        Includes both the user's primary user_type and any additional UserRole assignments.
         """
         user = getattr(obj, 'user', None)
         if not user:
             return []
+
+        roles_data = []
+
+        # Add the user's primary user_type as the base role
+        if user.user_type:
+            roles_data.append({
+                'id': None,  # No specific role assignment ID for user_type
+                'role_id': None,
+                'role_name': user.get_user_type_display(),
+                'role_code': user.user_type,
+                'college_id': user.college_id,
+                'college_name': user.college.short_name if user.college else None,
+                'is_primary': True,  # Mark this as the primary role
+                'assigned_at': user.date_joined,
+                'expires_at': None,
+                'is_expired': False,
+            })
 
         # Get all active roles for the user (using all_colleges to bypass scoping)
         user_roles = UserRole.objects.all_colleges().filter(
@@ -313,7 +331,6 @@ class TokenWithUserSerializer(DRATokenSerializer):
             is_active=True
         ).select_related('role', 'college')
 
-        roles_data = []
         for user_role in user_roles:
             roles_data.append({
                 'id': user_role.id,
@@ -322,6 +339,7 @@ class TokenWithUserSerializer(DRATokenSerializer):
                 'role_code': user_role.role.code,
                 'college_id': user_role.college_id,
                 'college_name': user_role.college.short_name if user_role.college else None,
+                'is_primary': False,  # Additional role
                 'assigned_at': user_role.assigned_at,
                 'expires_at': user_role.expires_at,
                 'is_expired': user_role.is_expired,
@@ -331,32 +349,30 @@ class TokenWithUserSerializer(DRATokenSerializer):
 
     def get_user_permissions(self, obj):
         """
-        Return aggregated permissions from all user's roles.
+        Return user permissions using the new KUMSS permission system.
+        Returns comprehensive permission JSON with scope and enabled status for each resource/action.
         """
         user = getattr(obj, 'user', None)
         if not user:
-            return []
+            return {}
 
-        # If superuser, they have all permissions
-        if user.is_superuser:
-            return ['*']  # Wildcard indicates all permissions
+        # Import the permission manager from the new system
+        from apps.core.permissions.manager import get_user_permissions as get_perms
+        from apps.core.models import College
 
-        # Aggregate permissions from all active roles
-        permissions = set()
-        user_roles = UserRole.objects.all_colleges().filter(
-            user=user,
-            is_active=True
-        ).select_related('role')
+        # Get user's college for permission lookup
+        college = None
+        if user.college_id:
+            try:
+                college = College.objects.all_colleges().get(id=user.college_id)
+            except College.DoesNotExist:
+                pass
 
-        for user_role in user_roles:
-            if user_role.role.permissions:
-                # Permissions stored as JSONField
-                if isinstance(user_role.role.permissions, list):
-                    permissions.update(user_role.role.permissions)
-                elif isinstance(user_role.role.permissions, dict):
-                    permissions.update(user_role.role.permissions.keys())
+        # Get permissions from the new system
+        # This returns the full permission JSON structure with scope and enabled for each action
+        permissions = get_perms(user, college)
 
-        return sorted(list(permissions))
+        return permissions
 
     def get_user_profile(self, obj):
         """
