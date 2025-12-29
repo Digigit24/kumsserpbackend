@@ -15,7 +15,7 @@ class StoreStatsService:
 
     def get_sales_stats(self):
         """Calculate store sales statistics"""
-        sales = StoreSale.objects.all_colleges().filter(
+        sales = StoreSale.objects.filter(
             college_id=self.college_id,
             payment_status='PAID'
         )
@@ -32,7 +32,7 @@ class StoreStatsService:
         )['total']
 
         # Total items sold
-        sale_items = SaleItem.objects.all_colleges().filter(sale__in=sales)
+        sale_items = SaleItem.objects.filter(sale__in=sales)
         total_items_sold = sale_items.aggregate(
             total=Coalesce(Sum('quantity'), 0)
         )['total']
@@ -80,7 +80,7 @@ class StoreStatsService:
 
     def get_inventory_stats(self):
         """Calculate inventory statistics"""
-        items = StoreItem.objects.all_colleges().filter(college_id=self.college_id, is_active=True)
+        items = StoreItem.objects.filter(college_id=self.college_id, is_active=True)
 
         total_items = items.count()
         low_stock_items = items.filter(stock_quantity__lte=F('min_stock_level')).count()

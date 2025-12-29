@@ -20,7 +20,7 @@ class AcademicStatsService:
     def get_performance_stats(self):
         """Calculate student performance statistics"""
         # Base queryset - use all_colleges() to bypass scoping
-        students_qs = Student.objects.all_colleges().filter(college_id=self.college_id, is_active=True)
+        students_qs = Student.objects.filter(college_id=self.college_id, is_active=True)
 
         # Apply filters
         if self.filters.get('academic_year'):
@@ -33,7 +33,7 @@ class AcademicStatsService:
         total_students = students_qs.count()
 
         # Exam results stats
-        exam_results = ExamResult.objects.all_colleges().filter(
+        exam_results = ExamResult.objects.filter(
             student__college_id=self.college_id,
             student__is_active=True
         )
@@ -98,7 +98,7 @@ class AcademicStatsService:
         from_date = self.filters.get('from_date', timezone.now().replace(day=1).date())
         to_date = self.filters.get('to_date', timezone.now().date())
 
-        attendance_qs = StudentAttendance.objects.all_colleges().filter(
+        attendance_qs = StudentAttendance.objects.filter(
             student__college_id=self.college_id,
             date__gte=from_date,
             date__lte=to_date
@@ -170,7 +170,7 @@ class AcademicStatsService:
         from_date = self.filters.get('from_date')
         to_date = self.filters.get('to_date')
 
-        assignments_qs = Assignment.objects.all_colleges().filter(
+        assignments_qs = Assignment.objects.filter(
             teacher__college_id=self.college_id,
             is_active=True
         )
@@ -184,7 +184,7 @@ class AcademicStatsService:
 
         total_assignments = assignments_qs.count()
 
-        submissions_qs = AssignmentSubmission.objects.all_colleges().filter(
+        submissions_qs = AssignmentSubmission.objects.filter(
             assignment__teacher__college_id=self.college_id
         )
 
@@ -221,7 +221,7 @@ class AcademicStatsService:
 
     def get_subject_wise_performance(self):
         """Calculate subject-wise performance statistics"""
-        exam_results = ExamResult.objects.all_colleges().filter(
+        exam_results = ExamResult.objects.filter(
             student__college_id=self.college_id,
             student__is_active=True
         )
@@ -234,7 +234,7 @@ class AcademicStatsService:
             exam_results = exam_results.filter(exam__class_obj=self.filters['class'])
 
         # Get marks grouped by subject
-        marks_qs = StudentMarks.objects.all_colleges().filter(
+        marks_qs = StudentMarks.objects.filter(
             register__exam__in=exam_results.values('exam'),
             student__college_id=self.college_id
         ).select_related('register__subject')
