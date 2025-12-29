@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils import timezone
 from django.core.cache import cache
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
@@ -9,6 +9,11 @@ from drf_spectacular.types import OpenApiTypes
 from datetime import datetime
 
 from apps.core.mixins import CollegeScopedMixin
+from apps.core.models import College
+from apps.students.models import Student
+from apps.teachers.models import Teacher
+from apps.accounts.models import User
+from apps.academic.models import Class
 from .serializers import (
     AcademicStatsSerializer,
     FinancialStatsSerializer,
@@ -148,6 +153,52 @@ class DashboardStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewS
         cache.set(cache_key, response_data, 60 * 5)
 
         return Response(response_data)
+
+    @extend_schema(
+        summary="DEBUG: Check Database Data",
+        description="Diagnostic endpoint to check what data exists in the database and which college ID to use",
+        responses={200: dict},
+        tags=['Statistics - Debug']
+    )
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
+    def debug_data(self, request):
+        """Debug endpoint to check database data"""
+        # Get all colleges
+        colleges = College.objects.all()
+
+        result = {
+            'total_colleges': colleges.count(),
+            'colleges': []
+        }
+
+        for college in colleges:
+            college_data = {
+                'id': college.id,
+                'name': college.name,
+                'code': college.code,
+                'data_summary': {
+                    'students': Student.objects.filter(college_id=college.id).count(),
+                    'teachers': Teacher.objects.filter(college_id=college.id).count(),
+                    'users': User.objects.filter(college_id=college.id).count(),
+                    'classes': Class.objects.filter(college_id=college.id).count(),
+                }
+            }
+            result['colleges'].append(college_data)
+
+        # Add overall totals
+        result['overall_totals'] = {
+            'total_students': Student.objects.all().count(),
+            'total_teachers': Teacher.objects.all().count(),
+            'total_users': User.objects.all().count(),
+            'total_classes': Class.objects.all().count(),
+        }
+
+        if colleges.exists():
+            result['message'] = "✅ Use X-College-ID header with one of the college IDs listed above"
+        else:
+            result['message'] = "❌ NO COLLEGES FOUND! Create colleges first in Django admin."
+
+        return Response(result)
 
 
 @extend_schema_view(
