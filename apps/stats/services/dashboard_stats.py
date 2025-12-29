@@ -24,37 +24,30 @@ class DashboardStatsService:
         self.filters = filters or {}
 
     def get_dashboard_overview(self):
-        """Get complete dashboard statistics overview"""
+        """Get complete dashboard statistics overview - ALL COLLEGES"""
         today = timezone.now().date()
         first_day_of_month = today.replace(day=1)
 
-        # Quick stats - use for_college() to explicitly filter by college ID
-        # This bypasses the thread-local context and uses explicit college_id
-        total_students = Student.objects.for_college(self.college_id).filter(
+        # Quick stats - COUNT ALL, NO FILTERING BY COLLEGE
+        total_students = Student.objects.all_colleges().filter(
             is_active=True
         ).count()
 
-        # Diagnostic: check if issue is with college_id or is_active
-        total_students_any_status = Student.objects.for_college(self.college_id).count()
-        total_students_all_colleges = Student.objects.all_colleges().filter(is_active=True).count()
-
-        total_teachers = Teacher.objects.for_college(self.college_id).filter(
+        total_teachers = Teacher.objects.all_colleges().filter(
             is_active=True
         ).count()
 
         total_staff = User.objects.filter(
-            college_id=self.college_id,
             is_active=True,
             user_type='STAFF'
         ).count()
 
-        active_classes = Class.objects.for_college(self.college_id).filter(
+        active_classes = Class.objects.all_colleges().filter(
             is_active=True
         ).count()
 
-        # Today's attendance stats - filter by relationship (no CollegeManager)
+        # Today's attendance stats - ALL COLLEGES
         today_student_attendance = StudentAttendance.objects.filter(
-            student__college_id=self.college_id,
             date=today
         )
 
@@ -68,7 +61,6 @@ class DashboardStatsService:
         )
 
         today_staff_attendance = StaffAttendance.objects.filter(
-            teacher__college_id=self.college_id,
             date=today
         )
 
@@ -80,9 +72,8 @@ class DashboardStatsService:
             if today_total_staff_records > 0 else 0
         )
 
-        # Financial summary - This month - filter by relationship (no CollegeManager)
+        # Financial summary - This month - ALL COLLEGES
         fee_collections_this_month = FeeCollection.objects.filter(
-            student__college_id=self.college_id,
             status='COMPLETED',
             payment_date__gte=first_day_of_month,
             payment_date__lte=today
@@ -93,14 +84,13 @@ class DashboardStatsService:
         )['total']
 
         total_fee_outstanding = FeeStructure.objects.filter(
-            student__college_id=self.college_id,
             student__is_active=True,
             is_paid=False
         ).aggregate(
             total=Coalesce(Sum('balance'), Decimal('0'))
         )['total']
 
-        total_expenses_this_month = Expense.objects.for_college(self.college_id).filter(
+        total_expenses_this_month = Expense.objects.all_colleges().filter(
             is_active=True,
             date__gte=first_day_of_month,
             date__lte=today
@@ -108,9 +98,8 @@ class DashboardStatsService:
             total=Coalesce(Sum('amount'), Decimal('0'))
         )['total']
 
-        # Academic summary - filter by relationship (no CollegeManager needed)
+        # Academic summary - ALL COLLEGES
         recent_exam_results = ExamResult.objects.filter(
-            student__college_id=self.college_id,
             exam__is_published=True
         ).order_by('-created_at')[:100]
 
@@ -119,46 +108,41 @@ class DashboardStatsService:
         )['avg'] or 0
 
         upcoming_exams = Exam.objects.filter(
-            class_obj__college_id=self.college_id,
             start_date__gte=today,
             start_date__lte=today + timedelta(days=30)
         ).count()
 
         pending_assignments = Assignment.objects.filter(
-            teacher__college_id=self.college_id,
             is_active=True,
             due_date__gte=today
         ).count()
 
-        # Library summary - filter by relationship (no CollegeManager needed)
+        # Library summary - ALL COLLEGES
         books_issued_today = BookIssue.objects.filter(
-            book__college_id=self.college_id,
             issue_date=today
         ).count()
 
         overdue_books = BookIssue.objects.filter(
-            book__college_id=self.college_id,
             status='ISSUED',
             due_date__lt=today
         ).count()
 
-        # Recent activity counts (last 7 days) - use for_college()
+        # Recent activity counts (last 7 days) - ALL COLLEGES
         seven_days_ago = today - timedelta(days=7)
 
-        recent_admissions = Student.objects.for_college(self.college_id).filter(
+        recent_admissions = Student.objects.all_colleges().filter(
             admission_date__gte=seven_days_ago,
             admission_date__lte=today
         ).count()
 
         recent_fee_payments = FeeCollection.objects.filter(
-            student__college_id=self.college_id,
             status='COMPLETED',
             payment_date__gte=seven_days_ago,
             payment_date__lte=today
         ).count()
 
-        result = {
-            # Quick stats
+        return {
+            # Quick stats - GLOBAL COUNTS ACROSS ALL COLLEGES
             'total_students': total_students,
             'total_teachers': total_teachers,
             'total_staff': total_staff,
@@ -190,14 +174,3 @@ class DashboardStatsService:
 
             'generated_at': timezone.now(),
         }
-
-        # Add diagnostic info if no data found
-        if total_students == 0:
-            result['_diagnostic'] = {
-                'college_id_used': self.college_id,
-                'total_students_this_college_any_status': total_students_any_status,
-                'total_students_all_colleges_active': total_students_all_colleges,
-                'message': 'No active students found for this college. Check diagnostic fields above.'
-            }
-
-        return result
