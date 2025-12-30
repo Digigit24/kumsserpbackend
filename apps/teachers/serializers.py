@@ -21,11 +21,12 @@ class FlexibleTeacherField(serializers.PrimaryKeyRelatedField):
     """
     Custom field that accepts Teacher ID (integer), User ID (UUID), or string numbers.
     Automatically converts to the appropriate Teacher instance.
+    If lookup fails, returns None and lets validation handle it.
     """
 
     def to_internal_value(self, data):
         """Convert UUID or string to Teacher instance."""
-        if data is None:
+        if data is None or data == '':
             return None
 
         # Try to detect if it's a UUID
@@ -36,17 +37,21 @@ class FlexibleTeacherField(serializers.PrimaryKeyRelatedField):
                 teacher = Teacher.objects.all_colleges().get(user__id=user_uuid, is_active=True)
                 return teacher
             except (ValueError, Teacher.DoesNotExist):
-                self.fail('does_not_exist', pk_value=data)
+                # UUID doesn't match a teacher - return None and let validate() handle it
+                return None
 
         # Try to convert string to integer
         if isinstance(data, str):
             try:
                 data = int(data)
             except (ValueError, TypeError):
-                self.fail('incorrect_type', data_type=type(data).__name__)
+                return None
 
-        # Now use the parent class logic for integer lookup
-        return super().to_internal_value(data)
+        # Try integer lookup
+        try:
+            return super().to_internal_value(data)
+        except:
+            return None
 
 
 # ============================================================================
