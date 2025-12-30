@@ -144,11 +144,6 @@ class AssignmentListSerializer(serializers.ModelSerializer):
 
 class AssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer):
     """Full serializer for Assignment model."""
-    teacher = serializers.PrimaryKeyRelatedField(
-        queryset=Teacher.objects.all_colleges(),
-        required=False,
-        help_text="Teacher ID (integer). If not provided, will use logged-in teacher's ID."
-    )
     teacher_name = serializers.CharField(source='teacher.get_full_name', read_only=True)
     subject_name = serializers.CharField(source='subject.name', read_only=True)
     class_name = serializers.CharField(source='class_obj.name', read_only=True)
@@ -168,6 +163,22 @@ class AssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer):
             'assigned_date', 'created_by', 'updated_by', 'created_at', 'updated_at'
         ]
 
+    def validate_subject(self, value):
+        """Validate subject ID."""
+        if not value or (hasattr(value, 'id') and value.id == 0):
+            raise serializers.ValidationError(
+                "Subject is required. Please select a valid subject."
+            )
+        return value
+
+    def validate_class_obj(self, value):
+        """Validate class ID."""
+        if not value or (hasattr(value, 'id') and value.id == 0):
+            raise serializers.ValidationError(
+                "Class is required. Please select a valid class."
+            )
+        return value
+
     def validate(self, attrs):
         """
         Validate assignment data and auto-populate teacher if not provided.
@@ -183,16 +194,12 @@ class AssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer):
                 )
                 attrs['teacher'] = teacher
             except (Teacher.DoesNotExist, Exception):
-                # If we can't find a teacher profile and no teacher was provided, raise error
-                if not attrs.get('teacher'):
-                    raise serializers.ValidationError({
-                        'teacher': 'Teacher ID is required. Please provide the teacher ID (integer, not UUID).'
-                    })
+                pass
 
-        # If still no teacher, raise error
+        # If still no teacher, raise error with helpful message
         if not attrs.get('teacher'):
             raise serializers.ValidationError({
-                'teacher': 'Teacher ID is required. Please provide the teacher ID (integer, not UUID).'
+                'teacher': 'Teacher ID is required. Use the integer teacher_id from login response (not the user UUID). Example: "teacher": 1'
             })
 
         return super().validate(attrs)
