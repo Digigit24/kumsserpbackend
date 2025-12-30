@@ -248,6 +248,7 @@ class AssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer):
     def validate(self, attrs):
         """
         Validate assignment data and auto-populate teacher if not provided.
+        Auto-creates teacher profile if user is a teacher but has no profile.
         """
         request = self.context.get('request')
 
@@ -260,11 +261,36 @@ class AssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer):
                 )
                 # Use logged-in user's teacher profile
                 attrs['teacher'] = teacher
-            except (Teacher.DoesNotExist, Exception) as e:
-                # Only raise error if no teacher was provided in request
-                if not attrs.get('teacher'):
+            except Teacher.DoesNotExist:
+                # Teacher profile doesn't exist - auto-create it if user is a teacher
+                if request.user.user_type == 'teacher':
+                    from apps.core.models import College
+                    from django.utils import timezone
+
+                    college = request.user.college or College.objects.first()
+                    if college:
+                        # Auto-create teacher profile
+                        teacher = Teacher.objects.create(
+                            user=request.user,
+                            college=college,
+                            employee_id=f'AUTO{str(request.user.id).replace("-", "")[:12]}',
+                            joining_date=timezone.now().date(),
+                            first_name=request.user.first_name or request.user.username,
+                            last_name=request.user.last_name or 'Teacher',
+                            date_of_birth='1990-01-01',
+                            gender='Male',
+                            email=request.user.email or f'{request.user.username}@example.com',
+                            phone='0000000000',
+                            is_active=True
+                        )
+                        attrs['teacher'] = teacher
+                    elif not attrs.get('teacher'):
+                        raise serializers.ValidationError({
+                            'teacher': 'No college found. Cannot create teacher profile.'
+                        })
+                elif not attrs.get('teacher'):
                     raise serializers.ValidationError({
-                        'teacher': f'No active teacher profile found for logged-in user. Please contact admin to create your teacher profile.'
+                        'teacher': 'No teacher profile found. User must be a teacher to create assignments.'
                     })
 
         # If still no teacher, raise error
