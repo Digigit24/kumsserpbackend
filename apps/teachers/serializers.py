@@ -246,21 +246,26 @@ class AssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer):
         """
         request = self.context.get('request')
 
-        # If teacher is not provided and user is a teacher, use their teacher_id
-        if not attrs.get('teacher') and request:
+        # ALWAYS try to get teacher from logged-in user first
+        if request and request.user:
             try:
                 teacher = Teacher.objects.all_colleges().get(
                     user=request.user,
                     is_active=True
                 )
+                # Use logged-in user's teacher profile
                 attrs['teacher'] = teacher
-            except (Teacher.DoesNotExist, Exception):
-                pass
+            except (Teacher.DoesNotExist, Exception) as e:
+                # Only raise error if no teacher was provided in request
+                if not attrs.get('teacher'):
+                    raise serializers.ValidationError({
+                        'teacher': f'No active teacher profile found for logged-in user. Please contact admin to create your teacher profile.'
+                    })
 
-        # If still no teacher, raise error with helpful message
+        # If still no teacher, raise error
         if not attrs.get('teacher'):
             raise serializers.ValidationError({
-                'teacher': 'Teacher ID is required. Use the integer teacher_id from login response (not the user UUID). Example: "teacher": 1'
+                'teacher': 'Could not determine teacher. Please ensure you have an active teacher profile.'
             })
 
         return super().validate(attrs)
