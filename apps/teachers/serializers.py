@@ -166,10 +166,33 @@ class AssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer):
     def to_internal_value(self, data):
         """
         Convert string IDs to integers before validation.
+        Also handles UUID to teacher ID conversion.
         This makes the API more forgiving of frontend mistakes.
         """
-        # Convert string IDs to integers
-        for field in ['teacher', 'subject', 'class_obj', 'section', 'max_marks']:
+        # Handle teacher field - convert UUID to teacher ID if needed
+        if 'teacher' in data and data['teacher'] is not None:
+            teacher_value = data['teacher']
+
+            # Check if it's a UUID (36 characters with dashes)
+            if isinstance(teacher_value, str) and len(teacher_value) == 36 and '-' in teacher_value:
+                try:
+                    # It's a UUID - look up teacher by user UUID
+                    import uuid
+                    user_uuid = uuid.UUID(teacher_value)
+                    teacher = Teacher.objects.all_colleges().get(user__id=user_uuid, is_active=True)
+                    data['teacher'] = teacher.id  # Convert to teacher integer ID
+                except (ValueError, Teacher.DoesNotExist, Exception):
+                    # If lookup fails, leave as is and let validation handle it
+                    pass
+            elif isinstance(teacher_value, str):
+                # It's a string number - convert to integer
+                try:
+                    data['teacher'] = int(teacher_value)
+                except (ValueError, TypeError):
+                    pass
+
+        # Convert other string IDs to integers
+        for field in ['subject', 'class_obj', 'section', 'max_marks']:
             if field in data and data[field] is not None:
                 try:
                     # Convert to integer if it's a string
