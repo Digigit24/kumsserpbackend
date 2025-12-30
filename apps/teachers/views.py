@@ -95,6 +95,34 @@ class TeacherViewSet(CollegeScopedModelViewSet):
     def perform_destroy(self, instance):
         instance.soft_delete()
 
+    @extend_schema(
+        summary="Get current teacher profile",
+        description="Get the teacher profile for the currently logged-in user. Returns 404 if user is not a teacher.",
+        responses={
+            200: TeacherSerializer,
+            404: OpenApiResponse(description="User is not a teacher or teacher profile not found")
+        },
+        tags=['Teachers']
+    )
+    @action(detail=False, methods=['get'], url_path='me')
+    def current_teacher(self, request):
+        """Get the teacher profile for the currently logged-in user."""
+        try:
+            teacher = Teacher.objects.all_colleges().get(
+                user=request.user,
+                is_active=True
+            )
+            serializer = self.get_serializer(teacher)
+            return Response(serializer.data)
+        except Teacher.DoesNotExist:
+            return Response(
+                {
+                    'error': 'Teacher profile not found',
+                    'detail': 'The current user does not have an active teacher profile.'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
 
 # ============================================================================
 # STUDY MATERIAL VIEWSET

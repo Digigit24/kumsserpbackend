@@ -377,14 +377,38 @@ class TokenWithUserSerializer(DRATokenSerializer):
     def get_user_profile(self, obj):
         """
         Return the user's profile information if it exists.
+        Includes teacher_id for teacher users and student_id for student users.
         """
         user = getattr(obj, 'user', None)
         if not user:
             return None
 
+        profile_data = {}
+
+        # Add teacher ID if user is a teacher
+        if hasattr(user, 'teacher_profile'):
+            try:
+                from apps.teachers.models import Teacher
+                teacher = Teacher.objects.all_colleges().get(user=user, is_active=True)
+                profile_data['teacher_id'] = teacher.id
+                profile_data['employee_id'] = teacher.employee_id
+            except Teacher.DoesNotExist:
+                pass
+
+        # Add student ID if user is a student
+        if hasattr(user, 'student_profile'):
+            try:
+                from apps.students.models import Student
+                student = Student.objects.all_colleges().get(user=user, is_active=True)
+                profile_data['student_id'] = student.id
+                profile_data['enrollment_number'] = student.enrollment_number
+            except Student.DoesNotExist:
+                pass
+
+        # Add UserProfile data if it exists
         try:
             profile = UserProfile.objects.all_colleges().get(user=user, is_active=True)
-            return {
+            profile_data.update({
                 'id': profile.id,
                 'department_id': profile.department_id,
                 'department_name': profile.department.name if profile.department else None,
@@ -404,9 +428,11 @@ class TokenWithUserSerializer(DRATokenSerializer):
                 'linkedin_url': profile.linkedin_url,
                 'website_url': profile.website_url,
                 'bio': profile.bio,
-            }
+            })
         except UserProfile.DoesNotExist:
-            return None
+            pass
+
+        return profile_data if profile_data else None
 
 
 # ============================================================================
