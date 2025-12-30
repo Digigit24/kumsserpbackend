@@ -168,25 +168,6 @@ class AssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer):
             'assigned_date', 'created_by', 'updated_by', 'created_at', 'updated_at'
         ]
 
-    def validate_teacher(self, value):
-        """
-        Validate teacher field and provide helpful error messages.
-        """
-        if value is None:
-            raise serializers.ValidationError(
-                "Teacher ID is required. Please provide the teacher's integer ID (not the user UUID)."
-            )
-
-        # Check if teacher exists and is active
-        try:
-            teacher = Teacher.objects.all_colleges().get(id=value.id, is_active=True)
-        except Teacher.DoesNotExist:
-            raise serializers.ValidationError(
-                f"Teacher with ID {value.id} does not exist or is not active."
-            )
-
-        return value
-
     def validate(self, attrs):
         """
         Validate assignment data and auto-populate teacher if not provided.
@@ -194,25 +175,25 @@ class AssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer):
         request = self.context.get('request')
 
         # If teacher is not provided and user is a teacher, use their teacher_id
-        if not attrs.get('teacher') and request and hasattr(request.user, 'teacher_profile'):
+        if not attrs.get('teacher') and request:
             try:
                 teacher = Teacher.objects.all_colleges().get(
                     user=request.user,
                     is_active=True
                 )
                 attrs['teacher'] = teacher
-            except Teacher.DoesNotExist:
-                raise serializers.ValidationError({
-                    'teacher': 'Could not find an active teacher profile for the logged-in user. Please provide a teacher ID.'
-                })
+            except (Teacher.DoesNotExist, Exception):
+                # If we can't find a teacher profile and no teacher was provided, raise error
+                if not attrs.get('teacher'):
+                    raise serializers.ValidationError({
+                        'teacher': 'Teacher ID is required. Please provide the teacher ID (integer, not UUID).'
+                    })
 
-        # Validate due_date is in the future
-        if attrs.get('due_date'):
-            from django.utils import timezone
-            if attrs['due_date'] < timezone.now().date():
-                raise serializers.ValidationError({
-                    'due_date': 'Due date must be in the future.'
-                })
+        # If still no teacher, raise error
+        if not attrs.get('teacher'):
+            raise serializers.ValidationError({
+                'teacher': 'Teacher ID is required. Please provide the teacher ID (integer, not UUID).'
+            })
 
         return super().validate(attrs)
 
