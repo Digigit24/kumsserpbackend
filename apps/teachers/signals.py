@@ -5,7 +5,50 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 from .models import Teacher, StudyMaterial, Assignment, AssignmentSubmission, Homework, HomeworkSubmission
+
+User = get_user_model()
+
+
+@receiver(post_save, sender=User)
+def auto_create_teacher_profile(sender, instance, created, **kwargs):
+    """
+    Automatically create teacher profile for users with user_type='teacher'.
+    This ensures any teacher user can create assignments without manual profile creation.
+    """
+    # Only for teacher users
+    if instance.user_type != 'teacher':
+        return
+
+    # Check if teacher profile exists
+    if Teacher.objects.filter(user=instance).exists():
+        return  # Already has profile
+
+    # Get college
+    from apps.core.models import College
+    college = instance.college or College.objects.first()
+    if not college:
+        return  # Can't create without college
+
+    # Create teacher profile
+    try:
+        Teacher.objects.create(
+            user=instance,
+            college=college,
+            employee_id=f'AUTO{str(instance.id).replace("-", "")[:12]}',
+            joining_date=timezone.now().date(),
+            first_name=instance.first_name or instance.username,
+            last_name=instance.last_name or 'Teacher',
+            date_of_birth='1990-01-01',
+            gender='Male',
+            email=instance.email or f'{instance.username}@example.com',
+            phone='0000000000',
+            is_active=True
+        )
+        print(f"✓ Auto-created teacher profile for user: {instance.username}")
+    except Exception as e:
+        print(f"Failed to auto-create teacher profile: {e}")
 
 
 @receiver(post_save, sender=Teacher)
