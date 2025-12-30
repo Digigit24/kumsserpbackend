@@ -1,6 +1,7 @@
 """
 DRF Serializers for Teachers app models.
 """
+import uuid as uuid_lib
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import (
@@ -9,6 +10,43 @@ from .models import (
 )
 
 User = get_user_model()
+
+
+# ============================================================================
+# CUSTOM FIELDS
+# ============================================================================
+
+
+class FlexibleTeacherField(serializers.PrimaryKeyRelatedField):
+    """
+    Custom field that accepts Teacher ID (integer), User ID (UUID), or string numbers.
+    Automatically converts to the appropriate Teacher instance.
+    """
+
+    def to_internal_value(self, data):
+        """Convert UUID or string to Teacher instance."""
+        if data is None:
+            return None
+
+        # Try to detect if it's a UUID
+        if isinstance(data, str) and len(data) == 36 and '-' in data:
+            try:
+                # It's a UUID - look up teacher by user UUID
+                user_uuid = uuid_lib.UUID(data)
+                teacher = Teacher.objects.all_colleges().get(user__id=user_uuid, is_active=True)
+                return teacher
+            except (ValueError, Teacher.DoesNotExist):
+                self.fail('does_not_exist', pk_value=data)
+
+        # Try to convert string to integer
+        if isinstance(data, str):
+            try:
+                data = int(data)
+            except (ValueError, TypeError):
+                self.fail('incorrect_type', data_type=type(data).__name__)
+
+        # Now use the parent class logic for integer lookup
+        return super().to_internal_value(data)
 
 
 # ============================================================================
@@ -144,6 +182,11 @@ class AssignmentListSerializer(serializers.ModelSerializer):
 
 class AssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer):
     """Full serializer for Assignment model."""
+    teacher = FlexibleTeacherField(
+        queryset=Teacher.objects.all_colleges(),
+        required=False,
+        help_text="Teacher ID (integer), User UUID, or string number. Auto-populated if not provided."
+    )
     teacher_name = serializers.CharField(source='teacher.get_full_name', read_only=True)
     subject_name = serializers.CharField(source='subject.name', read_only=True)
     class_name = serializers.CharField(source='class_obj.name', read_only=True)
@@ -166,32 +209,9 @@ class AssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer):
     def to_internal_value(self, data):
         """
         Convert string IDs to integers before validation.
-        Also handles UUID to teacher ID conversion.
-        This makes the API more forgiving of frontend mistakes.
+        Makes the API more forgiving of frontend mistakes.
         """
-        # Handle teacher field - convert UUID to teacher ID if needed
-        if 'teacher' in data and data['teacher'] is not None:
-            teacher_value = data['teacher']
-
-            # Check if it's a UUID (36 characters with dashes)
-            if isinstance(teacher_value, str) and len(teacher_value) == 36 and '-' in teacher_value:
-                try:
-                    # It's a UUID - look up teacher by user UUID
-                    import uuid
-                    user_uuid = uuid.UUID(teacher_value)
-                    teacher = Teacher.objects.all_colleges().get(user__id=user_uuid, is_active=True)
-                    data['teacher'] = teacher.id  # Convert to teacher integer ID
-                except (ValueError, Teacher.DoesNotExist, Exception):
-                    # If lookup fails, leave as is and let validation handle it
-                    pass
-            elif isinstance(teacher_value, str):
-                # It's a string number - convert to integer
-                try:
-                    data['teacher'] = int(teacher_value)
-                except (ValueError, TypeError):
-                    pass
-
-        # Convert other string IDs to integers
+        # Convert string IDs to integers for non-teacher fields
         for field in ['subject', 'class_obj', 'section', 'max_marks']:
             if field in data and data[field] is not None:
                 try:
