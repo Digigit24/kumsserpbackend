@@ -161,6 +161,12 @@ class Assignment(CollegeScopedModel):
     """
     Represents assignments given by teachers.
     """
+    college = models.ForeignKey(
+        College,
+        on_delete=models.CASCADE,
+        related_name='assignments',
+        help_text="College reference"
+    )
     teacher = models.ForeignKey(
         Teacher,
         on_delete=models.CASCADE,
