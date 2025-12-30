@@ -386,24 +386,22 @@ class TokenWithUserSerializer(DRATokenSerializer):
         profile_data = {}
 
         # Add teacher ID if user is a teacher
-        if hasattr(user, 'teacher_profile'):
-            try:
-                from apps.teachers.models import Teacher
-                teacher = Teacher.objects.all_colleges().get(user=user, is_active=True)
-                profile_data['teacher_id'] = teacher.id
-                profile_data['employee_id'] = teacher.employee_id
-            except Teacher.DoesNotExist:
-                pass
+        try:
+            from apps.teachers.models import Teacher
+            teacher = Teacher.objects.all_colleges().get(user=user, is_active=True)
+            profile_data['teacher_id'] = teacher.id
+            profile_data['employee_id'] = teacher.employee_id
+        except (Teacher.DoesNotExist, Exception):
+            pass
 
         # Add student ID if user is a student
-        if hasattr(user, 'student_profile'):
-            try:
-                from apps.students.models import Student
-                student = Student.objects.all_colleges().get(user=user, is_active=True)
-                profile_data['student_id'] = student.id
-                profile_data['enrollment_number'] = student.enrollment_number
-            except Student.DoesNotExist:
-                pass
+        try:
+            from apps.students.models import Student
+            student = Student.objects.all_colleges().get(user=user, is_active=True)
+            profile_data['student_id'] = student.id
+            profile_data['admission_number'] = student.admission_number
+        except (Student.DoesNotExist, Exception):
+            pass
 
         # Add UserProfile data if it exists
         try:
@@ -429,7 +427,7 @@ class TokenWithUserSerializer(DRATokenSerializer):
                 'website_url': profile.website_url,
                 'bio': profile.bio,
             })
-        except UserProfile.DoesNotExist:
+        except (UserProfile.DoesNotExist, Exception):
             pass
 
         return profile_data if profile_data else None
