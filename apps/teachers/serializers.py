@@ -163,11 +163,29 @@ class AssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer):
             'assigned_date', 'created_by', 'updated_by', 'created_at', 'updated_at'
         ]
 
+    def to_internal_value(self, data):
+        """
+        Convert string IDs to integers before validation.
+        This makes the API more forgiving of frontend mistakes.
+        """
+        # Convert string IDs to integers
+        for field in ['teacher', 'subject', 'class_obj', 'section', 'max_marks']:
+            if field in data and data[field] is not None:
+                try:
+                    # Convert to integer if it's a string
+                    if isinstance(data[field], str):
+                        data[field] = int(data[field])
+                except (ValueError, TypeError):
+                    # If conversion fails, leave as is and let validation handle it
+                    pass
+
+        return super().to_internal_value(data)
+
     def validate_subject(self, value):
         """Validate subject ID."""
         if not value or (hasattr(value, 'id') and value.id == 0):
             raise serializers.ValidationError(
-                "Subject is required. Please select a valid subject."
+                "Subject is required. Please select a valid subject from the dropdown."
             )
         return value
 
@@ -175,7 +193,7 @@ class AssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer):
         """Validate class ID."""
         if not value or (hasattr(value, 'id') and value.id == 0):
             raise serializers.ValidationError(
-                "Class is required. Please select a valid class."
+                "Class is required. Please select a valid class from the dropdown."
             )
         return value
 
