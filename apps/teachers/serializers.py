@@ -261,6 +261,7 @@ class AssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer):
                 )
                 # Use logged-in user's teacher profile
                 attrs['teacher'] = teacher
+                attrs['college'] = teacher.college  # Set college for assignment
             except Teacher.DoesNotExist:
                 # Teacher profile doesn't exist - auto-create it if user is a teacher
                 if request.user.user_type == 'teacher':
@@ -284,6 +285,7 @@ class AssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer):
                             is_active=True
                         )
                         attrs['teacher'] = teacher
+                        attrs['college'] = college  # Set college for assignment
                     elif not attrs.get('teacher'):
                         raise serializers.ValidationError({
                             'teacher': 'No college found. Cannot create teacher profile.'
