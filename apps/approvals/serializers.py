@@ -167,7 +167,7 @@ class BulkNotificationSerializer(serializers.Serializer):
         required=True
     )
     title = serializers.CharField(max_length=300, required=True)
-    message = serializers.TextField(required=True)
+    message = serializers.CharField(required=True)
     priority = serializers.ChoiceField(
         choices=['low', 'medium', 'high'],
         default='medium'
