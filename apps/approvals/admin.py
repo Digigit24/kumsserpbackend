@@ -64,7 +64,7 @@ class ApprovalRequestAdmin(admin.ModelAdmin):
     def is_overdue_badge(self, obj):
         """Display overdue status."""
         if obj.is_overdue:
-            return format_html('<span style="color: red; font-weight: bold;">  OVERDUE</span>')
+            return format_html('<span style="color: red; font-weight: bold;">WARNING: OVERDUE</span>')
         return format_html('<span style="color: green;">OK On Time</span>')
     is_overdue_badge.short_description = 'Deadline Status'
 
@@ -162,7 +162,7 @@ class NotificationAdmin(admin.ModelAdmin):
         """Display read status."""
         if obj.is_read:
             return format_html('<span style="color: green;">OK Read</span>')
-        return format_html('<span style="color: orange;">— Unread</span>')
+        return format_html('<span style="color: orange;">WARNING: Unread</span>')
     is_read_badge.short_description = 'Read Status'
 
     actions = ['mark_as_read', 'mark_as_unread']

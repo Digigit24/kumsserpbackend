@@ -229,11 +229,11 @@ class FeePaymentApprovalView(APIView):
         # Create approval request
         title = serializer.validated_data.get(
             'title',
-            f'Fee Payment Approval - ¹{fee_collection.amount}'
+            f'Fee Payment Approval - Rs.{fee_collection.amount}'
         )
         description = serializer.validated_data.get(
             'description',
-            f'Fee payment of ¹{fee_collection.amount} on {fee_collection.payment_date}'
+            f'Fee payment of Rs.{fee_collection.amount} on {fee_collection.payment_date}'
         )
 
         approval_request = ApprovalRequest.objects.create(
@@ -262,7 +262,7 @@ class FeePaymentApprovalView(APIView):
                 recipient=approver,
                 notification_type='approval_request',
                 title='New Fee Payment Approval Request',
-                message=f'{request.user.get_full_name() or request.user.username} submitted a fee payment of ¹{fee_collection.amount} for approval.',
+                message=f'{request.user.get_full_name() or request.user.username} submitted a fee payment of Rs.{fee_collection.amount} for approval.',
                 priority='high',
                 content_type=ContentType.objects.get_for_model(approval_request),
                 object_id=approval_request.id,
