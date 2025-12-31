@@ -148,6 +148,15 @@ def get_default_permissions(role):
                 'generate': {'scope': 'team', 'enabled': True},
                 'export': {'scope': 'team', 'enabled': True},
             },
+            'store': {
+                'create': {'scope': 'none', 'enabled': False},
+                'read': {'scope': 'all', 'enabled': True},
+                'update': {'scope': 'none', 'enabled': False},
+                'delete': {'scope': 'none', 'enabled': False},
+                'issue': {'scope': 'none', 'enabled': False},
+                'return': {'scope': 'team', 'enabled': True},
+                'export': {'scope': 'none', 'enabled': False},
+            },
         },
         'student': {
             'attendance': {
@@ -223,6 +232,15 @@ def get_default_permissions(role):
                 'read': {'scope': 'all', 'enabled': True},
                 'update': {'scope': 'all', 'enabled': True},
                 'delete': {'scope': 'all', 'enabled': True},
+                'export': {'scope': 'all', 'enabled': True},
+            },
+            'store': {
+                'create': {'scope': 'all', 'enabled': True},
+                'read': {'scope': 'all', 'enabled': True},
+                'update': {'scope': 'all', 'enabled': True},
+                'delete': {'scope': 'all', 'enabled': True},
+                'issue': {'scope': 'all', 'enabled': True},
+                'return': {'scope': 'all', 'enabled': True},
                 'export': {'scope': 'all', 'enabled': True},
             },
         },
