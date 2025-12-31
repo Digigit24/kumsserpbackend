@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'apps.store',
     'apps.hr',
     'apps.communication',
+    'apps.approvals',  # Approval and notification system
     'apps.reports',
     'apps.stats',
     #'apps.core.apps.CoreConfig',
