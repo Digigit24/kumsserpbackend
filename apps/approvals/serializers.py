@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Serializers for approval and notification models.
 """

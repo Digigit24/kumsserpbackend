@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Signals for approval system.
 Handles automatic notifications and status updates.

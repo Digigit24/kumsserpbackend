@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 API views for approval and notification management.
 """

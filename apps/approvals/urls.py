@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 URL routing for approval and notification endpoints.
 """

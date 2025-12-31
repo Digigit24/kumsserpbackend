@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Admin configuration for approval and notification models.
 """
@@ -64,7 +65,7 @@ class ApprovalRequestAdmin(admin.ModelAdmin):
         """Display overdue status."""
         if obj.is_overdue:
             return format_html('<span style="color: red; font-weight: bold;">  OVERDUE</span>')
-        return format_html('<span style="color: green;"> On Time</span>')
+        return format_html('<span style="color: green;">OK On Time</span>')
     is_overdue_badge.short_description = 'Deadline Status'
 
 
@@ -160,7 +161,7 @@ class NotificationAdmin(admin.ModelAdmin):
     def is_read_badge(self, obj):
         """Display read status."""
         if obj.is_read:
-            return format_html('<span style="color: green;"> Read</span>')
+            return format_html('<span style="color: green;">OK Read</span>')
         return format_html('<span style="color: orange;">— Unread</span>')
     is_read_badge.short_description = 'Read Status'
 

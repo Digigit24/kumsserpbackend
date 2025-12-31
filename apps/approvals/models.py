@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Approval models for managing approval workflows across the system.
 Handles fee payment approvals, document approvals, and other approval processes.
