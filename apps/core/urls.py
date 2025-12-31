@@ -15,6 +15,12 @@ from .views import (
     PermissionViewSet,
     TeamMembershipViewSet,
 )
+from .upload_views import (
+    SingleFileUploadView,
+    MultipleFileUploadView,
+    FileDeleteView,
+    PresignedUrlView,
+)
 
 app_name = 'core'
 
@@ -33,4 +39,10 @@ router.register(r'team-memberships', TeamMembershipViewSet, basename='team-membe
 
 urlpatterns = [
     path('', include(router.urls)),
+
+    # File upload endpoints
+    path('upload/single/', SingleFileUploadView.as_view(), name='upload-single'),
+    path('upload/multiple/', MultipleFileUploadView.as_view(), name='upload-multiple'),
+    path('upload/delete/', FileDeleteView.as_view(), name='upload-delete'),
+    path('upload/presigned-url/', PresignedUrlView.as_view(), name='upload-presigned-url'),
 ]

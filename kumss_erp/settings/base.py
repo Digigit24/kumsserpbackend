@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'dj_rest_auth',
     'drf_spectacular',  # API documentation
     'django_filters',
+    'storages',  # AWS S3 storage
 
     'django_extensions',
 
