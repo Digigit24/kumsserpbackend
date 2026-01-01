@@ -50,6 +50,8 @@ class UserListSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source='get_full_name', read_only=True)
     college_name = serializers.CharField(source='college.short_name', read_only=True)
     user_type_display = serializers.CharField(source='get_user_type_display', read_only=True)
+    teacher_id = serializers.SerializerMethodField()
+    student_id = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -57,9 +59,22 @@ class UserListSerializer(serializers.ModelSerializer):
             'id', 'username', 'email', 'full_name',
             'user_type', 'user_type_display',
             'college', 'college_name',
+            'teacher_id', 'student_id',
             'is_active', 'is_verified', 'date_joined'
         ]
         read_only_fields = fields
+
+    def get_teacher_id(self, obj):
+        """Get teacher profile ID if user is a teacher."""
+        if hasattr(obj, 'teacher_profile') and obj.teacher_profile:
+            return obj.teacher_profile.id
+        return None
+
+    def get_student_id(self, obj):
+        """Get student profile ID if user is a student."""
+        if hasattr(obj, 'student_profile') and obj.student_profile:
+            return obj.student_profile.id
+        return None
 
 
 class UserSerializer(serializers.ModelSerializer):
