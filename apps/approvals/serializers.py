@@ -166,7 +166,7 @@ class BulkNotificationSerializer(serializers.Serializer):
         required=True
     )
     title = serializers.CharField(max_length=300, required=True)
-    message = serializers.TextField(required=True)
+    message = serializers.CharField(required=True, style={'base_template': 'textarea.html'})
     priority = serializers.ChoiceField(
         choices=['low', 'medium', 'high'],
         default='medium'

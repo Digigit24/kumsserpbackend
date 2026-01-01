@@ -329,7 +329,11 @@ class Notification(AuditModel):
         ]
 
     def __str__(self):
+<<<<<<< HEAD
         return f"{self.title}  {self.recipient}"
+=======
+        return f"{self.title} - {self.recipient}"
+>>>>>>> origin/claude/fix-approval-app-errors-Bwqp5
 
     def mark_as_read(self):
         """Mark notification as read."""

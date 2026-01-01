@@ -47,8 +47,16 @@ class ApprovalRequestViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset()
 
         # Filter by college if available
-        if hasattr(user, 'college'):
-            queryset = queryset.filter(college=user.college)
+        college = None
+        if hasattr(user, 'college') and user.college:
+            college = user.college
+        elif hasattr(user, 'student_profile') and user.student_profile:
+            college = user.student_profile.college
+        elif hasattr(user, 'teacher_profile') and user.teacher_profile:
+            college = user.teacher_profile.college
+
+        if college:
+            queryset = queryset.filter(college=college)
 
         # Filter based on user role
         if self.action in ['my_requests']:
@@ -228,15 +236,40 @@ class FeePaymentApprovalView(APIView):
         # Create approval request
         title = serializer.validated_data.get(
             'title',
+<<<<<<< HEAD
             f'Fee Payment Approval - {fee_collection.amount}'
         )
         description = serializer.validated_data.get(
             'description',
             f'Fee payment of �{fee_collection.amount} on {fee_collection.payment_date}'
+=======
+            f'Fee Payment Approval - Rs.{fee_collection.amount}'
+        )
+        description = serializer.validated_data.get(
+            'description',
+            f'Fee payment of Rs.{fee_collection.amount} on {fee_collection.payment_date}'
+>>>>>>> origin/claude/fix-approval-app-errors-Bwqp5
         )
 
+        # Determine college - prioritize from fee_collection, fallback to user's profile
+        college = None
+        if hasattr(fee_collection, 'student') and fee_collection.student:
+            college = fee_collection.student.college
+        elif hasattr(request.user, 'student_profile') and request.user.student_profile:
+            college = request.user.student_profile.college
+        elif hasattr(request.user, 'teacher_profile') and request.user.teacher_profile:
+            college = request.user.teacher_profile.college
+        elif hasattr(request.user, 'college'):
+            college = request.user.college
+
+        if not college:
+            return Response(
+                {'error': 'Unable to determine college for this approval request'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         approval_request = ApprovalRequest.objects.create(
-            college=request.user.student_profile.college if hasattr(request.user, 'student_profile') else fee_collection.student.college,
+            college=college,
             requester=request.user,
             request_type='fee_payment',
             title=title,
@@ -261,7 +294,11 @@ class FeePaymentApprovalView(APIView):
                 recipient=approver,
                 notification_type='approval_request',
                 title='New Fee Payment Approval Request',
+<<<<<<< HEAD
                 message=f'{request.user.get_full_name() or request.user.username} submitted a fee payment of �{fee_collection.amount} for approval.',
+=======
+                message=f'{request.user.get_full_name() or request.user.username} submitted a fee payment of Rs.{fee_collection.amount} for approval.',
+>>>>>>> origin/claude/fix-approval-app-errors-Bwqp5
                 priority='high',
                 content_type=ContentType.objects.get_for_model(approval_request),
                 object_id=approval_request.id,
