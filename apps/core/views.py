@@ -643,6 +643,99 @@ class PermissionViewSet(CollegeScopedModelViewSet):
             'scopes': AVAILABLE_SCOPES,
         })
 
+    @extend_schema(
+        request={'application/json': {
+            'type': 'object',
+            'properties': {
+                'role': {'type': 'string', 'example': 'student'},
+                'students': {'type': 'object', 'example': {'read': True}},
+                'attendance': {'type': 'object', 'example': {'read': True, 'create': False}},
+            }
+        }},
+        responses={200: PermissionSerializer},
+        description="Update permissions for a specific role. Send only TRUE permissions.",
+        tags=['Permissions']
+    )
+    @action(detail=False, methods=['post'])
+    def update_role_permissions(self, request):
+        """
+        POST /api/core/permissions/update-role-permissions/
+        Update permissions for a specific role.
+        Frontend sends only TRUE permissions for each module.
+
+        Example payload:
+        {
+            "role": "student",
+            "students": {"read": true},
+            "attendance": {"read": true},
+            "fees": {"read": true}
+        }
+        """
+        from apps.core.permissions_serializers import PermissionUpdateSerializer
+
+        serializer = PermissionUpdateSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get college
+        college = self._get_user_college(request.user)
+        if not college:
+            return Response(
+                {'error': 'Unable to determine college for this user'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Convert to permissions_json format
+        role, permissions_json = serializer.to_permissions_json()
+
+        # Get or create permission record
+        permission, created = Permission.objects.get_or_create(
+            college=college,
+            role=role,
+            defaults={'permissions_json': permissions_json}
+        )
+
+        if not created:
+            # Update existing permission
+            permission.permissions_json = permissions_json
+            permission.save()
+
+        response_serializer = PermissionSerializer(permission)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        responses={200: PermissionSerializer(many=True)},
+        description="Get all permissions configured for current user's college",
+        tags=['Permissions']
+    )
+    @action(detail=False, methods=['get'])
+    def college_permissions(self, request):
+        """
+        GET /api/core/permissions/college-permissions/
+        Get all permissions configured for the current user's college.
+        """
+        college = self._get_user_college(request.user)
+        if not college:
+            return Response(
+                {'error': 'Unable to determine college for this user'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        permissions = Permission.objects.filter(college=college, is_active=True)
+        serializer = PermissionSerializer(permissions, many=True)
+        return Response(serializer.data)
+
+    def _get_user_college(self, user):
+        """Helper to get user's college."""
+        if hasattr(user, 'college') and user.college:
+            return user.college
+        elif hasattr(user, 'student_profile') and user.student_profile:
+            return user.student_profile.college
+        elif hasattr(user, 'teacher_profile') and user.teacher_profile:
+            return user.teacher_profile.college
+        return None
+
 
 class TeamMembershipViewSet(CollegeScopedModelViewSet):
     """
