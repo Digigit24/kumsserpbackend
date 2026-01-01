@@ -35,17 +35,16 @@ class LeaveApplicationSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, data):
-        """Auto-fill teacher from request user if not provided."""
+        """ALWAYS use logged-in user's teacher profile, ignore whatever is sent."""
         request = self.context.get('request')
 
-        # If teacher not provided, try to get from logged-in user
-        if 'teacher' not in data or data['teacher'] is None:
-            if request and hasattr(request.user, 'teacher_profile'):
-                data['teacher'] = request.user.teacher_profile
-            else:
-                raise serializers.ValidationError({
-                    'teacher': 'Teacher is required. Current user does not have a teacher profile.'
-                })
+        # ALWAYS override teacher with logged-in user (ignore frontend value)
+        if request and hasattr(request.user, 'teacher_profile') and request.user.teacher_profile:
+            data['teacher'] = request.user.teacher_profile
+        else:
+            raise serializers.ValidationError({
+                'teacher': 'Current user does not have a teacher profile.'
+            })
 
         return data
 
