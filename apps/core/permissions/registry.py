@@ -12,6 +12,14 @@ PERMISSION_REGISTRY = {
         'actions': ['create', 'read', 'update', 'delete', 'import', 'export'],
         'description': 'Student records management',
     },
+    'classes': {
+        'actions': ['create', 'read', 'update', 'delete', 'export'],
+        'description': 'Class/section management',
+    },
+    'subjects': {
+        'actions': ['create', 'read', 'update', 'delete', 'export'],
+        'description': 'Subject management',
+    },
     'fees': {
         'actions': ['create', 'read', 'update', 'delete', 'generate_invoice', 'export'],
         'description': 'Fee management',
