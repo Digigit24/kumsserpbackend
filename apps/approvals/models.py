@@ -329,7 +329,7 @@ class Notification(AuditModel):
         ]
 
     def __str__(self):
-        return f"{self.title} ’ {self.recipient}"
+        return f"{self.title}  {self.recipient}"
 
     def mark_as_read(self):
         """Mark notification as read."""
