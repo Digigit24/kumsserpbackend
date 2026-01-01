@@ -204,6 +204,11 @@ class UserViewSet(CollegeScopedModelViewSet):
     ordering_fields = ['username', 'email', 'date_joined', 'last_login']
     ordering = ['-date_joined']
 
+    def get_queryset(self):
+        """Add select_related for teacher_profile and student_profile."""
+        queryset = super().get_queryset()
+        return queryset.select_related('teacher_profile', 'student_profile', 'college')
+
     def get_serializer_class(self):
         """Use different serializers for different actions."""
         if self.action == 'list':
