@@ -54,7 +54,8 @@ class LeaveApplicationSerializer(serializers.ModelSerializer):
         if hasattr(user, 'teacher_profile') and user.teacher_profile:
             data['teacher'] = user.teacher_profile
         # If user is admin/staff, they must specify a teacher
-        elif user.is_staff or user.is_superuser or user.user_type == 'admin':
+        elif (user.is_staff or user.is_superuser or
+              user.user_type in ['college_admin', 'super_admin', 'staff']):
             if 'teacher' not in data or not data.get('teacher'):
                 raise serializers.ValidationError({
                     'teacher': 'Admin must specify a teacher for the leave application.'
