@@ -236,19 +236,12 @@ class FeePaymentApprovalView(APIView):
         # Create approval request
         title = serializer.validated_data.get(
             'title',
-<<<<<<< HEAD
-            f'Fee Payment Approval - {fee_collection.amount}'
-        )
-        description = serializer.validated_data.get(
-            'description',
-            f'Fee payment of �{fee_collection.amount} on {fee_collection.payment_date}'
-=======
+
             f'Fee Payment Approval - Rs.{fee_collection.amount}'
         )
         description = serializer.validated_data.get(
             'description',
             f'Fee payment of Rs.{fee_collection.amount} on {fee_collection.payment_date}'
->>>>>>> origin/claude/fix-approval-app-errors-Bwqp5
         )
 
         # Determine college - prioritize from fee_collection, fallback to user's profile
@@ -294,11 +287,8 @@ class FeePaymentApprovalView(APIView):
                 recipient=approver,
                 notification_type='approval_request',
                 title='New Fee Payment Approval Request',
-<<<<<<< HEAD
-                message=f'{request.user.get_full_name() or request.user.username} submitted a fee payment of �{fee_collection.amount} for approval.',
-=======
-                message=f'{request.user.get_full_name() or request.user.username} submitted a fee payment of Rs.{fee_collection.amount} for approval.',
->>>>>>> origin/claude/fix-approval-app-errors-Bwqp5
+
+
                 priority='high',
                 content_type=ContentType.objects.get_for_model(approval_request),
                 object_id=approval_request.id,
