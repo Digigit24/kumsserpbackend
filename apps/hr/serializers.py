@@ -35,15 +35,35 @@ class LeaveApplicationSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, data):
-        """ALWAYS use logged-in user's teacher profile, ignore whatever is sent."""
+        """
+        Auto-detect teacher based on user role:
+        - If logged-in user is a teacher: auto-use their profile (ignore frontend value)
+        - If logged-in user is admin/staff: allow them to specify teacher
+        - Otherwise: raise error
+        """
         request = self.context.get('request')
 
-        # ALWAYS override teacher with logged-in user (ignore frontend value)
-        if request and hasattr(request.user, 'teacher_profile') and request.user.teacher_profile:
-            data['teacher'] = request.user.teacher_profile
-        else:
+        if not request:
             raise serializers.ValidationError({
-                'teacher': 'Current user does not have a teacher profile.'
+                'teacher': 'Request context is required.'
+            })
+
+        user = request.user
+
+        # If logged-in user is a teacher, auto-use their teacher profile
+        if hasattr(user, 'teacher_profile') and user.teacher_profile:
+            data['teacher'] = user.teacher_profile
+        # If user is admin/staff, they must specify a teacher
+        elif user.is_staff or user.is_superuser or user.user_type == 'admin':
+            if 'teacher' not in data or not data.get('teacher'):
+                raise serializers.ValidationError({
+                    'teacher': 'Admin must specify a teacher for the leave application.'
+                })
+            # Admin provided teacher - use it as is
+        else:
+            # User is neither teacher nor admin
+            raise serializers.ValidationError({
+                'teacher': 'Only teachers and admins can create leave applications.'
             })
 
         return data
