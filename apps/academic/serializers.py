@@ -8,31 +8,9 @@ from .models import (
     SubjectAssignment, Classroom, ClassTime, Timetable, LabSchedule, ClassTeacher
 )
 from apps.core.models import College, AcademicSession
+from apps.core.serializers import UserBasicSerializer, TenantAuditMixin
 
 User = get_user_model()
-
-
-# ============================================================================
-# BASE SERIALIZERS
-# ============================================================================
-
-
-class UserBasicSerializer(serializers.ModelSerializer):
-    """Basic user information for nested representations."""
-    full_name = serializers.CharField(source='get_full_name', read_only=True)
-
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'full_name']
-        read_only_fields = fields
-
-
-class TenantAuditMixin(serializers.Serializer):
-    """Mixin to include audit fields in serializers."""
-    created_by = UserBasicSerializer(read_only=True)
-    updated_by = UserBasicSerializer(read_only=True)
-    created_at = serializers.DateTimeField(read_only=True)
-    updated_at = serializers.DateTimeField(read_only=True)
 
 
 # ============================================================================

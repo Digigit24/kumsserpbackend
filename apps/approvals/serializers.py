@@ -6,20 +6,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user_model
 
 from .models import ApprovalRequest, ApprovalAction, Notification
+from apps.core.serializers import UserBasicSerializer
 
 User = get_user_model()
-
-
-class UserBasicSerializer(serializers.ModelSerializer):
-    """Basic user information for approvals and notifications."""
-    full_name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'full_name']
-
-    def get_full_name(self, obj):
-        return f"{obj.first_name} {obj.last_name}".strip() or obj.username
 
 
 class ApprovalActionSerializer(serializers.ModelSerializer):

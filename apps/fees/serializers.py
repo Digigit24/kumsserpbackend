@@ -21,23 +21,9 @@ from .models import (
     FeeReminder,
 )
 from apps.students.models import Student
+from apps.core.serializers import UserBasicSerializer
 
 User = get_user_model()
-
-
-# ============================================================================
-# BASE SERIALIZERS
-# ============================================================================
-
-
-class UserBasicSerializer(serializers.ModelSerializer):
-    """Basic user information for nested representations."""
-    full_name = serializers.CharField(source='get_full_name', read_only=True)
-
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'full_name']
-        read_only_fields = fields
 
 
 # ============================================================================
