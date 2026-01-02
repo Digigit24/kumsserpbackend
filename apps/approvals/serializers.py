@@ -39,6 +39,7 @@ class ApprovalActionSerializer(serializers.ModelSerializer):
 
 class ApprovalRequestSerializer(serializers.ModelSerializer):
     """Serializer for approval requests."""
+    college_name = serializers.CharField(source='college.short_name', read_only=True)
     requester_details = UserBasicSerializer(source='requester', read_only=True)
     approvers_details = UserBasicSerializer(source='approvers', many=True, read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
@@ -50,7 +51,7 @@ class ApprovalRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = ApprovalRequest
         fields = [
-            'id', 'college', 'requester', 'requester_details',
+            'id', 'college', 'college_name', 'requester', 'requester_details',
             'request_type', 'request_type_display', 'title', 'description',
             'priority', 'priority_display', 'content_type', 'object_id',
             'status', 'status_display', 'approvers', 'approvers_details',
@@ -60,7 +61,7 @@ class ApprovalRequestSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = [
-            'id', 'current_approval_count', 'submitted_at', 'reviewed_at',
+            'id', 'college_name', 'current_approval_count', 'submitted_at', 'reviewed_at',
             'created_at', 'updated_at'
         ]
 
