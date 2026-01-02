@@ -9,7 +9,7 @@ from django.utils import timezone
 def create_default_central_store(apps, schema_editor):
     """Create a default CentralStore instance if none exists"""
     CentralStore = apps.get_model('store', 'CentralStore')
-    User = apps.get_model('auth', 'User')
+    User = apps.get_model('accounts', 'User')
 
     # Check if any central store exists
     if CentralStore.objects.exists():
