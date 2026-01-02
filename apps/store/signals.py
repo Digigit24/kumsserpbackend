@@ -20,6 +20,7 @@ from .models import (
     PrintJob,
     SupplierQuotation,
     PurchaseOrder,
+    ProcurementRequirement,
     GoodsReceiptNote,
     GoodsReceiptItem,
     StoreIndent,
