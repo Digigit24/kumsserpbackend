@@ -1,0 +1,58 @@
+from rest_framework.permissions import BasePermission, SAFE_METHODS
+
+from apps.core.utils import get_current_college_id
+from .models import CentralStore
+
+
+def _is_manager_of_central_store(user):
+    if not user or not user.is_authenticated:
+        return False
+    return CentralStore.objects.filter(manager=user, is_active=True).exists()
+
+
+def _user_college_id(user):
+    try:
+        return getattr(user, 'college_id', None)
+    except Exception:
+        return None
+
+
+class IsCentralStoreManagerOrReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        return _is_manager_of_central_store(request.user)
+
+
+class IsCentralStoreManager(BasePermission):
+    def has_permission(self, request, view):
+        return _is_manager_of_central_store(request.user)
+
+
+class IsCollegeStoreManager(BasePermission):
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        college_id = get_current_college_id() or _user_college_id(request.user)
+        return bool(college_id)
+
+
+class IsCEOOrFinance(BasePermission):
+    def has_permission(self, request, view):
+        user = request.user
+        if not user or not user.is_authenticated:
+            return False
+        return getattr(user, 'is_superuser', False) or user.groups.filter(name__in=['CEO', 'Finance']).exists()
+
+
+class CanApproveIndent(BasePermission):
+    def has_permission(self, request, view):
+        return _is_manager_of_central_store(request.user)
+
+
+class CanReceiveMaterials(BasePermission):
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        college_id = get_current_college_id() or _user_college_id(request.user)
+        return bool(college_id)

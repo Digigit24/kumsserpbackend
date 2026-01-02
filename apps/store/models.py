@@ -1,16 +1,90 @@
 """
 Store models for inventory, sales, and print jobs.
 """
+import re
 from decimal import Decimal
 
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models, transaction
 from django.db.models import Q
+from django.utils import timezone
 
 from apps.core.models import CollegeScopedModel, AuditModel, College
 from apps.students.models import Student
 from apps.teachers.models import Teacher
+from apps.approvals.models import ApprovalRequest
+from .utils import generate_document_number
+
+
+SUPPLIER_TYPE_CHOICES = [
+    ('manufacturer', 'Manufacturer'),
+    ('distributor', 'Distributor'),
+    ('wholesaler', 'Wholesaler'),
+    ('retailer', 'Retailer'),
+]
+
+PROCUREMENT_STATUS_CHOICES = [
+    ('draft', 'Draft'),
+    ('submitted', 'Submitted'),
+    ('pending_approval', 'Pending Approval'),
+    ('approved', 'Approved'),
+    ('quotations_received', 'Quotations Received'),
+    ('po_created', 'PO Created'),
+    ('fulfilled', 'Fulfilled'),
+    ('cancelled', 'Cancelled'),
+]
+
+PO_STATUS_CHOICES = [
+    ('draft', 'Draft'),
+    ('sent', 'Sent'),
+    ('acknowledged', 'Acknowledged'),
+    ('partially_received', 'Partially Received'),
+    ('fulfilled', 'Fulfilled'),
+    ('cancelled', 'Cancelled'),
+]
+
+GRN_STATUS_CHOICES = [
+    ('received', 'Received'),
+    ('pending_inspection', 'Pending Inspection'),
+    ('inspected', 'Inspected'),
+    ('approved', 'Approved'),
+    ('rejected', 'Rejected'),
+    ('posted_to_inventory', 'Posted To Inventory'),
+]
+
+INDENT_STATUS_CHOICES = [
+    ('draft', 'Draft'),
+    ('submitted', 'Submitted'),
+    ('pending_approval', 'Pending Approval'),
+    ('approved', 'Approved'),
+    ('partially_fulfilled', 'Partially Fulfilled'),
+    ('fulfilled', 'Fulfilled'),
+    ('rejected', 'Rejected'),
+    ('cancelled', 'Cancelled'),
+]
+
+TRANSACTION_TYPE_CHOICES = [
+    ('receipt', 'Receipt'),
+    ('issue', 'Issue'),
+    ('adjustment', 'Adjustment'),
+    ('transfer', 'Transfer'),
+    ('return', 'Return'),
+    ('damage', 'Damage'),
+    ('write_off', 'Write Off'),
+]
+
+INDENT_PRIORITY_CHOICES = [
+    ('low', 'Low'),
+    ('medium', 'Medium'),
+    ('high', 'High'),
+    ('urgent', 'Urgent'),
+]
+
+URGENCY_CHOICES = INDENT_PRIORITY_CHOICES
 
 
 class StoreCategory(CollegeScopedModel):
@@ -58,6 +132,20 @@ class StoreItem(CollegeScopedModel):
     min_stock_level = models.IntegerField(default=10, help_text="Minimum stock alert threshold")
     barcode = models.CharField(max_length=50, null=True, blank=True, help_text="Barcode")
     image = models.ImageField(upload_to='store_items/', null=True, blank=True, help_text="Item image")
+    managed_by = models.CharField(
+        max_length=20,
+        choices=[('central', 'Central Store'), ('college', 'College Store')],
+        default='college',
+        help_text="Whether item is centrally managed"
+    )
+    central_store = models.ForeignKey(
+        'CentralStore',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='items',
+        help_text="Linked central store when centrally managed"
+    )
 
     class Meta:
         db_table = 'store_item'
@@ -67,6 +155,7 @@ class StoreItem(CollegeScopedModel):
             models.Index(fields=['college', 'code']),
             models.Index(fields=['barcode']),
             models.Index(fields=['is_active']),
+            models.Index(fields=['central_store', 'managed_by']),
         ]
 
     def __str__(self):
@@ -301,3 +390,649 @@ class StoreCredit(AuditModel):
     def clean(self):
         if self.amount < 0:
             raise ValidationError("Amount cannot be negative.")
+
+
+class SupplierMaster(AuditModel):
+    supplier_code = models.CharField(max_length=20, unique=True)
+    name = models.CharField(max_length=200)
+    contact_person = models.CharField(max_length=100, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    phone = models.CharField(max_length=20)
+    alternate_phone = models.CharField(max_length=20, null=True, blank=True)
+    address_line1 = models.CharField(max_length=300)
+    address_line2 = models.CharField(max_length=300, null=True, blank=True)
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    pincode = models.CharField(max_length=10)
+    country = models.CharField(max_length=100, default='India')
+    gstin = models.CharField(max_length=15, null=True, blank=True, unique=True)
+    pan = models.CharField(max_length=10, null=True, blank=True)
+    bank_name = models.CharField(max_length=200, null=True, blank=True)
+    account_number = models.CharField(max_length=50, null=True, blank=True)
+    ifsc_code = models.CharField(max_length=11, null=True, blank=True)
+    payment_terms = models.CharField(max_length=100, null=True, blank=True)
+    credit_limit = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    rating = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
+    supplier_type = models.CharField(max_length=50, choices=SUPPLIER_TYPE_CHOICES)
+    is_active = models.BooleanField(default=True)
+    is_verified = models.BooleanField(default=False)
+    verification_date = models.DateField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        db_table = 'supplier_master'
+        ordering = ['name']
+        indexes = [
+            models.Index(fields=['name']),
+            models.Index(fields=['supplier_code']),
+            models.Index(fields=['gstin']),
+            models.Index(fields=['is_active']),
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.supplier_code})"
+
+    def save(self, *args, **kwargs):
+        if not self.supplier_code:
+            self.supplier_code = generate_document_number('SUP', SupplierMaster, field_name='created_at')
+        super().save(*args, **kwargs)
+
+    def get_full_address(self):
+        return ", ".join(filter(None, [
+            self.address_line1,
+            self.address_line2,
+            self.city,
+            self.state,
+            self.pincode,
+            self.country,
+        ]))
+
+    def clean(self):
+        gstin_pattern = r"^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$"
+        pan_pattern = r"^[A-Z]{5}[0-9]{4}[A-Z]$"
+        if self.gstin and not re.match(gstin_pattern, self.gstin):
+            raise ValidationError({'gstin': 'Invalid GSTIN format'})
+        if self.pan and not re.match(pan_pattern, self.pan):
+            raise ValidationError({'pan': 'Invalid PAN format'})
+
+
+class CentralStore(AuditModel):
+    name = models.CharField(max_length=200, unique=True)
+    code = models.CharField(max_length=20, unique=True)
+    address_line1 = models.CharField(max_length=300)
+    address_line2 = models.CharField(max_length=300, null=True, blank=True)
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    pincode = models.CharField(max_length=10)
+    manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='managed_central_stores')
+    contact_phone = models.CharField(max_length=20)
+    contact_email = models.EmailField()
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'central_store'
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} ({self.code})"
+
+
+class ProcurementRequirement(AuditModel):
+    requirement_number = models.CharField(max_length=50, unique=True)
+    central_store = models.ForeignKey(CentralStore, on_delete=models.CASCADE, related_name='requirements')
+    title = models.CharField(max_length=300)
+    description = models.TextField(null=True, blank=True)
+    requirement_date = models.DateField(auto_now_add=True)
+    required_by_date = models.DateField()
+    urgency = models.CharField(max_length=20, choices=URGENCY_CHOICES, default='medium')
+    status = models.CharField(max_length=30, choices=PROCUREMENT_STATUS_CHOICES, default='draft')
+    approval_request = models.ForeignKey(ApprovalRequest, null=True, blank=True, on_delete=models.SET_NULL, related_name='procurement_requirements')
+    estimated_budget = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    justification = models.TextField()
+    metadata = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        db_table = 'procurement_requirement'
+        ordering = ['-requirement_date']
+        indexes = [
+            models.Index(fields=['requirement_number']),
+            models.Index(fields=['status']),
+            models.Index(fields=['required_by_date']),
+        ]
+
+    def __str__(self):
+        return f"{self.requirement_number} - {self.title}"
+
+    def save(self, *args, **kwargs):
+        if not self.requirement_number:
+            self.requirement_number = generate_document_number('REQ', ProcurementRequirement, field_name='requirement_date')
+        super().save(*args, **kwargs)
+
+    def submit_for_approval(self):
+        if self.status not in ['draft', 'submitted']:
+            raise ValidationError('Requirement already submitted or processed')
+        self.status = 'pending_approval'
+        self.save(update_fields=['status', 'updated_at'])
+
+    def approve(self):
+        self.status = 'approved'
+        self.save(update_fields=['status', 'updated_at'])
+
+    def cancel(self):
+        self.status = 'cancelled'
+        self.save(update_fields=['status', 'updated_at'])
+
+
+class RequirementItem(AuditModel):
+    requirement = models.ForeignKey(ProcurementRequirement, on_delete=models.CASCADE, related_name='items')
+    item_description = models.CharField(max_length=500)
+    category = models.ForeignKey(StoreCategory, null=True, blank=True, on_delete=models.SET_NULL)
+    quantity = models.IntegerField(validators=[MinValueValidator(1)])
+    unit = models.CharField(max_length=20)
+    estimated_unit_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    estimated_total = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    specifications = models.TextField(null=True, blank=True)
+    remarks = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'requirement_item'
+        indexes = [models.Index(fields=['requirement'])]
+
+    def clean(self):
+        if self.quantity and self.quantity <= 0:
+            raise ValidationError({'quantity': 'Quantity must be greater than zero'})
+
+    def save(self, *args, **kwargs):
+        if self.estimated_unit_price is not None:
+            self.estimated_total = (self.estimated_unit_price or 0) * (self.quantity or 0)
+        super().save(*args, **kwargs)
+
+
+class SupplierQuotation(AuditModel):
+    quotation_number = models.CharField(max_length=50, unique=True)
+    requirement = models.ForeignKey(ProcurementRequirement, on_delete=models.CASCADE, related_name='quotations')
+    supplier = models.ForeignKey(SupplierMaster, on_delete=models.CASCADE, related_name='quotations')
+    quotation_date = models.DateField()
+    supplier_reference_number = models.CharField(max_length=100, null=True, blank=True)
+    valid_until = models.DateField()
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    tax_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    grand_total = models.DecimalField(max_digits=12, decimal_places=2)
+    payment_terms = models.CharField(max_length=200, null=True, blank=True)
+    delivery_time_days = models.IntegerField(null=True, blank=True)
+    warranty_terms = models.TextField(null=True, blank=True)
+    quotation_file = models.FileField(upload_to='quotations/', null=True, blank=True)
+    status = models.CharField(max_length=20, choices=[('received', 'Received'), ('under_review', 'Under Review'), ('accepted', 'Accepted'), ('rejected', 'Rejected')], default='received')
+    is_selected = models.BooleanField(default=False)
+    rejection_reason = models.TextField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'supplier_quotation'
+        ordering = ['-quotation_date']
+        indexes = [
+            models.Index(fields=['requirement']),
+            models.Index(fields=['supplier']),
+            models.Index(fields=['status']),
+            models.Index(fields=['is_selected']),
+        ]
+
+    def __str__(self):
+        return f"{self.quotation_number} - {self.supplier}"
+
+    def save(self, *args, **kwargs):
+        if not self.quotation_number:
+            self.quotation_number = generate_document_number('QUOT', SupplierQuotation, field_name='quotation_date')
+        super().save(*args, **kwargs)
+
+    def mark_as_selected(self):
+        with transaction.atomic():
+            SupplierQuotation.objects.filter(requirement=self.requirement).update(is_selected=False, status='rejected')
+            self.is_selected = True
+            self.status = 'accepted'
+            self.save(update_fields=['is_selected', 'status', 'updated_at'])
+
+    def clean(self):
+        if self.grand_total and self.total_amount and self.tax_amount is not None:
+            expected = (self.total_amount or 0) + (self.tax_amount or 0)
+            if self.grand_total != expected:
+                raise ValidationError({'grand_total': 'Grand total must equal total amount plus tax amount'})
+
+
+class QuotationItem(AuditModel):
+    quotation = models.ForeignKey(SupplierQuotation, on_delete=models.CASCADE, related_name='items')
+    requirement_item = models.ForeignKey(RequirementItem, on_delete=models.CASCADE, related_name='quotation_items')
+    item_description = models.CharField(max_length=500)
+    quantity = models.IntegerField()
+    unit = models.CharField(max_length=20)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    specifications = models.TextField(null=True, blank=True)
+    brand = models.CharField(max_length=100, null=True, blank=True)
+    hsn_code = models.CharField(max_length=20, null=True, blank=True)
+
+    class Meta:
+        db_table = 'quotation_item'
+
+    def save(self, *args, **kwargs):
+        self.tax_amount = (self.unit_price or 0) * (self.quantity or 0) * (self.tax_rate or 0) / Decimal('100.00')
+        self.total_amount = (self.unit_price or 0) * (self.quantity or 0) + (self.tax_amount or 0)
+        super().save(*args, **kwargs)
+
+
+class PurchaseOrder(AuditModel):
+    po_number = models.CharField(max_length=50, unique=True)
+    requirement = models.ForeignKey(ProcurementRequirement, on_delete=models.CASCADE, related_name='purchase_orders')
+    quotation = models.ForeignKey(SupplierQuotation, on_delete=models.CASCADE, related_name='purchase_orders')
+    supplier = models.ForeignKey(SupplierMaster, on_delete=models.PROTECT, related_name='purchase_orders')
+    central_store = models.ForeignKey(CentralStore, on_delete=models.CASCADE, related_name='purchase_orders')
+    po_date = models.DateField()
+    expected_delivery_date = models.DateField()
+    delivery_address_line1 = models.CharField(max_length=300)
+    delivery_address_line2 = models.CharField(max_length=300, null=True, blank=True)
+    delivery_city = models.CharField(max_length=100)
+    delivery_state = models.CharField(max_length=100)
+    delivery_pincode = models.CharField(max_length=10)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    tax_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    grand_total = models.DecimalField(max_digits=12, decimal_places=2)
+    payment_terms = models.CharField(max_length=200)
+    delivery_terms = models.CharField(max_length=200, null=True, blank=True)
+    special_instructions = models.TextField(null=True, blank=True)
+    terms_and_conditions = models.TextField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=PO_STATUS_CHOICES, default='draft')
+    po_document = models.FileField(upload_to='purchase_orders/', null=True, blank=True)
+    sent_date = models.DateTimeField(null=True, blank=True)
+    acknowledged_date = models.DateTimeField(null=True, blank=True)
+    completed_date = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'purchase_order'
+        ordering = ['-po_date']
+        indexes = [
+            models.Index(fields=['po_number']),
+            models.Index(fields=['status']),
+            models.Index(fields=['supplier']),
+            models.Index(fields=['po_date']),
+        ]
+
+    def __str__(self):
+        return self.po_number
+
+    def save(self, *args, **kwargs):
+        if not self.po_number:
+            self.po_number = generate_document_number('PO', PurchaseOrder, field_name='po_date')
+        super().save(*args, **kwargs)
+
+    def send_to_supplier(self):
+        self.status = 'sent'
+        self.sent_date = timezone.now()
+        self.save(update_fields=['status', 'sent_date', 'updated_at'])
+
+    def mark_as_acknowledged(self):
+        self.status = 'acknowledged'
+        self.acknowledged_date = timezone.now()
+        self.save(update_fields=['status', 'acknowledged_date', 'updated_at'])
+
+
+class PurchaseOrderItem(AuditModel):
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='items')
+    quotation_item = models.ForeignKey(QuotationItem, on_delete=models.CASCADE, related_name='po_items')
+    item_description = models.CharField(max_length=500)
+    hsn_code = models.CharField(max_length=20, null=True, blank=True)
+    quantity = models.IntegerField()
+    unit = models.CharField(max_length=20)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    tax_rate = models.DecimalField(max_digits=5, decimal_places=2)
+    tax_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    received_quantity = models.IntegerField(default=0)
+    pending_quantity = models.IntegerField(default=0)
+    specifications = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'purchase_order_item'
+
+    def save(self, *args, **kwargs):
+        self.pending_quantity = max(0, (self.quantity or 0) - (self.received_quantity or 0))
+        super().save(*args, **kwargs)
+
+    def update_received_quantity(self, qty):
+        self.received_quantity = (self.received_quantity or 0) + qty
+        self.save(update_fields=['received_quantity', 'pending_quantity', 'updated_at'])
+
+
+class GoodsReceiptNote(AuditModel):
+    grn_number = models.CharField(max_length=50, unique=True)
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='goods_receipts')
+    supplier = models.ForeignKey(SupplierMaster, on_delete=models.PROTECT, related_name='goods_receipts')
+    central_store = models.ForeignKey(CentralStore, on_delete=models.CASCADE, related_name='goods_receipts')
+    receipt_date = models.DateField()
+    invoice_number = models.CharField(max_length=100)
+    invoice_date = models.DateField()
+    invoice_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    invoice_file = models.FileField(upload_to='grn_invoices/', null=True, blank=True)
+    delivery_challan_number = models.CharField(max_length=100, null=True, blank=True)
+    delivery_challan_file = models.FileField(upload_to='grn_challans/', null=True, blank=True)
+    lr_number = models.CharField(max_length=100, null=True, blank=True)
+    lr_copy = models.FileField(upload_to='grn_lr/', null=True, blank=True)
+    vehicle_number = models.CharField(max_length=50, null=True, blank=True)
+    transporter_name = models.CharField(max_length=200, null=True, blank=True)
+    received_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='grns_received')
+    status = models.CharField(max_length=30, choices=GRN_STATUS_CHOICES, default='received')
+    inspection_approval_request = models.ForeignKey(ApprovalRequest, null=True, blank=True, on_delete=models.SET_NULL)
+    posted_to_inventory_date = models.DateTimeField(null=True, blank=True)
+    remarks = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'goods_receipt_note'
+        ordering = ['-receipt_date']
+        indexes = [
+            models.Index(fields=['grn_number']),
+            models.Index(fields=['purchase_order']),
+            models.Index(fields=['status']),
+            models.Index(fields=['receipt_date']),
+        ]
+
+    def __str__(self):
+        return self.grn_number
+
+    def save(self, *args, **kwargs):
+        if not self.grn_number:
+            self.grn_number = generate_document_number('GRN', GoodsReceiptNote, field_name='receipt_date')
+        super().save(*args, **kwargs)
+
+    def submit_for_inspection(self):
+        self.status = 'pending_inspection'
+        self.save(update_fields=['status', 'updated_at'])
+
+    def post_to_inventory(self):
+        self.status = 'posted_to_inventory'
+        self.posted_to_inventory_date = timezone.now()
+        self.save(update_fields=['status', 'posted_to_inventory_date', 'updated_at'])
+
+
+class GoodsReceiptItem(AuditModel):
+    grn = models.ForeignKey(GoodsReceiptNote, on_delete=models.CASCADE, related_name='items')
+    po_item = models.ForeignKey(PurchaseOrderItem, on_delete=models.CASCADE, related_name='grn_items')
+    item_description = models.CharField(max_length=500)
+    ordered_quantity = models.IntegerField()
+    received_quantity = models.IntegerField()
+    accepted_quantity = models.IntegerField(default=0)
+    rejected_quantity = models.IntegerField(default=0)
+    unit = models.CharField(max_length=20)
+    batch_number = models.CharField(max_length=100, null=True, blank=True)
+    serial_number = models.CharField(max_length=100, null=True, blank=True)
+    manufacturing_date = models.DateField(null=True, blank=True)
+    expiry_date = models.DateField(null=True, blank=True)
+    rejection_reason = models.TextField(null=True, blank=True)
+    inspection_notes = models.TextField(null=True, blank=True)
+    quality_status = models.CharField(max_length=20, choices=[('passed', 'Passed'), ('failed', 'Failed'), ('pending', 'Pending')], default='pending')
+
+    class Meta:
+        db_table = 'goods_receipt_item'
+
+    def clean(self):
+        if (self.accepted_quantity or 0) + (self.rejected_quantity or 0) != (self.received_quantity or 0):
+            raise ValidationError('Received quantity must equal accepted plus rejected')
+
+
+class InspectionNote(AuditModel):
+    grn = models.OneToOneField(GoodsReceiptNote, on_delete=models.CASCADE, related_name='inspection')
+    inspector = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='inspections')
+    inspection_date = models.DateField()
+    overall_status = models.CharField(max_length=20, choices=[('passed', 'Passed'), ('failed', 'Failed'), ('partial', 'Partial'), ('pending', 'Pending')], default='pending')
+    quality_rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], null=True, blank=True)
+    packaging_condition = models.CharField(max_length=20, choices=[('excellent', 'Excellent'), ('good', 'Good'), ('fair', 'Fair'), ('poor', 'Poor')])
+    remarks = models.TextField(null=True, blank=True)
+    recommendation = models.CharField(max_length=20, choices=[('accept', 'Accept'), ('reject', 'Reject'), ('partial_accept', 'Partial Accept')])
+    inspection_images = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        db_table = 'inspection_note'
+
+
+class StoreIndent(CollegeScopedModel):
+    indent_number = models.CharField(max_length=50, unique=True)
+    college = models.ForeignKey(College, on_delete=models.CASCADE, related_name='store_indents')
+    requesting_store_manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='indents_created')
+    central_store = models.ForeignKey(CentralStore, on_delete=models.CASCADE, related_name='indents')
+    indent_date = models.DateField(auto_now_add=True)
+    required_by_date = models.DateField()
+    priority = models.CharField(max_length=20, choices=INDENT_PRIORITY_CHOICES, default='medium')
+    justification = models.TextField()
+    status = models.CharField(max_length=30, choices=INDENT_STATUS_CHOICES, default='draft')
+    approval_request = models.ForeignKey(ApprovalRequest, null=True, blank=True, on_delete=models.SET_NULL, related_name='store_indents')
+    approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='indents_approved')
+    approved_date = models.DateTimeField(null=True, blank=True)
+    rejection_reason = models.TextField(null=True, blank=True)
+    attachments = models.FileField(upload_to='indent_attachments/', null=True, blank=True)
+    remarks = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'store_indent'
+        ordering = ['-indent_date']
+        indexes = [
+            models.Index(fields=['indent_number']),
+            models.Index(fields=['college']),
+            models.Index(fields=['status']),
+            models.Index(fields=['indent_date']),
+        ]
+
+    def __str__(self):
+        return self.indent_number
+
+    def save(self, *args, **kwargs):
+        if not self.indent_number:
+            self.indent_number = generate_document_number('IND', StoreIndent, field_name='indent_date')
+        super().save(*args, **kwargs)
+
+    def submit(self):
+        self.status = 'pending_approval'
+        self.save(update_fields=['status', 'updated_at'])
+
+    def approve(self, user=None, approved_items=None):
+        self.status = 'approved'
+        self.approved_by = user
+        self.approved_date = timezone.now()
+        self.save(update_fields=['status', 'approved_by', 'approved_date', 'updated_at'])
+
+    def reject(self, user=None, reason=None):
+        self.status = 'rejected'
+        self.rejection_reason = reason
+        self.approved_by = user
+        self.save(update_fields=['status', 'rejection_reason', 'approved_by', 'updated_at'])
+
+    def check_fulfillment(self):
+        items = self.items.all()
+        if items and all((line.pending_quantity or 0) == 0 for line in items):
+            self.status = 'fulfilled'
+        elif any((line.issued_quantity or 0) > 0 for line in items):
+            self.status = 'partially_fulfilled'
+        self.save(update_fields=['status', 'updated_at'])
+
+
+class IndentItem(AuditModel):
+    indent = models.ForeignKey(StoreIndent, on_delete=models.CASCADE, related_name='items')
+    central_store_item = models.ForeignKey(StoreItem, on_delete=models.CASCADE, related_name='indent_items')
+    requested_quantity = models.IntegerField(validators=[MinValueValidator(1)])
+    approved_quantity = models.IntegerField(default=0)
+    issued_quantity = models.IntegerField(default=0)
+    pending_quantity = models.IntegerField(default=0)
+    unit = models.CharField(max_length=20)
+    justification = models.TextField(null=True, blank=True)
+    remarks = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'indent_item'
+
+    def save(self, *args, **kwargs):
+        self.pending_quantity = max(0, (self.approved_quantity or 0) - (self.issued_quantity or 0))
+        super().save(*args, **kwargs)
+
+    def update_issued_quantity(self, qty):
+        self.issued_quantity = (self.issued_quantity or 0) + qty
+        self.save(update_fields=['issued_quantity', 'pending_quantity', 'updated_at'])
+
+
+class MaterialIssueNote(AuditModel):
+    min_number = models.CharField(max_length=50, unique=True)
+    indent = models.ForeignKey(StoreIndent, on_delete=models.CASCADE, related_name='material_issues')
+    central_store = models.ForeignKey(CentralStore, on_delete=models.CASCADE, related_name='material_issues')
+    receiving_college = models.ForeignKey(College, on_delete=models.CASCADE, related_name='materials_received')
+    issue_date = models.DateField()
+    issued_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='materials_issued')
+    received_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='materials_received_user')
+    transport_mode = models.CharField(max_length=50, null=True, blank=True)
+    vehicle_number = models.CharField(max_length=50, null=True, blank=True)
+    driver_name = models.CharField(max_length=100, null=True, blank=True)
+    driver_contact = models.CharField(max_length=20, null=True, blank=True)
+    status = models.CharField(max_length=20, choices=[('prepared', 'Prepared'), ('dispatched', 'Dispatched'), ('in_transit', 'In Transit'), ('received', 'Received'), ('cancelled', 'Cancelled')], default='prepared')
+    dispatch_date = models.DateTimeField(null=True, blank=True)
+    receipt_date = models.DateTimeField(null=True, blank=True)
+    min_document = models.FileField(upload_to='material_issue_notes/', null=True, blank=True)
+    internal_notes = models.TextField(null=True, blank=True)
+    receipt_confirmation_notes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'material_issue_note'
+        ordering = ['-issue_date']
+        indexes = [
+            models.Index(fields=['min_number']),
+            models.Index(fields=['indent']),
+            models.Index(fields=['status']),
+            models.Index(fields=['issue_date']),
+        ]
+
+    def __str__(self):
+        return self.min_number
+
+    def save(self, *args, **kwargs):
+        if not self.min_number:
+            self.min_number = generate_document_number('MIN', MaterialIssueNote, field_name='issue_date')
+        super().save(*args, **kwargs)
+
+    def dispatch(self):
+        self.status = 'dispatched'
+        self.dispatch_date = timezone.now()
+        self.save(update_fields=['status', 'dispatch_date', 'updated_at'])
+
+    def confirm_receipt(self, user=None, notes=None):
+        self.status = 'received'
+        self.receipt_date = timezone.now()
+        self.receipt_confirmation_notes = notes or ''
+        self.received_by = user
+        self.save(update_fields=['status', 'receipt_date', 'receipt_confirmation_notes', 'received_by', 'updated_at'])
+
+
+class MaterialIssueItem(AuditModel):
+    material_issue = models.ForeignKey(MaterialIssueNote, on_delete=models.CASCADE, related_name='items')
+    indent_item = models.ForeignKey(IndentItem, on_delete=models.CASCADE, related_name='issue_items')
+    item = models.ForeignKey(StoreItem, on_delete=models.CASCADE, related_name='material_issues')
+    issued_quantity = models.IntegerField()
+    unit = models.CharField(max_length=20)
+    batch_number = models.CharField(max_length=100, null=True, blank=True)
+    remarks = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'material_issue_item'
+
+
+class CentralStoreInventory(AuditModel):
+    central_store = models.ForeignKey(CentralStore, on_delete=models.CASCADE, related_name='inventory')
+    item = models.ForeignKey(StoreItem, on_delete=models.CASCADE, related_name='central_inventory')
+    quantity_on_hand = models.IntegerField(default=0)
+    quantity_allocated = models.IntegerField(default=0)
+    quantity_available = models.IntegerField(default=0)
+    min_stock_level = models.IntegerField(default=0)
+    reorder_point = models.IntegerField(default=0)
+    max_stock_level = models.IntegerField(null=True, blank=True)
+    last_stock_update = models.DateTimeField(auto_now=True)
+    unit_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    class Meta:
+        db_table = 'central_store_inventory'
+        unique_together = ['central_store', 'item']
+        indexes = [
+            models.Index(fields=['central_store']),
+            models.Index(fields=['item']),
+            models.Index(fields=['quantity_available']),
+        ]
+
+    def save(self, *args, **kwargs):
+        self.quantity_available = (self.quantity_on_hand or 0) - (self.quantity_allocated or 0)
+        super().save(*args, **kwargs)
+
+    def update_stock(self, delta, transaction_type, reference=None, performed_by=None):
+        before = self.quantity_on_hand or 0
+        self.quantity_on_hand = before + delta
+        self.save(update_fields=['quantity_on_hand', 'quantity_available', 'updated_at'])
+        reference_type = None
+        reference_id = None
+        if reference is not None:
+            try:
+                reference_type = ContentType.objects.get_for_model(reference.__class__)
+                reference_id = getattr(reference, 'pk', None)
+            except Exception:
+                reference_type = None
+                reference_id = None
+        InventoryTransaction.objects.create(
+            transaction_number=generate_document_number('TRN', InventoryTransaction, field_name='transaction_date'),
+            transaction_type=transaction_type,
+            central_store=self.central_store,
+            item=self.item,
+            quantity=delta,
+            before_quantity=before,
+            after_quantity=self.quantity_on_hand,
+            unit_cost=self.unit_cost,
+            total_value=(self.unit_cost or 0) * delta,
+            reference_type=reference_type,
+            reference_id=reference_id,
+            performed_by=performed_by,
+        )
+
+    def allocate_stock(self, quantity):
+        self.quantity_allocated = (self.quantity_allocated or 0) + quantity
+        self.save(update_fields=['quantity_allocated', 'quantity_available', 'updated_at'])
+
+    def release_allocation(self, quantity):
+        self.quantity_allocated = max(0, (self.quantity_allocated or 0) - quantity)
+        self.save(update_fields=['quantity_allocated', 'quantity_available', 'updated_at'])
+
+
+class InventoryTransaction(AuditModel):
+    transaction_number = models.CharField(max_length=50, unique=True)
+    transaction_type = models.CharField(max_length=30, choices=TRANSACTION_TYPE_CHOICES)
+    central_store = models.ForeignKey(CentralStore, on_delete=models.CASCADE, related_name='transactions')
+    item = models.ForeignKey(StoreItem, on_delete=models.CASCADE, related_name='transactions')
+    quantity = models.IntegerField()
+    transaction_date = models.DateTimeField(auto_now_add=True)
+    before_quantity = models.IntegerField()
+    after_quantity = models.IntegerField()
+    unit_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_value = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    reference_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    reference_id = models.PositiveIntegerField(null=True, blank=True)
+    reference_object = GenericForeignKey('reference_type', 'reference_id')
+    performed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    remarks = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'inventory_transaction'
+        ordering = ['-transaction_date']
+        indexes = [
+            models.Index(fields=['transaction_type']),
+            models.Index(fields=['transaction_date']),
+            models.Index(fields=['central_store']),
+            models.Index(fields=['item']),
+        ]
+
+    def save(self, *args, **kwargs):
+        if not self.transaction_number:
+            self.transaction_number = generate_document_number('TRN', InventoryTransaction, field_name='transaction_date')
+        if not self.total_value:
+            self.total_value = (self.unit_cost or 0) * (self.quantity or 0)
+        super().save(*args, **kwargs)

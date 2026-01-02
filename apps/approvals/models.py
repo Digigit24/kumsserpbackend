@@ -36,6 +36,9 @@ class ApprovalRequest(AuditModel):
         ('document_verification', 'Document Verification'),
         ('leave_request', 'Leave Request'),
         ('expense_claim', 'Expense Claim'),
+        ('procurement_requirement', 'Procurement Requirement'),
+        ('goods_inspection', 'Goods Inspection'),
+        ('store_indent', 'Store Indent'),
         ('other', 'Other'),
     ]
 

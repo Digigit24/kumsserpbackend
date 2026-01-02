@@ -9,6 +9,23 @@ from .models import (
     SaleItem,
     PrintJob,
     StoreCredit,
+    SupplierMaster,
+    CentralStore,
+    ProcurementRequirement,
+    RequirementItem,
+    SupplierQuotation,
+    QuotationItem,
+    PurchaseOrder,
+    PurchaseOrderItem,
+    GoodsReceiptNote,
+    GoodsReceiptItem,
+    InspectionNote,
+    StoreIndent,
+    IndentItem,
+    MaterialIssueNote,
+    MaterialIssueItem,
+    CentralStoreInventory,
+    InventoryTransaction,
 )
 
 
@@ -58,3 +75,280 @@ class StoreCreditSerializer(serializers.ModelSerializer):
     class Meta:
         model = StoreCredit
         fields = '__all__'
+
+
+class SupplierMasterListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplierMaster
+        fields = ['id', 'supplier_code', 'name', 'supplier_type', 'rating', 'is_active']
+
+
+class SupplierMasterDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplierMaster
+        fields = '__all__'
+
+
+class SupplierMasterCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplierMaster
+        fields = '__all__'
+
+
+class SupplierMasterUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplierMaster
+        exclude = ['supplier_code']
+
+
+class CentralStoreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CentralStore
+        fields = '__all__'
+
+
+class RequirementItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RequirementItem
+        fields = '__all__'
+
+
+class ProcurementRequirementListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProcurementRequirement
+        fields = ['id', 'requirement_number', 'title', 'status', 'urgency', 'requirement_date', 'required_by_date', 'central_store']
+
+
+class ProcurementRequirementDetailSerializer(serializers.ModelSerializer):
+    items = RequirementItemSerializer(many=True, read_only=True)
+    quotations_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProcurementRequirement
+        fields = '__all__'
+
+    def get_quotations_count(self, obj):
+        return obj.quotations.count()
+
+
+class ProcurementRequirementCreateSerializer(serializers.ModelSerializer):
+    items = RequirementItemSerializer(many=True)
+
+    class Meta:
+        model = ProcurementRequirement
+        fields = '__all__'
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items', [])
+        requirement = ProcurementRequirement.objects.create(**validated_data)
+        for item_data in items_data:
+            RequirementItem.objects.create(requirement=requirement, **item_data)
+        return requirement
+
+
+class QuotationItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuotationItem
+        fields = '__all__'
+
+
+class SupplierQuotationListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplierQuotation
+        fields = ['id', 'quotation_number', 'requirement', 'supplier', 'quotation_date', 'status', 'is_selected']
+
+
+class SupplierQuotationDetailSerializer(serializers.ModelSerializer):
+    items = QuotationItemSerializer(many=True, read_only=True)
+    supplier_details = SupplierMasterDetailSerializer(source='supplier', read_only=True)
+
+    class Meta:
+        model = SupplierQuotation
+        fields = '__all__'
+
+
+class SupplierQuotationCreateSerializer(serializers.ModelSerializer):
+    create_new_supplier = serializers.BooleanField(write_only=True, required=False, default=False)
+    supplier_data = SupplierMasterCreateSerializer(write_only=True, required=False)
+
+    class Meta:
+        model = SupplierQuotation
+        fields = '__all__'
+
+    def create(self, validated_data):
+        create_new_supplier = validated_data.pop('create_new_supplier', False)
+        supplier_data = validated_data.pop('supplier_data', None)
+        if create_new_supplier and supplier_data:
+            supplier = SupplierMaster.objects.create(**supplier_data)
+            validated_data['supplier'] = supplier
+        return super().create(validated_data)
+
+
+class QuotationComparisonSerializer(serializers.Serializer):
+    quotation = SupplierQuotationDetailSerializer()
+
+
+class PurchaseOrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PurchaseOrderItem
+        fields = '__all__'
+
+
+class PurchaseOrderListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PurchaseOrder
+        fields = ['id', 'po_number', 'supplier', 'status', 'po_date', 'expected_delivery_date']
+
+
+class PurchaseOrderDetailSerializer(serializers.ModelSerializer):
+    items = PurchaseOrderItemSerializer(many=True, read_only=True)
+    supplier_details = SupplierMasterDetailSerializer(source='supplier', read_only=True)
+
+    class Meta:
+        model = PurchaseOrder
+        fields = '__all__'
+
+
+class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
+    items = PurchaseOrderItemSerializer(many=True, required=False)
+
+    class Meta:
+        model = PurchaseOrder
+        fields = '__all__'
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items', [])
+        po = PurchaseOrder.objects.create(**validated_data)
+        for item_data in items_data:
+            PurchaseOrderItem.objects.create(purchase_order=po, **item_data)
+        return po
+
+
+class GoodsReceiptItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GoodsReceiptItem
+        fields = '__all__'
+
+
+class GoodsReceiptNoteListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GoodsReceiptNote
+        fields = ['id', 'grn_number', 'purchase_order', 'status', 'receipt_date']
+
+
+class GoodsReceiptNoteDetailSerializer(serializers.ModelSerializer):
+    items = GoodsReceiptItemSerializer(many=True, read_only=True)
+    inspection = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = GoodsReceiptNote
+        fields = '__all__'
+
+
+class GoodsReceiptNoteCreateSerializer(serializers.ModelSerializer):
+    items = GoodsReceiptItemSerializer(many=True, required=False)
+
+    class Meta:
+        model = GoodsReceiptNote
+        fields = '__all__'
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items', [])
+        grn = GoodsReceiptNote.objects.create(**validated_data)
+        for item_data in items_data:
+            GoodsReceiptItem.objects.create(grn=grn, **item_data)
+        return grn
+
+
+class InspectionNoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InspectionNote
+        fields = '__all__'
+
+
+class IndentItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IndentItem
+        fields = '__all__'
+
+
+class StoreIndentListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StoreIndent
+        fields = ['id', 'indent_number', 'college', 'status', 'priority', 'indent_date']
+
+
+class StoreIndentDetailSerializer(serializers.ModelSerializer):
+    items = IndentItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = StoreIndent
+        fields = '__all__'
+
+
+class StoreIndentCreateSerializer(serializers.ModelSerializer):
+    items = IndentItemSerializer(many=True)
+
+    class Meta:
+        model = StoreIndent
+        fields = '__all__'
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items', [])
+        indent = StoreIndent.objects.create(**validated_data)
+        for item_data in items_data:
+            IndentItem.objects.create(indent=indent, **item_data)
+        return indent
+
+
+class MaterialIssueItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MaterialIssueItem
+        fields = '__all__'
+
+
+class MaterialIssueNoteListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MaterialIssueNote
+        fields = ['id', 'min_number', 'indent', 'status', 'issue_date']
+
+
+class MaterialIssueNoteDetailSerializer(serializers.ModelSerializer):
+    items = MaterialIssueItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = MaterialIssueNote
+        fields = '__all__'
+
+
+class MaterialIssueNoteCreateSerializer(serializers.ModelSerializer):
+    items = MaterialIssueItemSerializer(many=True, required=False)
+
+    class Meta:
+        model = MaterialIssueNote
+        fields = '__all__'
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items', [])
+        min_note = MaterialIssueNote.objects.create(**validated_data)
+        for item_data in items_data:
+            MaterialIssueItem.objects.create(material_issue=min_note, **item_data)
+        return min_note
+
+
+class CentralStoreInventorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CentralStoreInventory
+        fields = '__all__'
+
+
+class InventoryTransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InventoryTransaction
+        fields = '__all__'
+
+
+class StockSummarySerializer(serializers.Serializer):
+    central_store = serializers.IntegerField()
+    total_items = serializers.IntegerField()
+    total_quantity = serializers.IntegerField()
