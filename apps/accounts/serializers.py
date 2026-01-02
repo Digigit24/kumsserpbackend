@@ -189,8 +189,8 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         return value.lower()
 
 
-class PasswordChangeSerializer(serializers.Serializer):
-    """Serializer for password change."""
+class CustomPasswordChangeSerializer(serializers.Serializer):
+    """Serializer for custom password change with confirmation."""
     old_password = serializers.CharField(
         required=True,
         write_only=True,
@@ -660,21 +660,21 @@ class UserProfileSerializer(TenantAuditMixin, serializers.ModelSerializer):
 # ============================================================================
 
 
-class BulkDeleteSerializer(serializers.Serializer):
-    """Serializer for bulk delete operations."""
+class UserBulkDeleteSerializer(serializers.Serializer):
+    """Serializer for bulk user delete operations (uses UUIDs)."""
     ids = serializers.ListField(
         child=serializers.UUIDField(),
         min_length=1,
-        help_text="List of UUIDs to delete"
+        help_text="List of user UUIDs to delete"
     )
 
 
-class BulkActivateSerializer(serializers.Serializer):
-    """Serializer for bulk activate/deactivate operations."""
+class UserBulkActivateSerializer(serializers.Serializer):
+    """Serializer for bulk user activate/deactivate operations (uses UUIDs)."""
     ids = serializers.ListField(
         child=serializers.UUIDField(),
         min_length=1,
-        help_text="List of UUIDs to activate/deactivate"
+        help_text="List of user UUIDs to activate/deactivate"
     )
     is_active = serializers.BooleanField(help_text="Set active status")
 

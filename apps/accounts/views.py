@@ -30,7 +30,7 @@ from .serializers import (
     UserListSerializer,
     UserCreateSerializer,
     UserUpdateSerializer,
-    PasswordChangeSerializer,
+    CustomPasswordChangeSerializer,
     TokenWithUserSerializer,
     RoleSerializer,
     RoleListSerializer,
@@ -38,8 +38,8 @@ from .serializers import (
     DepartmentSerializer,
     DepartmentListSerializer,
     UserProfileSerializer,
-    BulkDeleteSerializer,
-    BulkActivateSerializer,
+    UserBulkDeleteSerializer,
+    UserBulkActivateSerializer,
     BulkUserTypeUpdateSerializer,
 )
 from apps.core.mixins import CollegeScopedModelViewSet, CollegeScopedReadOnlyModelViewSet
@@ -218,7 +218,7 @@ class UserViewSet(CollegeScopedModelViewSet):
         if self.action in ['update', 'partial_update']:
             return UserUpdateSerializer
         if self.action == 'change_password':
-            return PasswordChangeSerializer
+            return CustomPasswordChangeSerializer
         return UserSerializer
 
     def perform_destroy(self, instance):
@@ -241,13 +241,13 @@ class UserViewSet(CollegeScopedModelViewSet):
     @extend_schema(
         summary="Change password",
         description="Change the password for the current user.",
-        request=PasswordChangeSerializer,
+        request=CustomPasswordChangeSerializer,
         tags=['Users']
     )
     @action(detail=False, methods=['post'])
     def change_password(self, request):
         """Change password for current user."""
-        serializer = PasswordChangeSerializer(data=request.data, context={'request': request})
+        serializer = CustomPasswordChangeSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         user = request.user
@@ -260,13 +260,13 @@ class UserViewSet(CollegeScopedModelViewSet):
     @extend_schema(
         summary="Bulk delete users",
         description="Soft delete multiple users at once.",
-        request=BulkDeleteSerializer,
+        request=UserBulkDeleteSerializer,
         tags=['Users']
     )
     @action(detail=False, methods=['post'])
     def bulk_delete(self, request):
         """Soft delete multiple users."""
-        serializer = BulkDeleteSerializer(data=request.data)
+        serializer = UserBulkDeleteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         ids = serializer.validated_data['ids']
@@ -283,13 +283,13 @@ class UserViewSet(CollegeScopedModelViewSet):
     @extend_schema(
         summary="Bulk activate/deactivate users",
         description="Activate or deactivate multiple users at once.",
-        request=BulkActivateSerializer,
+        request=UserBulkActivateSerializer,
         tags=['Users']
     )
     @action(detail=False, methods=['post'])
     def bulk_activate(self, request):
         """Bulk activate or deactivate users."""
-        serializer = BulkActivateSerializer(data=request.data)
+        serializer = UserBulkActivateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         ids = serializer.validated_data['ids']
