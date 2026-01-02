@@ -2,6 +2,7 @@
 DRF Serializers for Fees app models.
 """
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 from django.contrib.auth import get_user_model
 
 from .models import (
@@ -76,8 +77,8 @@ class FeeMasterSerializer(serializers.ModelSerializer):
         model = FeeMaster
         fields = [
             'id', 'college', 'college_name', 'program', 'program_name',
-            'academic_year', 'academic_year_name', 'class_obj', 'semester',
-            'fee_type', 'fee_type_name', 'amount', 'due_date', 'is_active'
+            'academic_year', 'academic_year_name', 'semester',
+            'fee_type', 'fee_type_name', 'amount', 'is_active'
         ]
         read_only_fields = ['id', 'college_name', 'program_name', 'academic_year_name', 'fee_type_name']
 
@@ -91,6 +92,7 @@ class StudentDisplaySerializer(serializers.ModelSerializer):
         model = Student
         fields = ['id', 'admission_number', 'student_name', 'first_name', 'last_name']
 
+    @extend_schema_field(serializers.CharField())
     def get_student_name(self, obj):
         return obj.get_full_name()
 
@@ -185,6 +187,7 @@ class FeeInstallmentSerializer(serializers.ModelSerializer):
         model = FeeInstallment
         fields = '__all__'
 
+    @extend_schema_field(serializers.DictField())
     def get_fee_structure_details(self, obj):
         if obj.fee_structure:
             return {
@@ -264,6 +267,7 @@ class FeeReminderSerializer(serializers.ModelSerializer):
         model = FeeReminder
         fields = '__all__'
 
+    @extend_schema_field(serializers.DictField())
     def get_fee_structure_details(self, obj):
         if obj.fee_structure:
             return {

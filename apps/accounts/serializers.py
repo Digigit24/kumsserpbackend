@@ -2,6 +2,7 @@
 DRF Serializers for Accounts app models.
 """
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from dj_rest_auth.serializers import TokenSerializer as DRATokenSerializer
@@ -63,6 +64,7 @@ class UserListSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
+    @extend_schema_field(serializers.UUIDField(allow_null=True))
     def get_teacher_id(self, obj):
         """Get teacher profile ID if user is a teacher."""
         if hasattr(obj, 'teacher_profile') and obj.teacher_profile:
@@ -104,12 +106,14 @@ class UserSerializer(serializers.ModelSerializer):
             'password': {'write_only': True},
         }
 
+    @extend_schema_field(serializers.UUIDField(allow_null=True))
     def get_teacher_id(self, obj):
         """Get teacher profile ID if user is a teacher."""
         if hasattr(obj, 'teacher_profile') and obj.teacher_profile:
             return obj.teacher_profile.id
         return None
 
+    @extend_schema_field(serializers.UUIDField(allow_null=True))
     def get_student_id(self, obj):
         """Get student profile ID if user is a student."""
         if hasattr(obj, 'student_profile') and obj.student_profile:
@@ -252,6 +256,7 @@ class TokenWithUserSerializer(DRATokenSerializer):
             'user_profile'
         ]
 
+    @extend_schema_field(serializers.CharField())
     def get_message(self, obj):
         """Return a success message."""
         user = getattr(obj, 'user', None)
@@ -259,6 +264,7 @@ class TokenWithUserSerializer(DRATokenSerializer):
             return f"Welcome back, {user.get_full_name()}! Login successful."
         return "Login successful"
 
+    @extend_schema_field(serializers.IntegerField(allow_null=True))
     def get_college_id(self, obj):
         """Return the user's primary college ID."""
         user = getattr(obj, 'user', None)
@@ -269,6 +275,7 @@ class TokenWithUserSerializer(DRATokenSerializer):
             return 0
         return user.college_id
 
+    @extend_schema_field(serializers.ListField(child=serializers.IntegerField()))
     def get_tenant_ids(self, obj):
         """
         Return list of all college IDs the user has access to.
@@ -303,6 +310,7 @@ class TokenWithUserSerializer(DRATokenSerializer):
 
         return tenant_ids if tenant_ids else [0] if (user.is_superuser or user.is_staff) else []
 
+    @extend_schema_field(CollegeBasicSerializer(many=True))
     def get_accessible_colleges(self, obj):
         """
         Return detailed information about all colleges the user can access.
@@ -325,6 +333,7 @@ class TokenWithUserSerializer(DRATokenSerializer):
         )
         return CollegeBasicSerializer(colleges, many=True).data
 
+    @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_user_roles(self, obj):
         """
         Return all active roles assigned to the user.
@@ -373,6 +382,7 @@ class TokenWithUserSerializer(DRATokenSerializer):
 
         return roles_data
 
+    @extend_schema_field(serializers.DictField())
     def get_user_permissions(self, obj):
         """
         Return user permissions using the new KUMSS permission system.
@@ -400,6 +410,7 @@ class TokenWithUserSerializer(DRATokenSerializer):
 
         return permissions
 
+    @extend_schema_field(serializers.DictField(allow_null=True))
     def get_user_profile(self, obj):
         """
         Return the user's profile information if it exists.
