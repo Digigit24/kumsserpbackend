@@ -38,7 +38,7 @@ from .serializers import (
 
 
 class FeeGroupViewSet(CollegeScopedModelViewSet):
-    queryset = FeeGroup.objects.all_colleges()
+    queryset = FeeGroup.objects.select_related('college').all_colleges()
     serializer_class = FeeGroupSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -49,7 +49,7 @@ class FeeGroupViewSet(CollegeScopedModelViewSet):
 
 
 class FeeTypeViewSet(CollegeScopedModelViewSet):
-    queryset = FeeType.objects.all_colleges()
+    queryset = FeeType.objects.select_related('college', 'fee_group').all_colleges()
     serializer_class = FeeTypeSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -60,7 +60,7 @@ class FeeTypeViewSet(CollegeScopedModelViewSet):
 
 
 class FeeMasterViewSet(CollegeScopedModelViewSet):
-    queryset = FeeMaster.objects.all_colleges()
+    queryset = FeeMaster.objects.select_related('college', 'program', 'academic_year', 'fee_type').all_colleges()
     serializer_class = FeeMasterSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
