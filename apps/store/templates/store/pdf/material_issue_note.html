@@ -1,9 +1,178 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>Material Issue Note</title></head>
+<head>
+    <meta charset="utf-8">
+    <title>Material Issue Note - {{ min.min_number }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
+        .header { text-align: center; border-bottom: 3px solid #27ae60; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { margin: 10px 0; color: #27ae60; }
+        .header p { margin: 5px 0; color: #7f8c8d; }
+        .section { margin-top: 25px; }
+        .section h3 { color: #27ae60; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px; }
+        .info-box { border: 1px solid #ecf0f1; padding: 15px; border-radius: 5px; }
+        .info-box h4 { margin: 0 0 10px 0; color: #27ae60; font-size: 14px; }
+        .info-row { margin: 5px 0; }
+        .info-label { font-weight: bold; display: inline-block; width: 140px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #27ae60; color: white; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .status-badge { display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .status-prepared { background-color: #3498db; color: white; }
+        .status-dispatched { background-color: #f39c12; color: white; }
+        .status-received { background-color: #27ae60; color: white; }
+        .signature-section { margin-top: 80px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        .signature-box { text-align: center; }
+        .signature-line { border-top: 1px solid #333; width: 150px; margin: 0 auto; padding-top: 5px; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #ecf0f1; text-align: center; color: #7f8c8d; font-size: 12px; }
+        .notes-box { background-color: #f8f9fa; padding: 15px; border-left: 4px solid #27ae60; margin-top: 15px; }
+    </style>
+</head>
 <body>
-  <h1>Material Issue {{ min.min_number }}</h1>
-  <p>Indent: {{ min.indent }}</p>
-  <p>Receiving College: {{ min.receiving_college }}</p>
+    <div class="header">
+        <h1>MATERIAL ISSUE NOTE</h1>
+        <p><strong>{{ min.min_number }}</strong></p>
+        <p>Issue Date: {{ min.issue_date|date:"d M, Y" }}</p>
+        <p><span class="status-badge status-{{ min.status }}">{{ min.get_status_display }}</span></p>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-box">
+            <h4>From: Central Store</h4>
+            <div class="info-row">
+                <span class="info-label">Store Name:</span>
+                <span>{{ min.central_store.name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Store Code:</span>
+                <span>{{ min.central_store.code }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Address:</span>
+                <span>{{ min.central_store.address_line1 }}, {{ min.central_store.city }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Contact:</span>
+                <span>{{ min.central_store.contact_phone }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Issued By:</span>
+                <span>{{ min.issued_by.get_full_name|default:min.issued_by.username }}</span>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h4>To: College Store</h4>
+            <div class="info-row">
+                <span class="info-label">College:</span>
+                <span>{{ min.receiving_college.name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Indent Number:</span>
+                <span>{{ min.indent.indent_number }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Indent Date:</span>
+                <span>{{ min.indent.indent_date|date:"d M, Y" }}</span>
+            </div>
+            {% if min.received_by %}
+            <div class="info-row">
+                <span class="info-label">Received By:</span>
+                <span>{{ min.received_by.get_full_name|default:min.received_by.username }}</span>
+            </div>
+            {% endif %}
+            {% if min.receipt_date %}
+            <div class="info-row">
+                <span class="info-label">Receipt Date:</span>
+                <span>{{ min.receipt_date|date:"d M, Y H:i" }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if min.transport_mode or min.vehicle_number %}
+    <div class="section">
+        <h3>Transportation Details</h3>
+        <div class="info-row">
+            {% if min.transport_mode %}<span class="info-label">Mode:</span> <span>{{ min.transport_mode }}</span>{% endif %}
+        </div>
+        <div class="info-row">
+            {% if min.vehicle_number %}<span class="info-label">Vehicle Number:</span> <span>{{ min.vehicle_number }}</span>{% endif %}
+        </div>
+        <div class="info-row">
+            {% if min.driver_name %}<span class="info-label">Driver:</span> <span>{{ min.driver_name }} ({{ min.driver_contact }})</span>{% endif %}
+        </div>
+        {% if min.dispatch_date %}
+        <div class="info-row">
+            <span class="info-label">Dispatch Date:</span>
+            <span>{{ min.dispatch_date|date:"d M, Y H:i" }}</span>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="section">
+        <h3>Issued Items</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>S.No</th>
+                    <th>Item Description</th>
+                    <th class="text-right">Issued Qty</th>
+                    <th class="text-center">Unit</th>
+                    <th>Batch Number</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in min.items.all %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.item.name }}</td>
+                    <td class="text-right">{{ item.issued_quantity }}</td>
+                    <td class="text-center">{{ item.unit }}</td>
+                    <td>{{ item.batch_number|default:"-" }}</td>
+                    <td>{{ item.remarks|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if min.internal_notes %}
+    <div class="notes-box">
+        <strong>Internal Notes:</strong> {{ min.internal_notes }}
+    </div>
+    {% endif %}
+
+    {% if min.receipt_confirmation_notes %}
+    <div class="notes-box">
+        <strong>Receipt Confirmation Notes:</strong> {{ min.receipt_confirmation_notes }}
+    </div>
+    {% endif %}
+
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="signature-line">Prepared By</div>
+            <p style="margin-top: 5px; font-size: 11px;">Central Store Manager</p>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line">Dispatched By</div>
+            <p style="margin-top: 5px; font-size: 11px;">{{ min.issued_by.get_full_name|default:min.issued_by.username }}</p>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line">Received By</div>
+            <p style="margin-top: 5px; font-size: 11px;">{{ min.receiving_college.name }}</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>This is a computer-generated document. No signature is required.</p>
+        <p>MIN Number: {{ min.min_number }} | Status: {{ min.get_status_display }}</p>
+    </div>
 </body>
 </html>

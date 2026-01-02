@@ -232,6 +232,29 @@ class CentralStoreViewSet(viewsets.ModelViewSet):
         total_qty = sum(item.quantity_on_hand for item in qs)
         return Response({'central_store': store.id, 'total_items': total_items, 'total_quantity': total_qty})
 
+    @action(detail=True, methods=['get'], permission_classes=[IsCentralStoreManager])
+    def low_stock_alerts(self, request, pk=None):
+        """Phase 9.10: GET items below reorder point"""
+        store = self.get_object()
+        qs = CentralStoreInventory.objects.filter(
+            central_store=store,
+            quantity_available__lte=models.F('reorder_point')
+        )
+        serializer = CentralStoreInventorySerializer(qs, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['get'], permission_classes=[IsCentralStoreManager])
+    def pending_indents(self, request, pk=None):
+        """Phase 9.10: GET all pending indent approvals"""
+        store = self.get_object()
+        indents = StoreIndent.objects.filter(
+            central_store=store,
+            status='pending_approval'
+        )
+        from .serializers import StoreIndentListSerializer
+        serializer = StoreIndentListSerializer(indents, many=True)
+        return Response(serializer.data)
+
 
 class ProcurementRequirementViewSet(viewsets.ModelViewSet):
     queryset = ProcurementRequirement.objects.all().select_related('central_store')
@@ -260,6 +283,19 @@ class ProcurementRequirementViewSet(viewsets.ModelViewSet):
         obj = self.get_object()
         serializer = SupplierQuotationListSerializer(obj.quotations.all(), many=True)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
+    def compare_quotations(self, request, pk=None):
+        """Phase 9.3: GET side-by-side comparison data"""
+        obj = self.get_object()
+        quotations = obj.quotations.all()
+        comparison_data = []
+        for quot in quotations:
+            comparison_data.append({
+                'quotation': SupplierQuotationDetailSerializer(quot).data,
+                'supplier': SupplierMasterDetailSerializer(quot.supplier).data,
+            })
+        return Response(comparison_data)
 
     @action(detail=True, methods=['post'], permission_classes=[IsCEOOrFinance])
     def select_quotation(self, request, pk=None):
@@ -417,6 +453,32 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         indent = self.get_object()
         indent.reject(user=request.user, reason=request.data.get('reason'))
         return Response({'status': indent.status})
+
+    @action(detail=False, methods=['get'], permission_classes=[CanApproveIndent])
+    def pending_approvals(self, request):
+        """Phase 9.8: For central manager, list pending indents"""
+        indents = StoreIndent.objects.filter(status='pending_approval')
+        serializer = self.get_serializer(indents, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
+    def issue_materials(self, request, pk=None):
+        """Phase 9.8: Create MaterialIssueNote (only after approval)"""
+        indent = self.get_object()
+        if indent.status != 'approved':
+            return Response(
+                {'detail': 'Indent must be approved before issuing materials'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        # Create MaterialIssueNote
+        issue_data = request.data.copy()
+        issue_data['indent'] = indent.id
+        issue_data['central_store'] = indent.central_store.id
+        issue_data['receiving_college'] = indent.college.id
+        serializer = MaterialIssueNoteCreateSerializer(data=issue_data)
+        serializer.is_valid(raise_exception=True)
+        min_note = serializer.save()
+        return Response(MaterialIssueNoteDetailSerializer(min_note).data)
 
 
 class MaterialIssueNoteViewSet(viewsets.ModelViewSet):

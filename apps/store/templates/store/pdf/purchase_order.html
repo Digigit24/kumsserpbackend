@@ -1,10 +1,157 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>Purchase Order</title></head>
+<head>
+    <meta charset="utf-8">
+    <title>Purchase Order - {{ po.po_number }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
+        .header { text-align: center; border-bottom: 3px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { margin: 10px 0; color: #2c3e50; }
+        .header p { margin: 5px 0; color: #7f8c8d; }
+        .section { margin-top: 25px; }
+        .section h3 { color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; }
+        .info-row { display: flex; margin: 8px 0; }
+        .info-label { font-weight: bold; width: 150px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #3498db; color: white; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .total-row { background-color: #ecf0f1 !important; font-weight: bold; }
+        .text-right { text-align: right; }
+        .signature-section { margin-top: 80px; display: flex; justify-content: space-between; }
+        .signature-box { text-align: center; }
+        .signature-line { border-top: 1px solid #333; width: 200px; margin: 0 auto; padding-top: 5px; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #ecf0f1; text-align: center; color: #7f8c8d; font-size: 12px; }
+    </style>
+</head>
 <body>
-  <h1>Purchase Order {{ po.po_number }}</h1>
-  <p>Supplier: {{ po.supplier }}</p>
-  <p>Central Store: {{ po.central_store }}</p>
-  <p>Total: {{ po.grand_total }}</p>
+    <div class="header">
+        <h1>PURCHASE ORDER</h1>
+        <p><strong>{{ po.po_number }}</strong></p>
+        <p>Date: {{ po.po_date|date:"d M, Y" }}</p>
+    </div>
+
+    <div class="section">
+        <h3>Supplier Details</h3>
+        <div class="info-row">
+            <span class="info-label">Name:</span>
+            <span>{{ po.supplier.name }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Code:</span>
+            <span>{{ po.supplier.supplier_code }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Address:</span>
+            <span>{{ po.supplier.get_full_address }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">GSTIN:</span>
+            <span>{{ po.supplier.gstin|default:"N/A" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Phone:</span>
+            <span>{{ po.supplier.phone }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Email:</span>
+            <span>{{ po.supplier.email|default:"N/A" }}</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Delivery Address</h3>
+        <div class="info-row">
+            <span>{{ po.delivery_address_line1 }}{% if po.delivery_address_line2 %}, {{ po.delivery_address_line2 }}{% endif %}</span>
+        </div>
+        <div class="info-row">
+            <span>{{ po.delivery_city }}, {{ po.delivery_state }} - {{ po.delivery_pincode }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Expected Delivery:</span>
+            <span>{{ po.expected_delivery_date|date:"d M, Y" }}</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Items</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>S.No</th>
+                    <th>Description</th>
+                    <th>HSN</th>
+                    <th class="text-right">Qty</th>
+                    <th>Unit</th>
+                    <th class="text-right">Rate</th>
+                    <th class="text-right">Tax %</th>
+                    <th class="text-right">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in po.items.all %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.item_description }}</td>
+                    <td>{{ item.hsn_code|default:"-" }}</td>
+                    <td class="text-right">{{ item.quantity }}</td>
+                    <td>{{ item.unit }}</td>
+                    <td class="text-right">₹{{ item.unit_price }}</td>
+                    <td class="text-right">{{ item.tax_rate }}%</td>
+                    <td class="text-right">₹{{ item.total_amount }}</td>
+                </tr>
+                {% endfor %}
+                <tr class="total-row">
+                    <td colspan="7" class="text-right">Subtotal:</td>
+                    <td class="text-right">₹{{ po.total_amount }}</td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="7" class="text-right">Tax:</td>
+                    <td class="text-right">₹{{ po.tax_amount }}</td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="7" class="text-right"><strong>Grand Total:</strong></td>
+                    <td class="text-right"><strong>₹{{ po.grand_total }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Terms & Conditions</h3>
+        <div class="info-row">
+            <span class="info-label">Payment Terms:</span>
+            <span>{{ po.payment_terms }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Delivery Terms:</span>
+            <span>{{ po.delivery_terms|default:"As per agreement" }}</span>
+        </div>
+        {% if po.special_instructions %}
+        <div class="info-row">
+            <span class="info-label">Special Instructions:</span>
+            <span>{{ po.special_instructions }}</span>
+        </div>
+        {% endif %}
+        {% if po.terms_and_conditions %}
+        <p style="margin-top: 15px;">{{ po.terms_and_conditions }}</p>
+        {% endif %}
+    </div>
+
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="signature-line">Authorized Signatory</div>
+            <p style="margin-top: 5px; font-size: 12px;">Central Store</p>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line">Supplier Signature</div>
+            <p style="margin-top: 5px; font-size: 12px;">{{ po.supplier.name }}</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>This is a computer-generated document. No signature is required.</p>
+        <p>Central Store: {{ po.central_store.name }} | Contact: {{ po.central_store.contact_phone }}</p>
+    </div>
 </body>
 </html>

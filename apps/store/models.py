@@ -19,6 +19,12 @@ from apps.teachers.models import Teacher
 from apps.approvals.models import ApprovalRequest
 from .utils import generate_document_number
 
+# Import S3 storage (SOP requirement)
+try:
+    from .storage import store_file_storage
+except ImportError:
+    store_file_storage = None
+
 
 SUPPLIER_TYPE_CHOICES = [
     ('manufacturer', 'Manufacturer'),
@@ -562,7 +568,7 @@ class SupplierQuotation(AuditModel):
     payment_terms = models.CharField(max_length=200, null=True, blank=True)
     delivery_time_days = models.IntegerField(null=True, blank=True)
     warranty_terms = models.TextField(null=True, blank=True)
-    quotation_file = models.FileField(upload_to='quotations/', null=True, blank=True)
+    quotation_file = models.FileField(upload_to='quotations/', storage=store_file_storage, null=True, blank=True)
     status = models.CharField(max_length=20, choices=[('received', 'Received'), ('under_review', 'Under Review'), ('accepted', 'Accepted'), ('rejected', 'Rejected')], default='received')
     is_selected = models.BooleanField(default=False)
     rejection_reason = models.TextField(null=True, blank=True)
@@ -587,6 +593,10 @@ class SupplierQuotation(AuditModel):
         super().save(*args, **kwargs)
 
     def mark_as_selected(self):
+        # Phase 12.1: Cannot select quotation if requirement not approved
+        if self.requirement and self.requirement.status not in ['approved', 'quotations_received']:
+            raise ValidationError('Cannot select quotation if requirement not approved')
+
         with transaction.atomic():
             SupplierQuotation.objects.filter(requirement=self.requirement).update(is_selected=False, status='rejected')
             self.is_selected = True
@@ -594,6 +604,12 @@ class SupplierQuotation(AuditModel):
             self.save(update_fields=['is_selected', 'status', 'updated_at'])
 
     def clean(self):
+        # Phase 12.1: Cannot create quotation for cancelled/fulfilled requirement
+        if self.requirement and self.requirement.status in ['cancelled', 'fulfilled']:
+            raise ValidationError({
+                'requirement': 'Cannot create quotation for cancelled or fulfilled requirement'
+            })
+
         if self.grand_total and self.total_amount and self.tax_amount is not None:
             expected = (self.total_amount or 0) + (self.tax_amount or 0)
             if self.grand_total != expected:
@@ -644,7 +660,7 @@ class PurchaseOrder(AuditModel):
     special_instructions = models.TextField(null=True, blank=True)
     terms_and_conditions = models.TextField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=PO_STATUS_CHOICES, default='draft')
-    po_document = models.FileField(upload_to='purchase_orders/', null=True, blank=True)
+    po_document = models.FileField(upload_to='purchase_orders/', storage=store_file_storage, null=True, blank=True)
     sent_date = models.DateTimeField(null=True, blank=True)
     acknowledged_date = models.DateTimeField(null=True, blank=True)
     completed_date = models.DateTimeField(null=True, blank=True)
@@ -667,6 +683,24 @@ class PurchaseOrder(AuditModel):
             self.po_number = generate_document_number('PO', PurchaseOrder, field_name='po_date')
         super().save(*args, **kwargs)
 
+    def clean(self):
+        # Phase 12.1: PO total must match quotation total (±2% tolerance)
+        if self.quotation and self.grand_total:
+            tolerance = Decimal('0.02')  # 2% tolerance
+            expected = self.quotation.grand_total
+            if expected > 0:
+                diff = abs(self.grand_total - expected) / expected
+                if diff > tolerance:
+                    raise ValidationError({
+                        'grand_total': f'PO total must match quotation total within 2% (Expected: {expected})'
+                    })
+
+        # Phase 12.1: Cannot create PO without approved requirement
+        if self.requirement and self.requirement.status not in ['approved', 'po_created']:
+            raise ValidationError({
+                'requirement': 'Cannot create PO without approved requirement'
+            })
+
     def send_to_supplier(self):
         self.status = 'sent'
         self.sent_date = timezone.now()
@@ -676,6 +710,21 @@ class PurchaseOrder(AuditModel):
         self.status = 'acknowledged'
         self.acknowledged_date = timezone.now()
         self.save(update_fields=['status', 'acknowledged_date', 'updated_at'])
+
+    def check_fulfillment_status(self):
+        """Phase 3.1: Check if all items received, update status accordingly"""
+        items = self.items.all()
+        if not items:
+            return
+
+        if all(item.pending_quantity == 0 for item in items):
+            self.status = 'fulfilled'
+            self.completed_date = timezone.now()
+            self.save(update_fields=['status', 'completed_date', 'updated_at'])
+        elif any(item.received_quantity > 0 for item in items):
+            if self.status not in ['partially_received', 'fulfilled']:
+                self.status = 'partially_received'
+                self.save(update_fields=['status', 'updated_at'])
 
 
 class PurchaseOrderItem(AuditModel):
@@ -714,11 +763,11 @@ class GoodsReceiptNote(AuditModel):
     invoice_number = models.CharField(max_length=100)
     invoice_date = models.DateField()
     invoice_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    invoice_file = models.FileField(upload_to='grn_invoices/', null=True, blank=True)
+    invoice_file = models.FileField(upload_to='grn_invoices/', storage=store_file_storage, null=True, blank=True)
     delivery_challan_number = models.CharField(max_length=100, null=True, blank=True)
-    delivery_challan_file = models.FileField(upload_to='grn_challans/', null=True, blank=True)
+    delivery_challan_file = models.FileField(upload_to='grn_challans/', storage=store_file_storage, null=True, blank=True)
     lr_number = models.CharField(max_length=100, null=True, blank=True)
-    lr_copy = models.FileField(upload_to='grn_lr/', null=True, blank=True)
+    lr_copy = models.FileField(upload_to='grn_lr/', storage=store_file_storage, null=True, blank=True)
     vehicle_number = models.CharField(max_length=50, null=True, blank=True)
     transporter_name = models.CharField(max_length=200, null=True, blank=True)
     received_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='grns_received')
@@ -745,11 +794,26 @@ class GoodsReceiptNote(AuditModel):
             self.grn_number = generate_document_number('GRN', GoodsReceiptNote, field_name='receipt_date')
         super().save(*args, **kwargs)
 
+    def clean(self):
+        # Phase 12.2: Invoice amount should match PO amount (warning if >5% difference)
+        if self.purchase_order and self.invoice_amount:
+            po_total = self.purchase_order.grand_total
+            if po_total > 0:
+                diff_pct = abs(self.invoice_amount - po_total) / po_total
+                if diff_pct > Decimal('0.05'):  # 5% tolerance
+                    # Note: This is a warning, not a blocking error
+                    import warnings
+                    warnings.warn(f'Invoice amount differs from PO by {diff_pct*100:.1f}%')
+
     def submit_for_inspection(self):
         self.status = 'pending_inspection'
         self.save(update_fields=['status', 'updated_at'])
 
     def post_to_inventory(self):
+        # Phase 12.2: Cannot post to inventory without inspection approval
+        if self.status not in ['approved', 'inspected']:
+            raise ValidationError('Cannot post to inventory without inspection approval')
+
         self.status = 'posted_to_inventory'
         self.posted_to_inventory_date = timezone.now()
         self.save(update_fields=['status', 'posted_to_inventory_date', 'updated_at'])
@@ -776,8 +840,16 @@ class GoodsReceiptItem(AuditModel):
         db_table = 'goods_receipt_item'
 
     def clean(self):
+        # Phase 12.2: Accepted + Rejected must equal Received quantity
         if (self.accepted_quantity or 0) + (self.rejected_quantity or 0) != (self.received_quantity or 0):
             raise ValidationError('Received quantity must equal accepted plus rejected')
+
+        # Phase 12.2: Cannot receive quantity > ordered quantity
+        if self.po_item and self.received_quantity:
+            if self.received_quantity > self.po_item.quantity:
+                raise ValidationError({
+                    'received_quantity': f'Cannot receive more than ordered quantity ({self.po_item.quantity})'
+                })
 
 
 class InspectionNote(AuditModel):
@@ -809,7 +881,7 @@ class StoreIndent(CollegeScopedModel):
     approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='indents_approved')
     approved_date = models.DateTimeField(null=True, blank=True)
     rejection_reason = models.TextField(null=True, blank=True)
-    attachments = models.FileField(upload_to='indent_attachments/', null=True, blank=True)
+    attachments = models.FileField(upload_to='indent_attachments/', storage=store_file_storage, null=True, blank=True)
     remarks = models.TextField(null=True, blank=True)
 
     class Meta:
@@ -829,6 +901,13 @@ class StoreIndent(CollegeScopedModel):
         if not self.indent_number:
             self.indent_number = generate_document_number('IND', StoreIndent, field_name='indent_date')
         super().save(*args, **kwargs)
+
+    def clean(self):
+        # Phase 12.3: Must provide justification for urgent priority
+        if self.priority == 'urgent' and not self.justification:
+            raise ValidationError({
+                'justification': 'Justification is required for urgent priority indents'
+            })
 
     def submit(self):
         self.status = 'pending_approval'
@@ -869,6 +948,30 @@ class IndentItem(AuditModel):
     class Meta:
         db_table = 'indent_item'
 
+    def clean(self):
+        # Phase 12.3: Cannot approve quantity > requested quantity
+        if self.approved_quantity and self.requested_quantity:
+            if self.approved_quantity > self.requested_quantity:
+                raise ValidationError({
+                    'approved_quantity': 'Cannot approve more than requested quantity'
+                })
+
+        # Phase 12.3: Cannot issue if central store stock insufficient
+        if self.indent and self.indent.central_store and self.central_store_item and self.requested_quantity:
+            try:
+                inventory = CentralStoreInventory.objects.get(
+                    central_store=self.indent.central_store,
+                    item=self.central_store_item
+                )
+                if self.requested_quantity > inventory.quantity_available:
+                    raise ValidationError({
+                        'requested_quantity': f'Insufficient stock. Available: {inventory.quantity_available}'
+                    })
+            except CentralStoreInventory.DoesNotExist:
+                raise ValidationError({
+                    'central_store_item': 'Item not available in central store inventory'
+                })
+
     def save(self, *args, **kwargs):
         self.pending_quantity = max(0, (self.approved_quantity or 0) - (self.issued_quantity or 0))
         super().save(*args, **kwargs)
@@ -893,7 +996,7 @@ class MaterialIssueNote(AuditModel):
     status = models.CharField(max_length=20, choices=[('prepared', 'Prepared'), ('dispatched', 'Dispatched'), ('in_transit', 'In Transit'), ('received', 'Received'), ('cancelled', 'Cancelled')], default='prepared')
     dispatch_date = models.DateTimeField(null=True, blank=True)
     receipt_date = models.DateTimeField(null=True, blank=True)
-    min_document = models.FileField(upload_to='material_issue_notes/', null=True, blank=True)
+    min_document = models.FileField(upload_to='material_issue_notes/', storage=store_file_storage, null=True, blank=True)
     internal_notes = models.TextField(null=True, blank=True)
     receipt_confirmation_notes = models.TextField(null=True, blank=True)
 
@@ -940,6 +1043,14 @@ class MaterialIssueItem(AuditModel):
     class Meta:
         db_table = 'material_issue_item'
 
+    def clean(self):
+        # Phase 12.3: Cannot issue quantity > approved quantity
+        if self.indent_item and self.issued_quantity:
+            if self.issued_quantity > self.indent_item.approved_quantity:
+                raise ValidationError({
+                    'issued_quantity': f'Cannot issue more than approved quantity ({self.indent_item.approved_quantity})'
+                })
+
 
 class CentralStoreInventory(AuditModel):
     central_store = models.ForeignKey(CentralStore, on_delete=models.CASCADE, related_name='inventory')
@@ -966,9 +1077,29 @@ class CentralStoreInventory(AuditModel):
         self.quantity_available = (self.quantity_on_hand or 0) - (self.quantity_allocated or 0)
         super().save(*args, **kwargs)
 
+    def clean(self):
+        # Phase 12.4: Stock cannot go negative
+        if self.quantity_on_hand is not None and self.quantity_on_hand < 0:
+            raise ValidationError({
+                'quantity_on_hand': 'Stock cannot go negative'
+            })
+
+        # Phase 12.4: Allocation + Issue ≤ On-hand quantity
+        if self.quantity_allocated is not None and self.quantity_on_hand is not None:
+            if self.quantity_allocated > self.quantity_on_hand:
+                raise ValidationError({
+                    'quantity_allocated': 'Allocated quantity cannot exceed on-hand quantity'
+                })
+
     def update_stock(self, delta, transaction_type, reference=None, performed_by=None):
         before = self.quantity_on_hand or 0
-        self.quantity_on_hand = before + delta
+        new_quantity = before + delta
+
+        # Phase 12.4: Stock cannot go negative
+        if new_quantity < 0:
+            raise ValidationError(f'Insufficient stock. Current: {before}, Requested: {abs(delta)}')
+
+        self.quantity_on_hand = new_quantity
         self.save(update_fields=['quantity_on_hand', 'quantity_available', 'updated_at'])
         reference_type = None
         reference_id = None

@@ -267,9 +267,25 @@ class InspectionNoteSerializer(serializers.ModelSerializer):
 
 
 class IndentItemSerializer(serializers.ModelSerializer):
+    available_stock_in_central = serializers.SerializerMethodField()
+
     class Meta:
         model = IndentItem
         fields = '__all__'
+
+    def get_available_stock_in_central(self, obj):
+        """Phase 8.6: Include method field available_stock_in_central"""
+        try:
+            if obj.indent and obj.indent.central_store and obj.central_store_item:
+                from .models import CentralStoreInventory
+                inventory = CentralStoreInventory.objects.get(
+                    central_store=obj.indent.central_store,
+                    item=obj.central_store_item
+                )
+                return inventory.quantity_available
+        except Exception:
+            return 0
+        return None
 
 
 class StoreIndentListSerializer(serializers.ModelSerializer):

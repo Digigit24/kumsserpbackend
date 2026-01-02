@@ -25,6 +25,13 @@ from .views import (
     CentralStoreInventoryViewSet,
     InventoryTransactionViewSet,
 )
+from .reports_views import (
+    procurement_pipeline,
+    transfer_history,
+    stock_valuation,
+    supplier_performance,
+    indent_fulfillment_rate,
+)
 
 router = DefaultRouter()
 router.register(r'categories', StoreCategoryViewSet, basename='storecategory')
@@ -50,4 +57,10 @@ router.register(r'inventory-transactions', InventoryTransactionViewSet, basename
 
 urlpatterns = [
     path('', include(router.urls)),
+    # Phase 9.12: Reports endpoints
+    path('reports/procurement-pipeline/', procurement_pipeline, name='procurement-pipeline'),
+    path('reports/transfer-history/', transfer_history, name='transfer-history'),
+    path('reports/stock-valuation/', stock_valuation, name='stock-valuation'),
+    path('reports/supplier-performance/', supplier_performance, name='supplier-performance'),
+    path('reports/indent-fulfillment-rate/', indent_fulfillment_rate, name='indent-fulfillment-rate'),
 ]
