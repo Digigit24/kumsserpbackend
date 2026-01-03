@@ -761,9 +761,10 @@ class StudentPromotionViewSet(RelatedCollegeScopedModelViewSet):
         tags=['Students - Certificates']
     ),
 )
-class CertificateViewSet(CollegeScopedModelViewSet):
+class CertificateViewSet(RelatedCollegeScopedModelViewSet):
     """ViewSet for managing certificates."""
-    queryset = Certificate.objects.all()
+    queryset = Certificate.objects.select_related('student')
+    related_college_lookup = 'student__college_id'
     serializer_class = CertificateSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
