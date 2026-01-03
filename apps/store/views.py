@@ -481,9 +481,9 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         return Response(MaterialIssueNoteDetailSerializer(min_note).data)
 
 
-class MaterialIssueNoteViewSet(viewsets.ModelViewSet):
-    queryset = MaterialIssueNote.objects.all().select_related('indent', 'central_store', 'receiving_college')
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+class MaterialIssueNoteViewSet(RelatedCollegeScopedModelViewSet):
+    queryset = MaterialIssueNote.objects.select_related('indent', 'central_store', 'receiving_college')
+    related_college_lookup = 'receiving_college_id'
     filterset_fields = ['status', 'receiving_college', 'issue_date']
     search_fields = ['min_number']
     ordering_fields = ['issue_date', 'created_at']
