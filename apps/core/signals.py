@@ -16,12 +16,40 @@ from .utils import get_current_request, get_client_ip
 
 def get_college_from_instance(instance):
     """Extract college from instance for activity logging."""
-    if hasattr(instance, 'college_id'):
+    # Direct college_id
+    if hasattr(instance, 'college_id') and instance.college_id:
         return instance.college_id
-    elif hasattr(instance, 'college'):
+    # Direct college FK
+    if hasattr(instance, 'college') and instance.college:
         return instance.college
-    elif hasattr(instance, 'student') and hasattr(instance.student, 'college_id'):
-        return instance.student.college_id
+    # Through student
+    if hasattr(instance, 'student') and instance.student:
+        if hasattr(instance.student, 'college_id'):
+            return instance.student.college_id
+        if hasattr(instance.student, 'college'):
+            return instance.student.college
+    # Through teacher
+    if hasattr(instance, 'teacher') and instance.teacher:
+        if hasattr(instance.teacher, 'college_id'):
+            return instance.teacher.college_id
+        if hasattr(instance.teacher, 'college'):
+            return instance.teacher.college
+    # Through class_instance
+    if hasattr(instance, 'class_instance') and instance.class_instance:
+        if hasattr(instance.class_instance, 'college_id'):
+            return instance.class_instance.college_id
+    # Through current_class
+    if hasattr(instance, 'current_class') and instance.current_class:
+        if hasattr(instance.current_class, 'college_id'):
+            return instance.current_class.college_id
+    # Through exam
+    if hasattr(instance, 'exam') and instance.exam:
+        if hasattr(instance.exam, 'college_id'):
+            return instance.exam.college_id
+    # User model - use their assigned college
+    if instance.__class__.__name__ == 'User' and hasattr(instance, 'college_id'):
+        return instance.college_id
+
     return None
 
 
