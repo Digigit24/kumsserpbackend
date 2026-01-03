@@ -113,6 +113,12 @@ class RequirementItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class RequirementItemCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RequirementItem
+        exclude = ['requirement']
+
+
 class ProcurementRequirementListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProcurementRequirement
@@ -132,7 +138,7 @@ class ProcurementRequirementDetailSerializer(serializers.ModelSerializer):
 
 
 class ProcurementRequirementCreateSerializer(serializers.ModelSerializer):
-    items = RequirementItemSerializer(many=True)
+    items = RequirementItemCreateSerializer(many=True)
 
     class Meta:
         model = ProcurementRequirement
@@ -150,6 +156,12 @@ class QuotationItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuotationItem
         fields = '__all__'
+
+
+class QuotationItemCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuotationItem
+        exclude = ['quotation']
 
 
 class SupplierQuotationListSerializer(serializers.ModelSerializer):
@@ -194,6 +206,12 @@ class PurchaseOrderItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class PurchaseOrderItemCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PurchaseOrderItem
+        exclude = ['purchase_order']
+
+
 class PurchaseOrderListSerializer(serializers.ModelSerializer):
     class Meta:
         model = PurchaseOrder
@@ -210,7 +228,7 @@ class PurchaseOrderDetailSerializer(serializers.ModelSerializer):
 
 
 class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
-    items = PurchaseOrderItemSerializer(many=True, required=False)
+    items = PurchaseOrderItemCreateSerializer(many=True, required=False)
 
     class Meta:
         model = PurchaseOrder
@@ -230,6 +248,12 @@ class GoodsReceiptItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class GoodsReceiptItemCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GoodsReceiptItem
+        exclude = ['grn']
+
+
 class GoodsReceiptNoteListSerializer(serializers.ModelSerializer):
     class Meta:
         model = GoodsReceiptNote
@@ -246,7 +270,7 @@ class GoodsReceiptNoteDetailSerializer(serializers.ModelSerializer):
 
 
 class GoodsReceiptNoteCreateSerializer(serializers.ModelSerializer):
-    items = GoodsReceiptItemSerializer(many=True, required=False)
+    items = GoodsReceiptItemCreateSerializer(many=True, required=False)
 
     class Meta:
         model = GoodsReceiptNote
@@ -288,6 +312,12 @@ class IndentItemSerializer(serializers.ModelSerializer):
         return None
 
 
+class IndentItemCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IndentItem
+        exclude = ['indent']
+
+
 class StoreIndentListSerializer(serializers.ModelSerializer):
     class Meta:
         model = StoreIndent
@@ -303,7 +333,7 @@ class StoreIndentDetailSerializer(serializers.ModelSerializer):
 
 
 class StoreIndentCreateSerializer(serializers.ModelSerializer):
-    items = IndentItemSerializer(many=True)
+    items = IndentItemCreateSerializer(many=True)
 
     class Meta:
         model = StoreIndent
@@ -323,6 +353,12 @@ class MaterialIssueItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class MaterialIssueItemCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MaterialIssueItem
+        exclude = ['material_issue']
+
+
 class MaterialIssueNoteListSerializer(serializers.ModelSerializer):
     class Meta:
         model = MaterialIssueNote
@@ -338,7 +374,7 @@ class MaterialIssueNoteDetailSerializer(serializers.ModelSerializer):
 
 
 class MaterialIssueNoteCreateSerializer(serializers.ModelSerializer):
-    items = MaterialIssueItemSerializer(many=True, required=False)
+    items = MaterialIssueItemCreateSerializer(many=True, required=False)
 
     class Meta:
         model = MaterialIssueNote
