@@ -313,6 +313,10 @@ class IndentItemSerializer(serializers.ModelSerializer):
 
 
 class IndentItemCreateSerializer(serializers.ModelSerializer):
+    central_store_item = serializers.PrimaryKeyRelatedField(
+        queryset=None  # Will be set in __init__
+    )
+
     class Meta:
         model = IndentItem
         exclude = ['indent']
@@ -395,9 +399,20 @@ class MaterialIssueNoteCreateSerializer(serializers.ModelSerializer):
 
 
 class CentralStoreInventorySerializer(serializers.ModelSerializer):
+    item = serializers.PrimaryKeyRelatedField(queryset=None)
+    central_store = serializers.PrimaryKeyRelatedField(queryset=None)
+
     class Meta:
         model = CentralStoreInventory
         fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from .models import StoreItem, CentralStore
+        # Allow items from any college that are managed centrally
+        self.fields['item'].queryset = StoreItem.objects.filter(managed_by='central')
+        # Allow any central store
+        self.fields['central_store'].queryset = CentralStore.objects.all()
 
 
 class InventoryTransactionSerializer(serializers.ModelSerializer):
