@@ -2,6 +2,7 @@
 Signal handlers for core app automation and business logic.
 """
 from django.db.models.signals import post_save, pre_save, post_delete
+from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.dispatch import receiver
 from django.db import transaction
 from .models import (
@@ -69,7 +70,14 @@ def auto_log_model_changes(sender, instance, created, **kwargs):
     if not college:
         return
 
-    user = getattr(instance, 'created_by', None) if created else getattr(instance, 'updated_by', None)
+    # Get user from request context or instance
+    request = get_current_request()
+    user = None
+    if request and hasattr(request, 'user') and request.user.is_authenticated:
+        user = request.user
+    else:
+        user = getattr(instance, 'created_by', None) if created else getattr(instance, 'updated_by', None)
+
     action = 'create' if created else 'update'
 
     try:
@@ -95,7 +103,13 @@ def auto_log_model_deletions(sender, instance, **kwargs):
     if not college:
         return
 
-    user = getattr(instance, 'updated_by', None)
+    # Get user from request context or instance
+    request = get_current_request()
+    user = None
+    if request and hasattr(request, 'user') and request.user.is_authenticated:
+        user = request.user
+    else:
+        user = getattr(instance, 'updated_by', None)
 
     try:
         ActivityLog.objects.create(
@@ -190,3 +204,37 @@ def capture_request_context(sender, instance, **kwargs):
             # Capture user agent if not already set
             if not instance.user_agent:
                 instance.user_agent = request.META.get('HTTP_USER_AGENT', '')
+
+
+@receiver(user_logged_in)
+def log_user_login(sender, request, user, **kwargs):
+    """Log user login activity."""
+    if hasattr(user, 'college_id') and user.college_id:
+        try:
+            ActivityLog.objects.create(
+                college_id=user.college_id,
+                user=user,
+                action='login',
+                model_name='User',
+                object_id=str(user.pk),
+                description=f"{user.get_full_name() or user.username} logged in"
+            )
+        except Exception:
+            pass
+
+
+@receiver(user_logged_out)
+def log_user_logout(sender, request, user, **kwargs):
+    """Log user logout activity."""
+    if user and hasattr(user, 'college_id') and user.college_id:
+        try:
+            ActivityLog.objects.create(
+                college_id=user.college_id,
+                user=user,
+                action='logout',
+                model_name='User',
+                object_id=str(user.pk),
+                description=f"{user.get_full_name() or user.username} logged out"
+            )
+        except Exception:
+            pass
