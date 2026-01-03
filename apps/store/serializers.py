@@ -314,7 +314,7 @@ class IndentItemSerializer(serializers.ModelSerializer):
 
 class IndentItemCreateSerializer(serializers.ModelSerializer):
     central_store_item = serializers.PrimaryKeyRelatedField(
-        queryset=None  # Will be set in __init__
+        queryset=StoreItem.objects.none()
     )
 
     class Meta:
@@ -399,8 +399,8 @@ class MaterialIssueNoteCreateSerializer(serializers.ModelSerializer):
 
 
 class CentralStoreInventorySerializer(serializers.ModelSerializer):
-    item = serializers.PrimaryKeyRelatedField(queryset=None)
-    central_store = serializers.PrimaryKeyRelatedField(queryset=None)
+    item = serializers.PrimaryKeyRelatedField(queryset=StoreItem.objects.none())
+    central_store = serializers.PrimaryKeyRelatedField(queryset=CentralStore.objects.none())
 
     class Meta:
         model = CentralStoreInventory
