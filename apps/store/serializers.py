@@ -314,7 +314,11 @@ class IndentItemSerializer(serializers.ModelSerializer):
 
 class IndentItemCreateSerializer(serializers.ModelSerializer):
     central_store_item = serializers.PrimaryKeyRelatedField(
+<<<<<<< HEAD
         queryset=StoreItem.objects.none()  # Placeholder, updated in __init__
+=======
+        queryset=StoreItem.objects.none()
+>>>>>>> claude/fix-central-store-item-AzXYW
     )
 
     class Meta:

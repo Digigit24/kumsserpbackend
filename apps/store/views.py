@@ -415,36 +415,92 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def submit(self, request, pk=None):
+        """College store manager submits indent to college admin"""
         indent = self.get_object()
         indent.submit()
-        return Response({'status': indent.status})
+        return Response({'status': indent.status, 'message': 'Submitted to college admin for approval'})
+
+    @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])
+    def college_admin_approve(self, request, pk=None):
+        """College admin approves and forwards to super admin"""
+        indent = self.get_object()
+        # Verify user is college admin for this college
+        if not request.user.is_superuser and indent.college_id != getattr(request.user, 'college_id', None):
+            return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+        indent.college_admin_approve(user=request.user)
+        return Response({'status': indent.status, 'message': 'Forwarded to super admin for approval'})
+
+    @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])
+    def college_admin_reject(self, request, pk=None):
+        """College admin rejects the indent"""
+        indent = self.get_object()
+        if not request.user.is_superuser and indent.college_id != getattr(request.user, 'college_id', None):
+            return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+        indent.college_admin_reject(user=request.user, reason=request.data.get('reason'))
+        return Response({'status': indent.status, 'message': 'Rejected by college admin'})
+
+    @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
+    def super_admin_approve(self, request, pk=None):
+        """Super admin approves and forwards to central store"""
+        indent = self.get_object()
+        indent.super_admin_approve(user=request.user)
+        return Response({'status': indent.status, 'message': 'Approved by super admin, forwarded to central store'})
+
+    @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
+    def super_admin_reject(self, request, pk=None):
+        """Super admin rejects the indent"""
+        indent = self.get_object()
+        indent.super_admin_reject(user=request.user, reason=request.data.get('reason'))
+        return Response({'status': indent.status, 'message': 'Rejected by super admin'})
 
     @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])
     def approve(self, request, pk=None):
+        """Legacy approve - kept for backward compatibility"""
         indent = self.get_object()
         indent.approve(user=request.user)
         return Response({'status': indent.status})
 
     @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])
     def reject(self, request, pk=None):
+        """Legacy reject - kept for backward compatibility"""
         indent = self.get_object()
         indent.reject(user=request.user, reason=request.data.get('reason'))
         return Response({'status': indent.status})
 
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def pending_college_approvals(self, request):
+        """For college admin, list indents pending their approval"""
+        college_id = getattr(request.user, 'college_id', None)
+        if request.user.is_superuser:
+            indents = StoreIndent.objects.filter(status='pending_college_approval')
+        elif college_id:
+            indents = StoreIndent.objects.filter(status='pending_college_approval', college_id=college_id)
+        else:
+            indents = StoreIndent.objects.none()
+        serializer = self.get_serializer(indents, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsCentralStoreManager])
+    def pending_super_admin_approvals(self, request):
+        """For super admin, list indents pending their approval"""
+        indents = StoreIndent.objects.filter(status='pending_super_admin')
+        serializer = self.get_serializer(indents, many=True)
+        return Response(serializer.data)
+
     @action(detail=False, methods=['get'], permission_classes=[CanApproveIndent])
     def pending_approvals(self, request):
-        """Phase 9.8: For central manager, list pending indents"""
-        indents = StoreIndent.objects.filter(status='pending_approval')
+        """Legacy endpoint - list all pending indents"""
+        indents = StoreIndent.objects.filter(status__in=['pending_college_approval', 'pending_super_admin'])
         serializer = self.get_serializer(indents, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
     def issue_materials(self, request, pk=None):
-        """Phase 9.8: Create MaterialIssueNote (only after approval)"""
+        """Phase 9.8: Create MaterialIssueNote (only after super admin approval)"""
         indent = self.get_object()
-        if indent.status != 'approved':
+        if indent.status not in ['super_admin_approved', 'approved']:
             return Response(
-                {'detail': 'Indent must be approved before issuing materials'},
+                {'detail': 'Indent must be approved by super admin before issuing materials'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         # Create MaterialIssueNote

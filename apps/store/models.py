@@ -65,10 +65,15 @@ GRN_STATUS_CHOICES = [
 INDENT_STATUS_CHOICES = [
     ('draft', 'Draft'),
     ('submitted', 'Submitted'),
-    ('pending_approval', 'Pending Approval'),
+    ('pending_college_approval', 'Pending College Admin Approval'),
+    ('college_approved', 'College Admin Approved'),
+    ('pending_super_admin', 'Pending Super Admin Approval'),
+    ('super_admin_approved', 'Super Admin Approved'),
     ('approved', 'Approved'),
     ('partially_fulfilled', 'Partially Fulfilled'),
     ('fulfilled', 'Fulfilled'),
+    ('rejected_by_college', 'Rejected by College Admin'),
+    ('rejected_by_super_admin', 'Rejected by Super Admin'),
     ('rejected', 'Rejected'),
     ('cancelled', 'Cancelled'),
 ]
@@ -910,16 +915,52 @@ class StoreIndent(CollegeScopedModel):
             })
 
     def submit(self):
-        self.status = 'pending_approval'
+        """College store submits request to college admin"""
+        self.status = 'pending_college_approval'
         self.save(update_fields=['status', 'updated_at'])
 
+    def college_admin_approve(self, user=None):
+        """College admin approves and sends to super admin"""
+        if self.status != 'pending_college_approval':
+            raise ValidationError('Invalid status for college admin approval')
+        self.status = 'pending_super_admin'
+        self.save(update_fields=['status', 'updated_at'])
+
+    def college_admin_reject(self, user=None, reason=None):
+        """College admin rejects the request"""
+        if self.status != 'pending_college_approval':
+            raise ValidationError('Invalid status for college admin rejection')
+        self.status = 'rejected_by_college'
+        self.rejection_reason = reason
+        self.save(update_fields=['status', 'rejection_reason', 'updated_at'])
+
+    def super_admin_approve(self, user=None):
+        """Super admin approves and forwards to central store"""
+        if self.status != 'pending_super_admin':
+            raise ValidationError('Invalid status for super admin approval')
+        self.status = 'super_admin_approved'
+        self.approved_by = user
+        self.approved_date = timezone.now()
+        self.save(update_fields=['status', 'approved_by', 'approved_date', 'updated_at'])
+
+    def super_admin_reject(self, user=None, reason=None):
+        """Super admin rejects the request"""
+        if self.status != 'pending_super_admin':
+            raise ValidationError('Invalid status for super admin rejection')
+        self.status = 'rejected_by_super_admin'
+        self.rejection_reason = reason
+        self.approved_by = user
+        self.save(update_fields=['status', 'rejection_reason', 'approved_by', 'updated_at'])
+
     def approve(self, user=None, approved_items=None):
+        """Legacy approve method - keeping for compatibility"""
         self.status = 'approved'
         self.approved_by = user
         self.approved_date = timezone.now()
         self.save(update_fields=['status', 'approved_by', 'approved_date', 'updated_at'])
 
     def reject(self, user=None, reason=None):
+        """Legacy reject method - keeping for compatibility"""
         self.status = 'rejected'
         self.rejection_reason = reason
         self.approved_by = user
