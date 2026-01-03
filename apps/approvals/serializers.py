@@ -36,6 +36,7 @@ class ApprovalRequestSerializer(serializers.ModelSerializer):
     priority_display = serializers.CharField(source='get_priority_display', read_only=True)
     actions = ApprovalActionSerializer(many=True, read_only=True)
     is_overdue = serializers.BooleanField(read_only=True)
+    related_object_details = serializers.SerializerMethodField()
 
     class Meta:
         model = ApprovalRequest
@@ -46,13 +47,60 @@ class ApprovalRequestSerializer(serializers.ModelSerializer):
             'status', 'status_display', 'approvers', 'approvers_details',
             'requires_approval_count', 'current_approval_count',
             'submitted_at', 'reviewed_at', 'deadline', 'metadata',
-            'attachment', 'actions', 'is_overdue',
+            'attachment', 'actions', 'is_overdue', 'related_object_details',
             'created_at', 'updated_at'
         ]
         read_only_fields = [
             'id', 'college_name', 'current_approval_count', 'submitted_at', 'reviewed_at',
             'created_at', 'updated_at'
         ]
+
+    def get_related_object_details(self, obj):
+        """Get details of the related object based on request type."""
+        try:
+            related_obj = obj.related_object
+            if not related_obj:
+                return None
+
+            # Store Indent details
+            if obj.request_type == 'store_indent':
+                return {
+                    'indent_number': getattr(related_obj, 'indent_number', None),
+                    'indent_date': getattr(related_obj, 'indent_date', None),
+                    'status': getattr(related_obj, 'status', None),
+                    'priority': getattr(related_obj, 'priority', None),
+                    'justification': getattr(related_obj, 'justification', None),
+                    'items_count': related_obj.items.count() if hasattr(related_obj, 'items') else 0,
+                    'central_store': getattr(related_obj.central_store, 'name', None) if hasattr(related_obj, 'central_store') else None,
+                }
+
+            # Procurement Requirement details
+            elif obj.request_type == 'procurement_requirement':
+                return {
+                    'requirement_number': getattr(related_obj, 'requirement_number', None),
+                    'requirement_date': getattr(related_obj, 'requirement_date', None),
+                    'required_by_date': getattr(related_obj, 'required_by_date', None),
+                    'status': getattr(related_obj, 'status', None),
+                    'urgency': getattr(related_obj, 'urgency', None),
+                    'justification': getattr(related_obj, 'justification', None),
+                    'items_count': related_obj.items.count() if hasattr(related_obj, 'items') else 0,
+                    'estimated_total': str(getattr(related_obj, 'estimated_total', 0)),
+                }
+
+            # Goods Inspection details
+            elif obj.request_type == 'goods_inspection':
+                return {
+                    'grn_number': getattr(related_obj, 'grn_number', None),
+                    'receipt_date': getattr(related_obj, 'receipt_date', None),
+                    'status': getattr(related_obj, 'status', None),
+                    'supplier': getattr(related_obj.supplier, 'name', None) if hasattr(related_obj, 'supplier') else None,
+                    'items_count': related_obj.items.count() if hasattr(related_obj, 'items') else 0,
+                }
+
+            return None
+
+        except Exception:
+            return None
 
 
 class ApprovalRequestCreateSerializer(serializers.ModelSerializer):

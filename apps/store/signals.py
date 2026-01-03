@@ -135,6 +135,17 @@ def procurement_requirement_post_save(sender, instance, created, **kwargs):
                     object_id=instance.id,
                     priority=instance.urgency,
                 )
+
+                # Assign college admins as approvers
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
+                college_admins = User.objects.filter(
+                    college_id=college_id,
+                    user_type__in=['admin', 'staff']
+                )
+                if college_admins.exists():
+                    approval.approvers.set(college_admins)
+
                 instance.approval_request = approval
                 instance.status = 'pending_approval'
                 instance.save(update_fields=['approval_request', 'status', 'updated_at'])
@@ -234,12 +245,24 @@ def store_indent_post_save(sender, instance, created, **kwargs):
                     college_id=college_id,
                     requester=requester,
                     request_type='store_indent',
-                    title=f"Store indent {instance.indent_number}",
+                    title=f"Store Indent {instance.indent_number}",
                     description=instance.justification,
                     content_type=ContentType.objects.get_for_model(StoreIndent),
                     object_id=instance.id,
                     priority=instance.priority,
                 )
+
+                # Assign central store managers as approvers
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
+                # Get central store managers or college admins
+                approvers = User.objects.filter(
+                    college_id=college_id,
+                    user_type__in=['admin', 'staff']
+                )
+                if approvers.exists():
+                    approval.approvers.set(approvers)
+
                 instance.approval_request = approval
                 instance.status = 'pending_approval'
                 instance.save(update_fields=['approval_request', 'status', 'updated_at'])

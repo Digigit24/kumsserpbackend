@@ -106,6 +106,47 @@ class ApprovalRequestViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @extend_schema(
+        description="Get all store-related approval requests (indents, procurement, inspections) for college admin",
+        responses={200: ApprovalRequestSerializer(many=True)}
+    )
+    @action(detail=False, methods=['get'])
+    def store_requests(self, request):
+        """Get all store-related approval requests for college admin."""
+        store_types = ['store_indent', 'procurement_requirement', 'goods_inspection']
+        queryset = self.filter_queryset(
+            self.get_queryset().filter(request_type__in=store_types)
+        )
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        description="Get pending store-related approval requests for college admin",
+        responses={200: ApprovalRequestSerializer(many=True)}
+    )
+    @action(detail=False, methods=['get'])
+    def pending_store_requests(self, request):
+        """Get pending store-related approval requests for college admin."""
+        store_types = ['store_indent', 'procurement_requirement', 'goods_inspection']
+        queryset = self.filter_queryset(
+            self.get_queryset().filter(
+                request_type__in=store_types,
+                status='pending'
+            )
+        )
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
         request=ApproveRejectSerializer,
         description="Approve or reject an approval request",
         responses={200: ApprovalRequestSerializer}
