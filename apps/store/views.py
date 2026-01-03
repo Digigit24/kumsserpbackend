@@ -525,7 +525,8 @@ class MaterialIssueNoteViewSet(RelatedCollegeScopedModelViewSet):
 class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
     queryset = CentralStoreInventory.objects.select_related('central_store', 'item')
     serializer_class = CentralStoreInventorySerializer
-    permission_classes = [IsCentralStoreManagerOrReadOnly]
+    permission_classes = [IsAuthenticated]
+    resource_name = 'store'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['central_store', 'item', 'quantity_available']
     ordering_fields = ['quantity_available', 'updated_at']

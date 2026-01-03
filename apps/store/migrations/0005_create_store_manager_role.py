@@ -10,33 +10,22 @@ def create_store_manager_role(apps, schema_editor):
     College = apps.get_model('core', 'College')
     Role = apps.get_model('accounts', 'Role')
 
-    # Store manager permissions
+    # Store manager permissions (using PERMISSION_REGISTRY format)
     store_permissions = {
         'store': {
-            'view': True,
-            'create': True,
-            'edit': True,
-            'delete': False,  # Can't delete store records
+            'create': {'scope': 'all', 'enabled': True},
+            'read': {'scope': 'all', 'enabled': True},
+            'update': {'scope': 'all', 'enabled': True},
+            'delete': {'scope': 'all', 'enabled': True},
+            'issue': {'scope': 'all', 'enabled': True},
+            'return': {'scope': 'all', 'enabled': True},
+            'export': {'scope': 'all', 'enabled': True},
         },
-        'store_indent': {
-            'view': True,
-            'create': True,
-            'edit': True,
-            'delete': False,
-            'submit': True,  # Can submit indents for approval
+        'reports': {
+            'read': {'scope': 'all', 'enabled': True},
+            'generate': {'scope': 'all', 'enabled': True},
+            'export': {'scope': 'all', 'enabled': True},
         },
-        'material_issue': {
-            'view': True,
-            'confirm_receipt': True,  # Can confirm receipt of materials
-        },
-        'inventory': {
-            'view': True,
-            'view_reports': True,
-        },
-        'approvals': {
-            'view': True,
-            'create': True,
-        }
     }
 
     for college in College.objects.all():
