@@ -1,7 +1,7 @@
 """
 Signal handlers for core app automation and business logic.
 """
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 from django.db import transaction
 from .models import (
@@ -12,6 +12,74 @@ from .models import (
     Weekend
 )
 from .utils import get_current_request, get_client_ip
+
+
+def get_college_from_instance(instance):
+    """Extract college from instance for activity logging."""
+    if hasattr(instance, 'college_id'):
+        return instance.college_id
+    elif hasattr(instance, 'college'):
+        return instance.college
+    elif hasattr(instance, 'student') and hasattr(instance.student, 'college_id'):
+        return instance.student.college_id
+    return None
+
+
+def should_log_model(sender):
+    """Check if this model should be auto-logged."""
+    excluded = ['ActivityLog', 'Session', 'LogEntry', 'ContentType', 'Permission', 'Migration']
+    return sender.__name__ not in excluded
+
+
+@receiver(post_save)
+def auto_log_model_changes(sender, instance, created, **kwargs):
+    """Automatically log create/update actions for all models."""
+    if not should_log_model(sender):
+        return
+
+    college = get_college_from_instance(instance)
+    if not college:
+        return
+
+    user = getattr(instance, 'created_by', None) if created else getattr(instance, 'updated_by', None)
+    action = 'create' if created else 'update'
+
+    try:
+        ActivityLog.objects.create(
+            college_id=college.id if hasattr(college, 'id') else college,
+            user=user,
+            action=action,
+            model_name=sender.__name__,
+            object_id=str(instance.pk),
+            description=f"{sender.__name__} {action}d: {str(instance)[:100]}"
+        )
+    except Exception:
+        pass
+
+
+@receiver(post_delete)
+def auto_log_model_deletions(sender, instance, **kwargs):
+    """Automatically log delete actions for all models."""
+    if not should_log_model(sender):
+        return
+
+    college = get_college_from_instance(instance)
+    if not college:
+        return
+
+    user = getattr(instance, 'updated_by', None)
+
+    try:
+        ActivityLog.objects.create(
+            college_id=college.id if hasattr(college, 'id') else college,
+            user=user,
+            action='delete',
+            model_name=sender.__name__,
+            object_id=str(instance.pk),
+            description=f"{sender.__name__} deleted: {str(instance)[:100]}"
+        )
+    except Exception:
+        pass
 
 
 @receiver(post_save, sender=College)
