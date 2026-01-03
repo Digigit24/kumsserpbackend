@@ -7,6 +7,7 @@ from .utils import get_current_college_id
 
 logger = logging.getLogger(__name__)
 
+
 class CollegeScopedMixin:
     """
     Enforces presence of X-College-ID header and scopes queries accordingly.
