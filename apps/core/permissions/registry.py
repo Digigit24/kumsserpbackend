@@ -252,5 +252,22 @@ def get_default_permissions(role):
                 'export': {'scope': 'all', 'enabled': True},
             },
         },
+        'store_manager': {
+            # Store manager has full access to store and inventory operations
+            'store': {
+                'create': {'scope': 'all', 'enabled': True},
+                'read': {'scope': 'all', 'enabled': True},
+                'update': {'scope': 'all', 'enabled': True},
+                'delete': {'scope': 'all', 'enabled': True},
+                'issue': {'scope': 'all', 'enabled': True},
+                'return': {'scope': 'all', 'enabled': True},
+                'export': {'scope': 'all', 'enabled': True},
+            },
+            'reports': {
+                'read': {'scope': 'all', 'enabled': True},
+                'generate': {'scope': 'all', 'enabled': True},
+                'export': {'scope': 'all', 'enabled': True},
+            },
+        },
     }
     return defaults.get(role, {})
