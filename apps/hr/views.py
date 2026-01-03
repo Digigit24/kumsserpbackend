@@ -2,7 +2,9 @@ from rest_framework import filters, viewsets
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
-from apps.core.mixins import CollegeScopedMixin, CollegeScopedModelViewSet
+from apps.core.mixins import (
+    CollegeScopedMixin, CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
+)
 from .models import (
     LeaveType,
     LeaveApplication,
@@ -27,31 +29,6 @@ from .serializers import (
     PayrollItemSerializer,
     PayslipSerializer,
 )
-
-
-class RelatedCollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet):
-    """
-    Scopes by college via a related lookup path when model lacks direct college FK.
-    """
-    related_college_lookup = None
-    permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        college_id = self.get_college_id(required=False)
-        user = getattr(self.request, 'user', None)
-
-        if college_id == 'all' or (user and (user.is_superuser or user.is_staff) and not college_id):
-            return queryset
-
-        if not college_id:
-            college_id = self.get_college_id(required=True)
-
-        if not self.related_college_lookup:
-            return queryset.none()
-
-        return queryset.filter(**{self.related_college_lookup: college_id})
 
 
 class LeaveTypeViewSet(CollegeScopedModelViewSet):
