@@ -317,6 +317,12 @@ class IndentItemCreateSerializer(serializers.ModelSerializer):
         model = IndentItem
         exclude = ['indent']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Allow central store items from any college
+        from .models import StoreItem
+        self.fields['central_store_item'].queryset = StoreItem.objects.filter(managed_by='central')
+
 
 class StoreIndentListSerializer(serializers.ModelSerializer):
     class Meta:
