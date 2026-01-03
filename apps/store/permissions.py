@@ -21,12 +21,14 @@ class IsCentralStoreManagerOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-        return _is_manager_of_central_store(request.user)
+        # Only super admin can modify central store
+        return request.user and request.user.is_authenticated and request.user.is_superuser
 
 
 class IsCentralStoreManager(BasePermission):
     def has_permission(self, request, view):
-        return _is_manager_of_central_store(request.user)
+        # Central store only accessible by super admin
+        return request.user and request.user.is_authenticated and request.user.is_superuser
 
 
 class IsCollegeStoreManager(BasePermission):
@@ -46,8 +48,13 @@ class IsCEOOrFinance(BasePermission):
 
 
 class CanApproveIndent(BasePermission):
+    """College admin can approve indents for their college"""
     def has_permission(self, request, view):
-        return _is_manager_of_central_store(request.user)
+        user = request.user
+        if not user or not user.is_authenticated:
+            return False
+        # College admin or super admin can approve
+        return user.is_superuser or (hasattr(user, 'college_id') and user.college_id)
 
 
 class CanReceiveMaterials(BasePermission):
