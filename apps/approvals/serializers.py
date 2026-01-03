@@ -110,9 +110,10 @@ class ApprovalRequestCreateSerializer(serializers.ModelSerializer):
         model = ApprovalRequest
         fields = [
             'college', 'requester', 'request_type', 'title', 'description',
-            'priority', 'content_type', 'object_id', 'approvers',
-            'requires_approval_count', 'deadline', 'metadata', 'attachment'
+            'priority', 'approvers', 'requires_approval_count',
+            'deadline', 'metadata', 'attachment'
         ]
+        # content_type and object_id are auto-set by signals - not needed in POST
 
     def create(self, validated_data):
         approvers = validated_data.pop('approvers', [])
