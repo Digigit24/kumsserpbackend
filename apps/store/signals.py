@@ -148,7 +148,7 @@ def procurement_requirement_post_save(sender, instance, created, **kwargs):
                 User = get_user_model()
                 college_admins = User.objects.filter(
                     college_id=college_id,
-                    user_type__in=['admin', 'staff']
+                    user_type__in=['college_admin', 'staff']
                 )
                 if college_admins.exists():
                     approval.approvers.set(college_admins)
@@ -274,7 +274,7 @@ def store_indent_post_save(sender, instance, created, **kwargs):
                 # Get central store managers or college admins
                 approvers = User.objects.filter(
                     college_id=college_id,
-                    user_type__in=['admin', 'staff']
+                    user_type__in=['college_admin', 'staff']
                 )
                 if approvers.exists():
                     approval.approvers.set(approvers)
