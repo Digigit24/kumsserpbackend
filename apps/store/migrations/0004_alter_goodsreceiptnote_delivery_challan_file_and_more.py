@@ -14,36 +14,36 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='goodsreceiptnote',
             name='delivery_challan_file',
-            field=models.FileField(blank=True, null=True, storage=apps.store.storage.StoreS3Storage(), upload_to='grn_challans/'),
+            field=models.FileField(blank=True, null=True, storage=apps.store.storage.store_file_storage, upload_to='grn_challans/'),
         ),
         migrations.AlterField(
             model_name='goodsreceiptnote',
             name='invoice_file',
-            field=models.FileField(blank=True, null=True, storage=apps.store.storage.StoreS3Storage(), upload_to='grn_invoices/'),
+            field=models.FileField(blank=True, null=True, storage=apps.store.storage.store_file_storage, upload_to='grn_invoices/'),
         ),
         migrations.AlterField(
             model_name='goodsreceiptnote',
             name='lr_copy',
-            field=models.FileField(blank=True, null=True, storage=apps.store.storage.StoreS3Storage(), upload_to='grn_lr/'),
+            field=models.FileField(blank=True, null=True, storage=apps.store.storage.store_file_storage, upload_to='grn_lr/'),
         ),
         migrations.AlterField(
             model_name='materialissuenote',
             name='min_document',
-            field=models.FileField(blank=True, null=True, storage=apps.store.storage.StoreS3Storage(), upload_to='material_issue_notes/'),
+            field=models.FileField(blank=True, null=True, storage=apps.store.storage.store_file_storage, upload_to='material_issue_notes/'),
         ),
         migrations.AlterField(
             model_name='purchaseorder',
             name='po_document',
-            field=models.FileField(blank=True, null=True, storage=apps.store.storage.StoreS3Storage(), upload_to='purchase_orders/'),
+            field=models.FileField(blank=True, null=True, storage=apps.store.storage.store_file_storage, upload_to='purchase_orders/'),
         ),
         migrations.AlterField(
             model_name='storeindent',
             name='attachments',
-            field=models.FileField(blank=True, null=True, storage=apps.store.storage.StoreS3Storage(), upload_to='indent_attachments/'),
+            field=models.FileField(blank=True, null=True, storage=apps.store.storage.store_file_storage, upload_to='indent_attachments/'),
         ),
         migrations.AlterField(
             model_name='supplierquotation',
             name='quotation_file',
-            field=models.FileField(blank=True, null=True, storage=apps.store.storage.StoreS3Storage(), upload_to='quotations/'),
+            field=models.FileField(blank=True, null=True, storage=apps.store.storage.store_file_storage, upload_to='quotations/'),
         ),
     ]
