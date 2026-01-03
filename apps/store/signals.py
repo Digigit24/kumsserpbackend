@@ -132,6 +132,19 @@ def procurement_requirement_post_save(sender, instance, created, **kwargs):
             requester = instance.created_by if hasattr(instance, 'created_by') and instance.created_by else instance.central_store.manager
 
             if requester:
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
+
+                # Get approvers first
+                college_admins = User.objects.filter(
+                    college_id=college_id,
+                    user_type__in=['college_admin', 'staff']
+                )
+
+                if not college_admins.exists():
+                    print(f"[Store] No approvers found for college {college_id}")
+                    return
+
                 approval = ApprovalRequest.objects.create(
                     college_id=college_id,
                     requester=requester,
@@ -141,24 +154,20 @@ def procurement_requirement_post_save(sender, instance, created, **kwargs):
                     content_type=ContentType.objects.get_for_model(ProcurementRequirement),
                     object_id=instance.id,
                     priority=instance.urgency,
+                    status='pending'
                 )
 
-                # Assign college admins as approvers
-                from django.contrib.auth import get_user_model
-                User = get_user_model()
-                college_admins = User.objects.filter(
-                    college_id=college_id,
-                    user_type__in=['college_admin', 'staff']
-                )
-                if college_admins.exists():
-                    approval.approvers.set(college_admins)
+                # Set approvers
+                approval.approvers.set(college_admins)
+                approval.save()
 
                 instance.approval_request = approval
                 instance.status = 'pending_approval'
                 instance.save(update_fields=['approval_request', 'status', 'updated_at'])
-                print(f"[Store] Created approval request for procurement requirement {instance.requirement_number}")
+
+                print(f"[Store] Created approval {approval.id} for requirement {instance.requirement_number} with {college_admins.count()} approvers")
         except Exception as exc:
-            print(f"[Store] Could not create approval for requirement {instance.id}: {exc}")
+            print(f"[Store] Error creating approval for requirement {instance.id}: {exc}")
             import traceback
             traceback.print_exc()
 
@@ -257,6 +266,19 @@ def store_indent_post_save(sender, instance, created, **kwargs):
         requester = instance.requesting_store_manager or instance.created_by
         if college_id and requester:
             try:
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
+
+                # Get approvers first
+                approvers = User.objects.filter(
+                    college_id=college_id,
+                    user_type__in=['college_admin', 'staff']
+                )
+
+                if not approvers.exists():
+                    print(f"[Store] No approvers found for college {college_id}")
+                    return
+
                 approval = ApprovalRequest.objects.create(
                     college_id=college_id,
                     requester=requester,
@@ -266,25 +288,22 @@ def store_indent_post_save(sender, instance, created, **kwargs):
                     content_type=ContentType.objects.get_for_model(StoreIndent),
                     object_id=instance.id,
                     priority=instance.priority,
+                    status='pending'
                 )
 
-                # Assign central store managers as approvers
-                from django.contrib.auth import get_user_model
-                User = get_user_model()
-                # Get central store managers or college admins
-                approvers = User.objects.filter(
-                    college_id=college_id,
-                    user_type__in=['college_admin', 'staff']
-                )
-                if approvers.exists():
-                    approval.approvers.set(approvers)
+                # Set approvers
+                approval.approvers.set(approvers)
+                approval.save()
 
                 instance.approval_request = approval
                 instance.status = 'pending_approval'
                 instance.save(update_fields=['approval_request', 'status', 'updated_at'])
-                print(f"[Store] Created approval request for indent {instance.indent_number}")
+
+                print(f"[Store] Created approval {approval.id} for indent {instance.indent_number} with {approvers.count()} approvers")
             except Exception as exc:
-                print(f"[Store] Could not create approval for indent {instance.id}: {exc}")
+                print(f"[Store] Error creating approval for indent {instance.id}: {exc}")
+                import traceback
+                traceback.print_exc()
 
 
 @receiver(post_save, sender=MaterialIssueNote)
