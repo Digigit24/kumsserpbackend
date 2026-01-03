@@ -244,3 +244,57 @@ Permissions: College Store Manager
    - College-specific validation in approval endpoints
 
 5. **Material Issuance**: Only possible after super admin approval
+
+
+
+we tried our best but the error still exist now we will create
+
+a new centraal store through the super admin only give all permissions regarding the central store to the super admin
+
+all the college's specific store which will be only accessible to that clg store and that specific clg admin and super admin
+
+now the flow will be like :
+the central store will have all the inventries the specific clg store will send the request to the central store for oreders and the same request will go to the specific clg admin and if the clg admin accepts the request it goes to the super admin and if super admin grants the aproval it send it to central store to grant the order and then the specific clg gets the oreder from the central store
+
+the specific clg will have the access to see the inventery of the central store while placing the order
+
+this will be the flow ok
+
+the central store will also be the independent store like other stores but only controled by super admin
+
+now change the apis if needed in the backend and return me the exact flow with all the changes in the backend from approvals to permissions to apis iof needed bcz tomaarrow is the dead line to submit the project so i need it very urgently also make a md file which will contain the endpoints from whic api what will perform use less tokens for this
+
+
+AzXYW
+Done! Complete two-level approval system implemented. Here's what changed:
+
+Changes Made
+1. Permissions (apps/store/permissions.py)
+Central store now super-admin only
+College admins can approve indents for their college
+Super admin has full access
+2. Models (apps/store/models.py)
+New statuses: pending_college_approval, pending_super_admin, super_admin_approved, rejected_by_college, rejected_by_super_admin
+New methods:
+college_admin_approve() - College admin approves → super admin
+college_admin_reject() - College admin rejects
+super_admin_approve() - Super admin approves → central store
+super_admin_reject() - Super admin rejects
+3. Views (apps/store/views.py)
+New endpoints:
+POST /api/v1/store/indents/{id}/college_admin_approve/
+POST /api/v1/store/indents/{id}/college_admin_reject/
+POST /api/v1/store/indents/{id}/super_admin_approve/
+POST /api/v1/store/indents/{id}/super_admin_reject/
+GET /api/v1/store/indents/pending_college_approvals/
+GET /api/v1/store/indents/pending_super_admin_approvals/
+4. Serializers (apps/store/serializers.py)
+Fixed central store item validation - any college can now access central items
+5. Documentation (CENTRAL_STORE_API_FLOW.md)
+Complete API reference with all endpoints
+Flow diagrams
+Permission matrix
+Example requests
+Approval Flow
+College Store → Submit → College Admin → Approve → Super Admin → Approve → Central Store → Issue Materials → College
+
