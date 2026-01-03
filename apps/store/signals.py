@@ -107,6 +107,13 @@ def purchase_order_post_save(sender, instance, created, **kwargs):
 @receiver(post_save, sender=ProcurementRequirement)
 def procurement_requirement_post_save(sender, instance, created, **kwargs):
     """Phase 11.1: Create approval request when requirement is submitted"""
+
+    # If just created with draft status, auto-submit it
+    if created and instance.status == 'draft':
+        instance.status = 'submitted'
+        instance.save(update_fields=['status'])
+        return  # Signal will re-trigger with status='submitted'
+
     if instance.status == 'submitted' and not instance.approval_request_id:
         try:
             # Get college ID from central store manager or use a default
@@ -236,9 +243,18 @@ def goods_receipt_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=StoreIndent)
 def store_indent_post_save(sender, instance, created, **kwargs):
+    """Auto-submit indent on creation and create approval request"""
+
+    # If just created with draft status, auto-submit it
+    if created and instance.status == 'draft':
+        instance.status = 'submitted'
+        instance.save(update_fields=['status'])
+        return  # Signal will re-trigger with status='submitted'
+
+    # Create approval request when submitted
     if instance.status == 'submitted' and not instance.approval_request_id:
         college_id = getattr(instance.college, 'id', None)
-        requester = instance.requesting_store_manager
+        requester = instance.requesting_store_manager or instance.created_by
         if college_id and requester:
             try:
                 approval = ApprovalRequest.objects.create(
@@ -266,6 +282,7 @@ def store_indent_post_save(sender, instance, created, **kwargs):
                 instance.approval_request = approval
                 instance.status = 'pending_approval'
                 instance.save(update_fields=['approval_request', 'status', 'updated_at'])
+                print(f"[Store] Created approval request for indent {instance.indent_number}")
             except Exception as exc:
                 print(f"[Store] Could not create approval for indent {instance.id}: {exc}")
 
