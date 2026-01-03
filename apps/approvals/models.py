@@ -147,6 +147,8 @@ class ApprovalRequest(AuditModel):
         if self.current_approval_count >= self.requires_approval_count:
             self.status = 'approved'
             self.reviewed_at = timezone.now()
+            # Update related object status
+            self._update_related_object_status('approved', approver)
         self.save()
 
     def reject(self, approver, reason):
@@ -154,7 +156,35 @@ class ApprovalRequest(AuditModel):
         self.status = 'rejected'
         self.reviewed_at = timezone.now()
         self.metadata['rejection_reason'] = reason
+        # Update related object status
+        self._update_related_object_status('rejected', approver, reason)
         self.save()
+
+    def _update_related_object_status(self, action, approver=None, reason=None):
+        """Update the related object's status based on approval action."""
+        try:
+            related_obj = self.related_object
+            if not related_obj:
+                return
+
+            # Update StoreIndent
+            if self.request_type == 'store_indent':
+                if action == 'approved':
+                    related_obj.status = 'approved'
+                    related_obj.approved_by = approver
+                    related_obj.approved_date = timezone.now()
+                else:  # rejected
+                    related_obj.status = 'rejected'
+                    related_obj.rejection_reason = reason or 'Rejected by approver'
+                related_obj.save(update_fields=['status', 'approved_by', 'approved_date', 'rejection_reason', 'updated_at'])
+
+            # Update ProcurementRequirement
+            elif self.request_type == 'procurement_requirement':
+                related_obj.status = 'approved' if action == 'approved' else 'rejected'
+                related_obj.save(update_fields=['status', 'updated_at'])
+
+        except Exception as e:
+            print(f"[Approvals] Error updating related object: {e}")
 
     def cancel(self):
         """Cancel the approval request."""
