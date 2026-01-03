@@ -510,7 +510,7 @@ class MaterialIssueNoteViewSet(RelatedCollegeScopedModelViewSet):
         return Response({'status': 'pdf_generated'})
 
     @action(detail=True, methods=['post'])
-    def dispatch(self, request, pk=None):
+    def mark_dispatched(self, request, pk=None):
         min_note = self.get_object()
         min_note.dispatch()
         return Response({'status': min_note.status})
