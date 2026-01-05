@@ -412,10 +412,25 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         item_name = validated_data.pop('item_name')
-        from .models import StoreItem
+        from .models import StoreItem, StoreCategory
+
+        # Find or create item
         item = StoreItem.objects.all_colleges().filter(name__iexact=item_name).first()
         if not item:
-            raise serializers.ValidationError({'item_name': f'Item "{item_name}" not found'})
+            # Auto-create item for central inventory
+            category, _ = StoreCategory.objects.get_or_create(
+                name='General',
+                defaults={'code': 'GEN', 'college_id': 1}
+            )
+            item = StoreItem.objects.create(
+                name=item_name,
+                code=item_name.upper()[:20],
+                category=category,
+                unit='unit',
+                price=0,
+                managed_by='central',
+                college_id=1
+            )
         validated_data['item'] = item
         return super().create(validated_data)
 
