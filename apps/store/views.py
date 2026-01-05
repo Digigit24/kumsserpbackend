@@ -493,9 +493,9 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         """For college admin, list indents pending their approval"""
         college_id = getattr(request.user, 'college_id', None)
         if request.user.is_superuser:
-            indents = StoreIndent.objects.filter(status='pending_college_approval')
+            indents = StoreIndent.objects.all_colleges().filter(status='pending_college_approval')
         elif college_id:
-            indents = StoreIndent.objects.filter(status='pending_college_approval', college_id=college_id)
+            indents = StoreIndent.objects.all_colleges().filter(status='pending_college_approval', college_id=college_id)
         else:
             indents = StoreIndent.objects.none()
         serializer = self.get_serializer(indents, many=True)
@@ -504,14 +504,14 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
     @action(detail=False, methods=['get'], permission_classes=[IsCentralStoreManager])
     def pending_super_admin_approvals(self, request):
         """For super admin, list indents pending their approval"""
-        indents = StoreIndent.objects.filter(status='pending_super_admin')
+        indents = StoreIndent.objects.all_colleges().filter(status='pending_super_admin')
         serializer = self.get_serializer(indents, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=['get'], permission_classes=[CanApproveIndent])
     def pending_approvals(self, request):
         """Legacy endpoint - list all pending indents"""
-        indents = StoreIndent.objects.filter(status__in=['pending_college_approval', 'pending_super_admin'])
+        indents = StoreIndent.objects.all_colleges().filter(status__in=['pending_college_approval', 'pending_super_admin'])
         serializer = self.get_serializer(indents, many=True)
         return Response(serializer.data)
 
