@@ -493,9 +493,15 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         """For college admin, list indents pending their approval"""
         college_id = getattr(request.user, 'college_id', None)
         if request.user.is_superuser:
+<<<<<<< HEAD
             indents = self.get_queryset().filter(status='pending_college_approval')
         elif college_id:
             indents = self.get_queryset().filter(status='pending_college_approval', college_id=college_id)
+=======
+            indents = StoreIndent.objects.all_colleges().filter(status='pending_college_approval')
+        elif college_id:
+            indents = StoreIndent.objects.all_colleges().filter(status='pending_college_approval', college_id=college_id)
+>>>>>>> claude/add-store-manager-permissions-TEzx2
         else:
             indents = self.get_queryset().none()
         serializer = self.get_serializer(indents, many=True)
@@ -504,14 +510,22 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
     @action(detail=False, methods=['get'], permission_classes=[IsCentralStoreManager])
     def pending_super_admin_approvals(self, request):
         """For super admin, list indents pending their approval"""
+<<<<<<< HEAD
         indents = self.get_queryset().filter(status='pending_super_admin')
+=======
+        indents = StoreIndent.objects.all_colleges().filter(status='pending_super_admin')
+>>>>>>> claude/add-store-manager-permissions-TEzx2
         serializer = self.get_serializer(indents, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=['get'], permission_classes=[CanApproveIndent])
     def pending_approvals(self, request):
         """Legacy endpoint - list all pending indents"""
+<<<<<<< HEAD
         indents = self.get_queryset().filter(status__in=['pending_college_approval', 'pending_super_admin'])
+=======
+        indents = StoreIndent.objects.all_colleges().filter(status__in=['pending_college_approval', 'pending_super_admin'])
+>>>>>>> claude/add-store-manager-permissions-TEzx2
         serializer = self.get_serializer(indents, many=True)
         return Response(serializer.data)
 
@@ -585,6 +599,13 @@ class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
     filterset_fields = ['central_store', 'item', 'quantity_available']
     ordering_fields = ['quantity_available', 'updated_at']
     ordering = ['quantity_available']
+
+    def create(self, request, *args, **kwargs):
+        """Only super admin can create central inventory"""
+        if not request.user.is_superuser:
+            return Response({'detail': 'Only super admin can add central inventory items'},
+                          status=status.HTTP_403_FORBIDDEN)
+        return super().create(request, *args, **kwargs)
 
     @action(detail=False, methods=['get'])
     def low_stock(self, request):

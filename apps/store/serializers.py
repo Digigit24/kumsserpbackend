@@ -231,26 +231,14 @@ class SupplierQuotationDetailSerializer(serializers.ModelSerializer):
 class SupplierQuotationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = SupplierQuotation
-        fields = ['requirement', 'supplier', 'quotation_date', 'valid_until', 'total_amount', 'tax_amount', 'grand_total', 'quotation_file', 'notes']
-        extra_kwargs = {
-            'quotation_date': {'required': False},
-            'valid_until': {'required': False},
-            'total_amount': {'required': False},
-            'grand_total': {'required': False},
-        }
+        fields = '__all__'
 
     def create(self, validated_data):
-        # Set default values for required fields if not provided
-        from datetime import date, timedelta
-        if 'quotation_date' not in validated_data:
-            validated_data['quotation_date'] = date.today()
-        if 'valid_until' not in validated_data:
-            validated_data['valid_until'] = date.today() + timedelta(days=30)
-        if 'total_amount' not in validated_data:
-            validated_data['total_amount'] = 0
-        if 'grand_total' not in validated_data:
-            validated_data['grand_total'] = validated_data.get('total_amount', 0) + validated_data.get('tax_amount', 0)
-        
+        create_new_supplier = validated_data.pop('create_new_supplier', False)
+        supplier_data = validated_data.pop('supplier_data', None)
+        if create_new_supplier and supplier_data:
+            supplier = SupplierMaster.objects.create(**supplier_data)
+            validated_data['supplier'] = supplier
         return super().create(validated_data)
 
 
@@ -495,8 +483,6 @@ class MaterialIssueNoteCreateSerializer(serializers.ModelSerializer):
 class CentralStoreInventorySerializer(serializers.ModelSerializer):
     item = serializers.PrimaryKeyRelatedField(queryset=StoreItem.objects.none())
     central_store = serializers.PrimaryKeyRelatedField(queryset=CentralStore.objects.none())
-    item_name = serializers.CharField(source='item.name', read_only=True)
-    central_store_name = serializers.CharField(source='central_store.name', read_only=True)
 
     class Meta:
         model = CentralStoreInventory
@@ -506,7 +492,7 @@ class CentralStoreInventorySerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
         from .models import StoreItem, CentralStore
         # Allow items from any college that are managed centrally
-        self.fields['item'].queryset = StoreItem.objects.all_colleges().filter(managed_by='central')
+        self.fields['item'].queryset = StoreItem.objects.filter(managed_by='central')
         # Allow any central store
         self.fields['central_store'].queryset = CentralStore.objects.all()
 
