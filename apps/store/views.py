@@ -63,6 +63,7 @@ from .serializers import (
     MaterialIssueNoteDetailSerializer,
     MaterialIssueNoteCreateSerializer,
     CentralStoreInventorySerializer,
+    CentralStoreInventoryCreateSerializer,
     InventoryTransactionSerializer,
 )
 from .permissions import (
@@ -585,6 +586,11 @@ class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
     filterset_fields = ['central_store', 'item', 'quantity_available']
     ordering_fields = ['quantity_available', 'updated_at']
     ordering = ['quantity_available']
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return CentralStoreInventoryCreateSerializer
+        return CentralStoreInventorySerializer
 
     def create(self, request, *args, **kwargs):
         """Only super admin can create central inventory"""
