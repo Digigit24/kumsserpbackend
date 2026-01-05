@@ -387,34 +387,42 @@ class MaterialIssueNoteCreateSerializer(serializers.ModelSerializer):
         return min_note
 
 
-class CentralStoreInventorySerializer(serializers.ModelSerializer):
-    item_name = serializers.CharField(write_only=True, required=False, help_text="Item name for creation")
+class CentralStoreInventoryListSerializer(serializers.ModelSerializer):
+    """For GET - returns item ID and name"""
     item_display = serializers.CharField(source='item.name', read_only=True)
-    item = serializers.PrimaryKeyRelatedField(queryset=StoreItem.objects.none(), required=False)
 
     class Meta:
         model = CentralStoreInventory
-        fields = ['id', 'item', 'item_name', 'item_display', 'central_store',
+        fields = ['id', 'item', 'item_display', 'central_store',
                   'quantity_on_hand', 'quantity_allocated', 'quantity_available',
                   'min_stock_level', 'reorder_point', 'max_stock_level',
                   'last_stock_update', 'unit_cost', 'is_active',
-                  'created_by', 'updated_by', 'created_at', 'updated_at']
+                  'created_at', 'updated_at']
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Allow all items
-        self.fields['item'].queryset = StoreItem.objects.all_colleges()
+
+class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
+    """For POST - only accepts item_name"""
+    item_name = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = CentralStoreInventory
+        fields = ['item_name', 'central_store', 'quantity_on_hand',
+                  'quantity_allocated', 'quantity_available', 'min_stock_level',
+                  'reorder_point', 'max_stock_level', 'unit_cost', 'is_active']
 
     def create(self, validated_data):
-        item_name = validated_data.pop('item_name', None)
-        if item_name and not validated_data.get('item'):
-            from .models import StoreItem
-            # Find item by name
-            item = StoreItem.objects.all_colleges().filter(name__iexact=item_name).first()
-            if not item:
-                raise serializers.ValidationError({'item_name': f'Item "{item_name}" not found'})
-            validated_data['item'] = item
+        item_name = validated_data.pop('item_name')
+        from .models import StoreItem
+        item = StoreItem.objects.all_colleges().filter(name__iexact=item_name).first()
+        if not item:
+            raise serializers.ValidationError({'item_name': f'Item "{item_name}" not found'})
+        validated_data['item'] = item
         return super().create(validated_data)
+
+
+class CentralStoreInventorySerializer(CentralStoreInventoryListSerializer):
+    """Default - same as list"""
+    pass
 
 
 class InventoryTransactionSerializer(serializers.ModelSerializer):
