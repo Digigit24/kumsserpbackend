@@ -27,6 +27,7 @@ class UserType(models.TextChoices):
     STUDENT = 'student', 'Student'
     PARENT = 'parent', 'Parent'
     STAFF = 'staff', 'Support Staff'
+    STORE_MANAGER = 'store_manager', 'Store Manager'
 
 
 class GenderChoices(models.TextChoices):
