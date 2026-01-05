@@ -388,18 +388,28 @@ class MaterialIssueNoteCreateSerializer(serializers.ModelSerializer):
 
 
 class CentralStoreInventorySerializer(serializers.ModelSerializer):
-    item_name = serializers.CharField(write_only=True, required=False)
+    item_name = serializers.CharField(write_only=True, required=False, help_text="Item name for creation")
     item_display = serializers.CharField(source='item.name', read_only=True)
+    item = serializers.PrimaryKeyRelatedField(queryset=StoreItem.objects.none(), required=False)
 
     class Meta:
         model = CentralStoreInventory
-        fields = '__all__'
+        fields = ['id', 'item', 'item_name', 'item_display', 'central_store',
+                  'quantity_on_hand', 'quantity_allocated', 'quantity_available',
+                  'min_stock_level', 'reorder_point', 'max_stock_level',
+                  'last_stock_update', 'unit_cost', 'is_active',
+                  'created_by', 'updated_by', 'created_at', 'updated_at']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Allow all items
+        self.fields['item'].queryset = StoreItem.objects.all_colleges()
 
     def create(self, validated_data):
         item_name = validated_data.pop('item_name', None)
-        if item_name:
+        if item_name and not validated_data.get('item'):
             from .models import StoreItem
-            # Find or create item by name
+            # Find item by name
             item = StoreItem.objects.all_colleges().filter(name__iexact=item_name).first()
             if not item:
                 raise serializers.ValidationError({'item_name': f'Item "{item_name}" not found'})
