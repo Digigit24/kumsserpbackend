@@ -165,6 +165,13 @@ def get_default_permissions(role):
                 'return': {'scope': 'team', 'enabled': True},
                 'export': {'scope': 'none', 'enabled': False},
             },
+            'communication': {
+                'create': {'scope': 'mine', 'enabled': True},
+                'read': {'scope': 'mine', 'enabled': True},
+                'update': {'scope': 'mine', 'enabled': True},
+                'delete': {'scope': 'mine', 'enabled': True},
+                'send': {'scope': 'all', 'enabled': True},
+            },
         },
         'student': {
             'attendance': {
@@ -206,6 +213,13 @@ def get_default_permissions(role):
                 'delete': {'scope': 'none', 'enabled': False},
                 'publish': {'scope': 'none', 'enabled': False},
                 'evaluate': {'scope': 'none', 'enabled': False},
+            },
+            'communication': {
+                'create': {'scope': 'mine', 'enabled': True},
+                'read': {'scope': 'mine', 'enabled': True},
+                'update': {'scope': 'mine', 'enabled': True},
+                'delete': {'scope': 'mine', 'enabled': True},
+                'send': {'scope': 'all', 'enabled': True},
             },
         },
         'hod': {
@@ -251,6 +265,13 @@ def get_default_permissions(role):
                 'return': {'scope': 'all', 'enabled': True},
                 'export': {'scope': 'all', 'enabled': True},
             },
+            'communication': {
+                'create': {'scope': 'mine', 'enabled': True},
+                'read': {'scope': 'mine', 'enabled': True},
+                'update': {'scope': 'mine', 'enabled': True},
+                'delete': {'scope': 'mine', 'enabled': True},
+                'send': {'scope': 'all', 'enabled': True},
+            },
         },
         'store_manager': {
             # Store manager has full access to store and inventory operations
@@ -267,6 +288,13 @@ def get_default_permissions(role):
                 'read': {'scope': 'all', 'enabled': True},
                 'generate': {'scope': 'all', 'enabled': True},
                 'export': {'scope': 'all', 'enabled': True},
+            },
+            'communication': {
+                'create': {'scope': 'mine', 'enabled': True},
+                'read': {'scope': 'mine', 'enabled': True},
+                'update': {'scope': 'mine', 'enabled': True},
+                'delete': {'scope': 'mine', 'enabled': True},
+                'send': {'scope': 'all', 'enabled': True},
             },
         },
     }

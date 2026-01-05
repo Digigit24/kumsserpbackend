@@ -142,3 +142,14 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
     filterset_fields = ['sender', 'receiver', 'is_read', 'is_active']
     ordering_fields = ['timestamp', 'created_at']
     ordering = ['-timestamp']
+
+    def get_queryset(self):
+        """Filter messages to show only those sent to or from the current user."""
+        queryset = super().get_queryset()
+        user = self.request.user
+
+        # Only show messages where user is sender OR receiver
+        from django.db.models import Q
+        queryset = queryset.filter(Q(sender=user) | Q(receiver=user))
+
+        return queryset
