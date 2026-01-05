@@ -13,14 +13,20 @@ except Exception:
 
 
 def generate_document_number(prefix, model_class, field_name='created_at'):
-    """Generate sequential number PREFIX-YYYY-NNNNN with yearly reset."""
+    """Generate sequential number PREFIX-YYYY-NNNNN with yearly reset (global across all colleges)."""
     now = timezone.now()
     year = now.year
     with transaction.atomic():
         filter_kwargs = {}
         if hasattr(model_class, field_name):
             filter_kwargs[f"{field_name}__year"] = year
-        last_record = model_class.objects.filter(**filter_kwargs).order_by('-id').first()
+
+        # Use all_colleges() if available to get global count across all colleges
+        manager = model_class.objects
+        if hasattr(manager, 'all_colleges'):
+            manager = manager.all_colleges()
+
+        last_record = manager.filter(**filter_kwargs).order_by('-id').first()
         last_seq = 0
         if last_record:
             for attr in [

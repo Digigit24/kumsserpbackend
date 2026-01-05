@@ -97,6 +97,27 @@ class StoreItemViewSet(CollegeScopedModelViewSet):
     ordering_fields = ['name', 'stock_quantity', 'min_stock_level', 'price', 'created_at']
     ordering = ['name']
 
+    def create(self, request, *args, **kwargs):
+        """Prevent college_admin from creating central store items"""
+        from rest_framework.exceptions import PermissionDenied
+
+        # Check if user is trying to create a central store item
+        managed_by = request.data.get('managed_by', 'college')
+        if managed_by == 'central' and request.user.user_type == 'college_admin':
+            raise PermissionDenied("College admins cannot create central store items")
+
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        """Prevent college_admin from updating items to central"""
+        from rest_framework.exceptions import PermissionDenied
+
+        managed_by = request.data.get('managed_by')
+        if managed_by == 'central' and request.user.user_type == 'college_admin':
+            raise PermissionDenied("College admins cannot modify central store items")
+
+        return super().update(request, *args, **kwargs)
+
 
 class VendorViewSet(CollegeScopedModelViewSet):
     queryset = Vendor.objects.all_colleges().select_related('college')
