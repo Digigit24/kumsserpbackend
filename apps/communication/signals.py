@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from .models import Notice, NotificationRule, Event, BulkMessage, MessageLog
 from .tasks import process_bulk_message
+from .utils import broadcast_college_notification
 
 
 @receiver(post_save, sender=Notice)
@@ -23,6 +24,12 @@ def notice_post_save(sender, instance, created, **kwargs):
                 'created_by': instance.created_by,
                 'updated_by': instance.updated_by,
             }
+        )
+        broadcast_college_notification(
+            college_id=instance.college_id,
+            title="New Notice Published",
+            message=instance.title,
+            notification_type='notice'
         )
         print(f"[Communication] Notice '{instance.title}' published.")
 

@@ -1,5 +1,6 @@
 from rest_framework import filters, viewsets
 from rest_framework.permissions import IsAuthenticated
+from apps.core.permissions.drf_permissions import ResourcePermission
 from django_filters.rest_framework import DjangoFilterBackend
 
 from apps.core.mixins import CollegeScopedMixin, CollegeScopedModelViewSet
@@ -55,7 +56,8 @@ class RelatedCollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet
 class NoticeViewSet(CollegeScopedModelViewSet):
     queryset = Notice.objects.all_colleges()
     serializer_class = NoticeSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ResourcePermission]
+    resource_name = 'communication'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['publish_date', 'is_published', 'is_urgent', 'is_active']
     search_fields = ['title', 'content']
@@ -75,7 +77,8 @@ class NoticeVisibilityViewSet(RelatedCollegeScopedModelViewSet):
 class EventViewSet(CollegeScopedModelViewSet):
     queryset = Event.objects.all_colleges()
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ResourcePermission]
+    resource_name = 'communication'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['event_date', 'registration_required', 'is_active']
     search_fields = ['title', 'description', 'organizer']
@@ -95,7 +98,8 @@ class EventRegistrationViewSet(RelatedCollegeScopedModelViewSet):
 class MessageTemplateViewSet(CollegeScopedModelViewSet):
     queryset = MessageTemplate.objects.all_colleges()
     serializer_class = MessageTemplateSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ResourcePermission]
+    resource_name = 'communication'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['message_type', 'is_active']
     search_fields = ['name', 'code']
@@ -106,7 +110,8 @@ class MessageTemplateViewSet(CollegeScopedModelViewSet):
 class BulkMessageViewSet(CollegeScopedModelViewSet):
     queryset = BulkMessage.objects.all_colleges().select_related('template', 'college')
     serializer_class = BulkMessageSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ResourcePermission]
+    resource_name = 'communication'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'message_type', 'scheduled_at', 'is_active']
     search_fields = ['title']

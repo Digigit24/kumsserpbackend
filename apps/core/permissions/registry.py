@@ -215,11 +215,11 @@ def get_default_permissions(role):
                 'evaluate': {'scope': 'none', 'enabled': False},
             },
             'communication': {
-                'create': {'scope': 'mine', 'enabled': True},
-                'read': {'scope': 'mine', 'enabled': True},
-                'update': {'scope': 'mine', 'enabled': True},
-                'delete': {'scope': 'mine', 'enabled': True},
-                'send': {'scope': 'all', 'enabled': True},
+                'create': {'scope': 'none', 'enabled': False},
+                'read': {'scope': 'all', 'enabled': True},
+                'update': {'scope': 'none', 'enabled': False},
+                'delete': {'scope': 'none', 'enabled': False},
+                'send': {'scope': 'none', 'enabled': False},
             },
         },
         'hod': {

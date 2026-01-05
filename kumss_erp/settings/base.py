@@ -26,6 +26,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'grappelli',
 
     'django.contrib.admin',
@@ -67,9 +68,21 @@ INSTALLED_APPS = [
     'apps.stats',
     #'apps.core.apps.CoreConfig',
 
+    'channels',
     'debug_toolbar',
 
 ]
+
+ASGI_APPLICATION = 'kumss_erp.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [config('REDIS_URL', default='redis://127.0.0.1:6379')],
+        },
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
