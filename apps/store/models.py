@@ -935,10 +935,10 @@ class StoreIndent(CollegeScopedModel):
         self.save(update_fields=['status', 'rejection_reason', 'updated_at'])
 
     def super_admin_approve(self, user=None):
-        """Super admin approves - final approval, status set to approved"""
+        """Super admin approves - status set to super_admin_approved"""
         if self.status != 'pending_super_admin':
             raise ValidationError('Invalid status for super admin approval')
-        self.status = 'approved'
+        self.status = 'super_admin_approved'
         self.approved_by = user
         self.approved_date = timezone.now()
         self.save(update_fields=['status', 'approved_by', 'approved_date', 'updated_at'])
