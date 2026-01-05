@@ -272,8 +272,8 @@ class StudentViewSet(CollegeScopedModelViewSet):
 )
 class GuardianViewSet(RelatedCollegeScopedModelViewSet):
     """ViewSet for managing guardians."""
-    queryset = Guardian.objects.select_related('created_by', 'updated_by')
-    related_college_lookup = 'studentguardian__student__college_id'
+    queryset = Guardian.objects.select_related('user')
+    related_college_lookup = 'students__student__college_id'
     serializer_class = GuardianSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

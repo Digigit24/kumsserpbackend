@@ -15,12 +15,19 @@ django.setup()
 
 # Import routing after django.setup()
 import apps.communication.routing
+from apps.communication.middleware import TokenAuthMiddleware
+
+from channels.security.websocket import AllowedHostsOriginValidator
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
-    "websocket": AuthMiddlewareStack(
-        URLRouter(
-            apps.communication.routing.websocket_urlpatterns
+    "websocket": AllowedHostsOriginValidator(
+        AuthMiddlewareStack(
+            TokenAuthMiddleware(
+                URLRouter(
+                    apps.communication.routing.websocket_urlpatterns
+                )
+            )
         )
     ),
 })
