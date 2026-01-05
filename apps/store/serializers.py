@@ -325,7 +325,7 @@ class IndentItemCreateSerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
         # Allow central store items from any college
         from .models import StoreItem
-        self.fields['central_store_item'].queryset = StoreItem.objects.filter(managed_by='central')
+        self.fields['central_store_item'].queryset = StoreItem.objects.all_colleges().filter(managed_by='central')
 
 
 class StoreIndentListSerializer(serializers.ModelSerializer):
