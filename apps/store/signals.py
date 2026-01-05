@@ -252,58 +252,9 @@ def goods_receipt_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=StoreIndent)
 def store_indent_post_save(sender, instance, created, **kwargs):
-    """Auto-submit indent on creation and create approval request"""
-
-    # If just created with draft status, auto-submit it
-    if created and instance.status == 'draft':
-        instance.status = 'submitted'
-        instance.save(update_fields=['status'])
-        return  # Signal will re-trigger with status='submitted'
-
-    # Create approval request when submitted
-    if instance.status == 'submitted' and not instance.approval_request_id:
-        college_id = getattr(instance.college, 'id', None)
-        requester = instance.requesting_store_manager or instance.created_by
-        if college_id and requester:
-            try:
-                from django.contrib.auth import get_user_model
-                User = get_user_model()
-
-                # Get approvers first
-                approvers = User.objects.filter(
-                    college_id=college_id,
-                    user_type__in=['college_admin', 'staff']
-                )
-
-                if not approvers.exists():
-                    print(f"[Store] No approvers found for college {college_id}")
-                    return
-
-                approval = ApprovalRequest.objects.create(
-                    college_id=college_id,
-                    requester=requester,
-                    request_type='store_indent',
-                    title=f"Store Indent {instance.indent_number}",
-                    description=instance.justification,
-                    content_type=ContentType.objects.get_for_model(StoreIndent),
-                    object_id=instance.id,
-                    priority=instance.priority,
-                    status='pending'
-                )
-
-                # Set approvers
-                approval.approvers.set(approvers)
-                approval.save()
-
-                instance.approval_request = approval
-                instance.status = 'pending_approval'
-                instance.save(update_fields=['approval_request', 'status', 'updated_at'])
-
-                print(f"[Store] Created approval {approval.id} for indent {instance.indent_number} with {approvers.count()} approvers")
-            except Exception as exc:
-                print(f"[Store] Error creating approval for indent {instance.id}: {exc}")
-                import traceback
-                traceback.print_exc()
+    """Disabled - using manual two-level approval flow instead"""
+    # Manual flow: draft → pending_college_approval → pending_super_admin → super_admin_approved
+    pass
 
 
 @receiver(post_save, sender=MaterialIssueNote)
