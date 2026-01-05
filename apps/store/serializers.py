@@ -506,7 +506,7 @@ class CentralStoreInventorySerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
         from .models import StoreItem, CentralStore
         # Allow items from any college that are managed centrally
-        self.fields['item'].queryset = StoreItem.objects.filter(managed_by='central')
+        self.fields['item'].queryset = StoreItem.objects.all_colleges().filter(managed_by='central')
         # Allow any central store
         self.fields['central_store'].queryset = CentralStore.objects.all()
 
