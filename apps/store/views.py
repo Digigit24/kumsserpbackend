@@ -586,6 +586,13 @@ class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
     ordering_fields = ['quantity_available', 'updated_at']
     ordering = ['quantity_available']
 
+    def create(self, request, *args, **kwargs):
+        """Only super admin can create central inventory"""
+        if not request.user.is_superuser:
+            return Response({'detail': 'Only super admin can add central inventory items'},
+                          status=status.HTTP_403_FORBIDDEN)
+        return super().create(request, *args, **kwargs)
+
     @action(detail=False, methods=['get'])
     def low_stock(self, request):
         qs = self.filter_queryset(self.get_queryset()).filter(quantity_available__lte=models.F('reorder_point'))

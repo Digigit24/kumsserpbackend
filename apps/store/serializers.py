@@ -388,20 +388,23 @@ class MaterialIssueNoteCreateSerializer(serializers.ModelSerializer):
 
 
 class CentralStoreInventorySerializer(serializers.ModelSerializer):
-    item = serializers.PrimaryKeyRelatedField(queryset=StoreItem.objects.none())
-    central_store = serializers.PrimaryKeyRelatedField(queryset=CentralStore.objects.none())
+    item_name = serializers.CharField(write_only=True, required=False)
+    item_display = serializers.CharField(source='item.name', read_only=True)
 
     class Meta:
         model = CentralStoreInventory
         fields = '__all__'
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        from .models import StoreItem, CentralStore
-        # Allow items from any college
-        self.fields['item'].queryset = StoreItem.objects.all_colleges()
-        # Allow any central store
-        self.fields['central_store'].queryset = CentralStore.objects.all()
+    def create(self, validated_data):
+        item_name = validated_data.pop('item_name', None)
+        if item_name:
+            from .models import StoreItem
+            # Find or create item by name
+            item = StoreItem.objects.all_colleges().filter(name__iexact=item_name).first()
+            if not item:
+                raise serializers.ValidationError({'item_name': f'Item "{item_name}" not found'})
+            validated_data['item'] = item
+        return super().create(validated_data)
 
 
 class InventoryTransactionSerializer(serializers.ModelSerializer):
