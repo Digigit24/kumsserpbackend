@@ -77,6 +77,7 @@ class StudentSerializer(TenantAuditMixin, serializers.ModelSerializer):
     program_name = serializers.CharField(source='program.name', read_only=True)
     current_class_name = serializers.CharField(source='current_class.name', read_only=True)
     current_section_name = serializers.CharField(source='current_section.name', read_only=True)
+    academic_year_name = serializers.CharField(source='academic_year.name', read_only=True)
     category_name = serializers.CharField(source='category.name', read_only=True)
     group_name = serializers.CharField(source='group.name', read_only=True)
     full_name = serializers.CharField(source='get_full_name', read_only=True)
@@ -89,7 +90,7 @@ class StudentSerializer(TenantAuditMixin, serializers.ModelSerializer):
             'admission_number', 'admission_date', 'admission_type', 'roll_number',
             'registration_number', 'program', 'program_name',
             'current_class', 'current_class_name', 'current_section', 'current_section_name',
-            'academic_year', 'category', 'category_name', 'group', 'group_name',
+            'academic_year', 'academic_year_name', 'category', 'category_name', 'group', 'group_name',
             'first_name', 'middle_name', 'last_name', 'full_name',
             'date_of_birth', 'gender', 'blood_group', 'email', 'phone', 'alternate_phone',
             'photo', 'nationality', 'religion', 'caste', 'mother_tongue',
@@ -99,7 +100,7 @@ class StudentSerializer(TenantAuditMixin, serializers.ModelSerializer):
         ]
         read_only_fields = [
             'id', 'full_name', 'college_name', 'program_name', 'current_class_name',
-            'current_section_name', 'category_name', 'group_name', 'user_details',
+            'current_section_name', 'academic_year_name', 'category_name', 'group_name', 'user_details',
             'created_by', 'updated_by', 'created_at', 'updated_at'
         ]
 
