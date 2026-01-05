@@ -180,20 +180,9 @@ class SupplierQuotationDetailSerializer(serializers.ModelSerializer):
 
 
 class SupplierQuotationCreateSerializer(serializers.ModelSerializer):
-    create_new_supplier = serializers.BooleanField(write_only=True, required=False, default=False)
-    supplier_data = SupplierMasterCreateSerializer(write_only=True, required=False)
-
     class Meta:
         model = SupplierQuotation
-        fields = '__all__'
-
-    def create(self, validated_data):
-        create_new_supplier = validated_data.pop('create_new_supplier', False)
-        supplier_data = validated_data.pop('supplier_data', None)
-        if create_new_supplier and supplier_data:
-            supplier = SupplierMaster.objects.create(**supplier_data)
-            validated_data['supplier'] = supplier
-        return super().create(validated_data)
+        fields = ['quotation_file']  # Only accept file upload
 
 
 class QuotationComparisonSerializer(serializers.Serializer):
@@ -409,8 +398,8 @@ class CentralStoreInventorySerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         from .models import StoreItem, CentralStore
-        # Allow items from any college that are managed centrally
-        self.fields['item'].queryset = StoreItem.objects.filter(managed_by='central')
+        # Allow items from any college
+        self.fields['item'].queryset = StoreItem.objects.all_colleges()
         # Allow any central store
         self.fields['central_store'].queryset = CentralStore.objects.all()
 

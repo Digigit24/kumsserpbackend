@@ -62,6 +62,9 @@ class NotificationRuleSerializer(serializers.ModelSerializer):
 
 
 class ChatMessageSerializer(serializers.ModelSerializer):
+    sender_name = serializers.CharField(source='sender.get_full_name', read_only=True)
+    receiver_name = serializers.CharField(source='receiver.get_full_name', read_only=True)
+
     class Meta:
         model = ChatMessage
         fields = '__all__'
