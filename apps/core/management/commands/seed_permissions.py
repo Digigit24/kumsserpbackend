@@ -61,7 +61,7 @@ class Command(BaseCommand):
 
         for college in colleges:
             for role in roles:
-                permission, created = Permission.objects.get_or_create(
+                permission, created = Permission.objects.all_colleges().get_or_create(
                     college=college,
                     role=role,
                     defaults={'permissions_json': get_default_permissions(role)}
