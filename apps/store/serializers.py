@@ -133,9 +133,23 @@ class RequirementItemCreateSerializer(serializers.ModelSerializer):
 
 
 class ProcurementRequirementListSerializer(serializers.ModelSerializer):
+    is_draft_submitted = serializers.SerializerMethodField()
+    is_quotation_approved = serializers.SerializerMethodField()
+    is_po_created = serializers.SerializerMethodField()
+
     class Meta:
         model = ProcurementRequirement
-        fields = ['id', 'requirement_number', 'title', 'status', 'urgency', 'requirement_date', 'required_by_date', 'central_store']
+        fields = ['id', 'requirement_number', 'title', 'status', 'urgency', 'requirement_date',
+                  'required_by_date', 'central_store', 'is_draft_submitted', 'is_quotation_approved', 'is_po_created']
+
+    def get_is_draft_submitted(self, obj):
+        return obj.status in ['submitted', 'pending_approval', 'approved', 'quotations_received', 'po_created', 'fulfilled']
+
+    def get_is_quotation_approved(self, obj):
+        return obj.quotations.filter(is_selected=True).exists()
+
+    def get_is_po_created(self, obj):
+        return obj.status in ['po_created', 'fulfilled']
 
 
 class ProcurementRequirementDetailSerializer(serializers.ModelSerializer):
@@ -334,11 +348,28 @@ class StoreIndentListSerializer(serializers.ModelSerializer):
     college_name = serializers.CharField(source='college.name', read_only=True)
     central_store_name = serializers.CharField(source='central_store.name', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
+    is_prepared = serializers.SerializerMethodField()
+    is_dispatched = serializers.SerializerMethodField()
+    is_in_transit = serializers.SerializerMethodField()
+    is_received = serializers.SerializerMethodField()
 
     class Meta:
         model = StoreIndent
         fields = ['id', 'indent_number', 'college', 'college_name', 'central_store',
-                  'central_store_name', 'status', 'status_display', 'priority', 'indent_date']
+                  'central_store_name', 'status', 'status_display', 'priority', 'indent_date',
+                  'is_prepared', 'is_dispatched', 'is_in_transit', 'is_received']
+
+    def get_is_prepared(self, obj):
+        return obj.material_issues.filter(status='prepared').exists()
+
+    def get_is_dispatched(self, obj):
+        return obj.material_issues.filter(status='dispatched').exists()
+
+    def get_is_in_transit(self, obj):
+        return obj.material_issues.filter(status='in_transit').exists()
+
+    def get_is_received(self, obj):
+        return obj.material_issues.filter(status='received').exists()
 
 
 class StoreIndentDetailSerializer(serializers.ModelSerializer):

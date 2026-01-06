@@ -605,6 +605,12 @@ class UserProfileViewSet(CollegeScopedModelViewSet):
     ordering_fields = ['created_at']
     ordering = ['-created_at']
 
+    def get_queryset(self):
+        """Return all profiles for superuser, college-scoped for others"""
+        if self.request.user.is_superuser:
+            return UserProfile.objects.all()
+        return super().get_queryset()
+
     def perform_destroy(self, instance):
         """Soft delete instead of hard delete."""
         instance.soft_delete()

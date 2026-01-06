@@ -260,6 +260,13 @@ class CentralStoreViewSet(viewsets.ModelViewSet):
         serializer = StoreIndentListSerializer(indents, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'], url_path='list', permission_classes=[IsCentralStoreManager])
+    def stores_list(self, request):
+        """GET /api/v1/store/central-stores/list/ - List all stores"""
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = CentralStoreListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class ProcurementRequirementViewSet(viewsets.ModelViewSet):
     queryset = ProcurementRequirement.objects.all().select_related('central_store')
