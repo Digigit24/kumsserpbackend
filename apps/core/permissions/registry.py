@@ -307,5 +307,37 @@ def get_default_permissions(role):
                 'send': {'scope': 'all', 'enabled': True},
             },
         },
+        'central_manager': {
+            # Central manager has full access to all store operations across all colleges
+            'store': {
+                'create': {'scope': 'all', 'enabled': True},
+                'read': {'scope': 'all', 'enabled': True},
+                'update': {'scope': 'all', 'enabled': True},
+                'delete': {'scope': 'all', 'enabled': True},
+                'issue': {'scope': 'all', 'enabled': True},
+                'return': {'scope': 'all', 'enabled': True},
+                'export': {'scope': 'all', 'enabled': True},
+            },
+            'accounting': {
+                'create': {'scope': 'all', 'enabled': True},
+                'read': {'scope': 'all', 'enabled': True},
+                'update': {'scope': 'all', 'enabled': True},
+                'delete': {'scope': 'all', 'enabled': True},
+                'export': {'scope': 'all', 'enabled': True},
+                'generate_report': {'scope': 'all', 'enabled': True},
+            },
+            'reports': {
+                'read': {'scope': 'all', 'enabled': True},
+                'generate': {'scope': 'all', 'enabled': True},
+                'export': {'scope': 'all', 'enabled': True},
+            },
+            'communication': {
+                'create': {'scope': 'all', 'enabled': True},
+                'read': {'scope': 'all', 'enabled': True},
+                'update': {'scope': 'all', 'enabled': True},
+                'delete': {'scope': 'all', 'enabled': True},
+                'send': {'scope': 'all', 'enabled': True},
+            },
+        },
     }
     return defaults.get(role, {})

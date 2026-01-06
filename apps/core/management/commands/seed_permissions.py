@@ -32,7 +32,7 @@ class Command(BaseCommand):
         overwrite = options.get('overwrite', False)
 
         # Define roles to seed
-        roles = ['admin', 'college_admin', 'teacher', 'student', 'hod', 'staff']
+        roles = ['admin', 'college_admin', 'central_manager', 'teacher', 'student', 'hod', 'staff', 'store_manager']
 
         if role_filter:
             if role_filter not in roles:
