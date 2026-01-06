@@ -1,8 +1,10 @@
 import json
+import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -33,38 +35,71 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         """
         Handle incoming WebSocket messages.
-        Expects JSON: {"receiver_id": int, "message": str}
+        Expects JSON: {"receiver_id": int, "message": str, "attachment": str (optional)}
         """
-        data = json.loads(text_data)
-        receiver_id = data.get("receiver_id")
-        message_content = data.get("message")
+        try:
+            data = json.loads(text_data)
+            receiver_id = data.get("receiver_id")
+            message_content = data.get("message", "").strip()
+            attachment = data.get("attachment")
 
-        if not receiver_id or not message_content:
-            return
+            # Validate input
+            if not receiver_id:
+                await self.send(text_data=json.dumps({
+                    "type": "error",
+                    "error": "receiver_id is required"
+                }))
+                return
 
-        # Save message to database
-        saved_msg = await self.save_message(receiver_id, message_content)
-        
-        if saved_msg:
-            # Send message to receiver's group
-            receiver_group = f"user_{receiver_id}"
-            await self.channel_layer.group_send(
-                receiver_group,
-                {
-                    "type": "chat_message",
+            if not message_content and not attachment:
+                await self.send(text_data=json.dumps({
+                    "type": "error",
+                    "error": "message or attachment is required"
+                }))
+                return
+
+            # Save message to database
+            saved_msg = await self.save_message(receiver_id, message_content, attachment)
+
+            if saved_msg:
+                # Send message to receiver's group
+                receiver_group = f"user_{receiver_id}"
+                await self.channel_layer.group_send(
+                    receiver_group,
+                    {
+                        "type": "chat_message",
+                        "id": saved_msg.id,
+                        "sender_id": self.user.id,
+                        "sender_name": self.user.get_full_name(),
+                        "message": message_content,
+                        "attachment": attachment,
+                        "timestamp": str(saved_msg.timestamp),
+                    }
+                )
+
+                # Send confirmation back to sender
+                await self.send(text_data=json.dumps({
+                    "type": "message_sent",
                     "id": saved_msg.id,
-                    "sender_id": self.user.id,
-                    "sender_name": self.user.get_full_name(),
-                    "message": message_content,
-                    "timestamp": str(saved_msg.timestamp),
-                }
-            )
-            
-            # Send confirmation back to sender
+                    "status": "delivered"
+                }))
+            else:
+                await self.send(text_data=json.dumps({
+                    "type": "error",
+                    "error": "Failed to send message. Receiver not found."
+                }))
+
+        except json.JSONDecodeError:
+            logger.error(f"Invalid JSON received from user {self.user.id}")
             await self.send(text_data=json.dumps({
-                "type": "message_sent",
-                "id": saved_msg.id,
-                "status": "delivered"
+                "type": "error",
+                "error": "Invalid JSON format"
+            }))
+        except Exception as e:
+            logger.error(f"Error in ChatConsumer.receive: {str(e)}", exc_info=True)
+            await self.send(text_data=json.dumps({
+                "type": "error",
+                "error": "An error occurred while processing your message"
             }))
 
     async def chat_message(self, event):
@@ -74,16 +109,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(event))
 
     @database_sync_to_async
-    def save_message(self, receiver_id, message):
+    def save_message(self, receiver_id, message, attachment=None):
         from .models import ChatMessage
         try:
             receiver = User.objects.get(id=receiver_id)
             return ChatMessage.objects.create(
                 sender=self.user,
                 receiver=receiver,
-                message=message
+                message=message,
+                attachment=attachment
             )
         except User.DoesNotExist:
+            logger.warning(f"User {receiver_id} not found when saving message")
+            return None
+        except Exception as e:
+            logger.error(f"Error saving message: {str(e)}", exc_info=True)
             return None
 
 
