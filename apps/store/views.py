@@ -596,8 +596,13 @@ class MaterialIssueNoteViewSet(RelatedCollegeScopedModelViewSet):
         """Return all for superuser/central_manager, college-scoped for others"""
         user = self.request.user
         if user.is_superuser or getattr(user, 'user_type', None) == 'central_manager':
-            return MaterialIssueNote.objects.select_related('indent', 'central_store', 'receiving_college')
-        return super().get_queryset()
+            return MaterialIssueNote.objects.select_related('indent', 'central_store', 'receiving_college').all()
+
+        # For regular users, apply college filtering
+        college_id = self.request.headers.get('X-College-Id')
+        if college_id:
+            return MaterialIssueNote.objects.filter(receiving_college_id=college_id).select_related('indent', 'central_store', 'receiving_college')
+        return MaterialIssueNote.objects.none()
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy', 'dispatch']:
