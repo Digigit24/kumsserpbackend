@@ -45,11 +45,16 @@ class CollegeMiddleware(MiddlewareMixin):
         if college_header:
             # Check for special 'all' value for superuser/staff
             if college_header.lower() == 'all':
-                # Only allow 'all' for authenticated superuser/staff
-                if user and user.is_authenticated and (user.is_superuser or user.is_staff):
+                # Allow 'all' for superuser, staff, and central managers
+                is_global_user = (
+                    user.is_superuser or 
+                    user.is_staff or 
+                    getattr(user, 'user_type', None) == 'central_manager'
+                )
+                if user and user.is_authenticated and is_global_user:
                     set_current_college_id('all')
                     request.current_college = None  # No specific college
-                # For non-superuser, treat 'all' as invalid (will be None)
+                # For regular users, 'all' is invalid (context remains None)
             else:
                 # Normal integer college ID
                 college = None
