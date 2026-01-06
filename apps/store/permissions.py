@@ -19,16 +19,18 @@ def _user_college_id(user):
 
 class IsCentralStoreManagerOrReadOnly(BasePermission):
     def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
         if request.method in SAFE_METHODS:
-            return True
-        # Only super admin can modify central store
-        return request.user and request.user.is_authenticated and request.user.is_superuser
+            return request.user.is_superuser or request.user.user_type == 'central_manager'
+        return request.user.is_superuser or request.user.user_type == 'central_manager'
 
 
 class IsCentralStoreManager(BasePermission):
     def has_permission(self, request, view):
-        # Central store only accessible by super admin
-        return request.user and request.user.is_authenticated and request.user.is_superuser
+        if not request.user or not request.user.is_authenticated:
+            return False
+        return request.user.is_superuser or request.user.user_type == 'central_manager'
 
 
 class IsCollegeStoreManager(BasePermission):
