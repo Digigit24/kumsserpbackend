@@ -107,6 +107,19 @@ class CentralStoreSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class CentralStoreListSerializer(serializers.ModelSerializer):
+    """List all stores with manager and creation details"""
+    manager_name = serializers.CharField(source='manager.get_full_name', read_only=True)
+    store_type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CentralStore
+        fields = ['id', 'name', 'code', 'manager', 'manager_name', 'store_type', 'created_at', 'is_active']
+
+    def get_store_type(self, obj):
+        return 'Central Store'
+
+
 class RequirementItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = RequirementItem

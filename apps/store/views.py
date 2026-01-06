@@ -43,6 +43,7 @@ from .serializers import (
     SupplierMasterCreateSerializer,
     SupplierMasterUpdateSerializer,
     CentralStoreSerializer,
+    CentralStoreListSerializer,
     ProcurementRequirementListSerializer,
     ProcurementRequirementDetailSerializer,
     ProcurementRequirementCreateSerializer,
@@ -207,7 +208,7 @@ class SupplierMasterViewSet(viewsets.ModelViewSet):
 
 
 class CentralStoreViewSet(viewsets.ModelViewSet):
-    queryset = CentralStore.objects.all()
+    queryset = CentralStore.objects.select_related('manager').all()
     serializer_class = CentralStoreSerializer
     permission_classes = [IsCentralStoreManagerOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -215,6 +216,11 @@ class CentralStoreViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'code', 'city']
     ordering_fields = ['name', 'code', 'created_at']
     ordering = ['name']
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return CentralStoreListSerializer
+        return CentralStoreSerializer
 
     @action(detail=True, methods=['get'], permission_classes=[IsCentralStoreManager])
     def inventory(self, request, pk=None):
