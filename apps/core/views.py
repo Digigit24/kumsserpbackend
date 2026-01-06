@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+import uuid
 from drf_spectacular.utils import (
     extend_schema,
     extend_schema_view,
@@ -615,8 +616,46 @@ class PermissionViewSet(CollegeScopedModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         """
-        Retrieve permission details and include current user's permissions.
+        Retrieve permission details.
+        If PK is a UUID, returns permissions for the User with that ID.
+        If PK is an ID (int), returns the Permission object details + requesting user's permissions.
         """
+        pk = kwargs.get('pk')
+        is_uuid = False
+        try:
+            if pk:
+                uuid.UUID(str(pk))
+                is_uuid = True
+        except ValueError:
+            is_uuid = False
+
+        if is_uuid:
+            from apps.accounts.models import User
+            from apps.core.permissions.manager import get_user_permissions
+            from apps.core.utils import get_current_college_id
+
+            try:
+                target_user = User.objects.get(id=pk)
+            except User.DoesNotExist:
+                return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+            college = None
+            college_id = get_current_college_id()
+            if college_id and college_id != 'all':
+                college = College.objects.filter(id=college_id).first()
+                
+            permissions = get_user_permissions(target_user, college)
+            role = getattr(target_user, 'user_type', 'student')
+
+            return Response({
+                'user_id': str(target_user.id),
+                'username': target_user.username,
+                'is_superadmin': getattr(target_user, 'is_superadmin', False),
+                'college_id': college_id,
+                'role': role,
+                'permissions': permissions,
+            })
+
         response = super().retrieve(request, *args, **kwargs)
 
         # Add user permissions to the response
