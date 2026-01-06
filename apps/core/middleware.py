@@ -28,10 +28,14 @@ class CollegeMiddleware(MiddlewareMixin):
         """
         clear_current_college_id()
 
-        # Superadmin bypasses college scoping
+        # Superadmin and Central Managers bypass college scoping
         user = getattr(request, 'user', None)
-        if user and user.is_authenticated and getattr(user, 'is_superadmin', False):
-            # Don't set college context - superadmin sees everything
+        is_global_user = user and user.is_authenticated and (
+            getattr(user, 'is_superadmin', False) or 
+            getattr(user, 'user_type', None) == 'central_manager'
+        )
+        if is_global_user:
+            # Don't set college context - they see everything
             set_current_request(request)
             request.current_college = None
             return
@@ -45,11 +49,10 @@ class CollegeMiddleware(MiddlewareMixin):
         if college_header:
             # Check for special 'all' value for superuser/staff
             if college_header.lower() == 'all':
-                # Only allow 'all' for authenticated superuser/staff
-                if user and user.is_authenticated and (user.is_superuser or user.is_staff):
-                    set_current_college_id('all')
-                    request.current_college = None  # No specific college
-                # For non-superuser, treat 'all' as invalid (will be None)
+                # Set context to 'all'. Security checks are handled in view mixins
+                # because Token authentication hasn't run yet at this middleware stage.
+                set_current_college_id('all')
+                request.current_college = None
             else:
                 # Normal integer college ID
                 college = None

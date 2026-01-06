@@ -42,6 +42,8 @@ def get_user_permissions(user, college=None):
         'parent': 'student',  # Parents have same permissions as students
         'staff': 'staff',
         'store_manager': 'store_manager',
+        'central_manager': 'central_manager',
+        'hod': 'hod',
     }
 
     role = role_mapping.get(role, 'student')

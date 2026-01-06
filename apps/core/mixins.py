@@ -30,7 +30,12 @@ class CollegeScopedMixin:
         Superusers/staff bypass the requirement and get unscoped access.
         """
         user = getattr(self.request, 'user', None)
-        return not (user and (user.is_superuser or user.is_staff))
+        is_global_user = (
+            user.is_superuser or 
+            user.is_staff or 
+            getattr(user, 'user_type', None) == 'central_manager'
+        )
+        return not (user and is_global_user)
 
     def get_college_id(self, required=False):
         """
@@ -69,8 +74,13 @@ class CollegeScopedMixin:
                 return manager.all_colleges()
             return queryset.model._default_manager.all()
 
-        # Superusers/staff without any header also get all records
-        if user and (user.is_superuser or user.is_staff) and not college_id:
+        # Global users (superusers, staff, central managers) without any header also get all records
+        is_global_user = (
+            user.is_superuser or 
+            user.is_staff or 
+            getattr(user, 'user_type', None) == 'central_manager'
+        )
+        if user and is_global_user and not college_id:
             logger.debug("Superuser/staff detected, no college_id passed")
             manager = queryset.model.objects
             if hasattr(manager, 'all_colleges'):
@@ -269,8 +279,12 @@ class RelatedCollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet
         queryset = super().get_queryset()
         college_id = self.get_college_id(required=False)
         user = getattr(self.request, 'user', None)
-
-        if college_id == 'all' or (user and (user.is_superuser or user.is_staff) and not college_id):
+        is_global_user = (
+            user.is_superuser or 
+            user.is_staff or 
+            getattr(user, 'user_type', None) == 'central_manager'
+        )
+        if college_id == 'all' or (user and is_global_user and not college_id):
             return queryset
 
         if not college_id:

@@ -581,8 +581,59 @@ class PermissionViewSet(CollegeScopedModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['college', 'role', 'is_active']
     search_fields = ['role']
-    ordering_fields = ['college', 'role']
     ordering = ['college', 'role']
+    ordering_fields = ['college', 'role']
+
+    def list(self, request, *args, **kwargs):
+        """
+        List all permissions and include current user's permissions in the response.
+        """
+        response = super().list(request, *args, **kwargs)
+
+        # Add user permissions to the response
+        from apps.core.permissions.manager import get_user_permissions
+        from apps.core.utils import get_current_college_id
+
+        college = None
+        college_id = get_current_college_id()
+        if college_id and college_id != 'all':
+            college = College.objects.filter(id=college_id).first()
+
+        user_permissions = get_user_permissions(request.user, college)
+
+        # If response.data is a dict (happens with pagination)
+        if isinstance(response.data, dict):
+            response.data['user_permissions'] = user_permissions
+        else:
+            # If not paginated, response.data is a list
+            response.data = {
+                'results': response.data,
+                'user_permissions': user_permissions
+            }
+
+        return response
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve permission details and include current user's permissions.
+        """
+        response = super().retrieve(request, *args, **kwargs)
+
+        # Add user permissions to the response
+        from apps.core.permissions.manager import get_user_permissions
+        from apps.core.utils import get_current_college_id
+
+        college = None
+        college_id = get_current_college_id()
+        if college_id and college_id != 'all':
+            college = College.objects.filter(id=college_id).first()
+
+        user_permissions = get_user_permissions(request.user, college)
+
+        # Add to response data
+        response.data['user_permissions'] = user_permissions
+
+        return response
 
     def get_queryset(self):
         # Superadmin sees all permissions across all colleges
