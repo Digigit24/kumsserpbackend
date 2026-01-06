@@ -32,7 +32,7 @@ class Command(BaseCommand):
         overwrite = options.get('overwrite', False)
 
         # Define roles to seed
-        roles = ['admin', 'college_admin', 'teacher', 'student', 'hod', 'staff']
+        roles = ['admin', 'college_admin', 'central_manager', 'teacher', 'student', 'hod', 'staff', 'store_manager']
 
         if role_filter:
             if role_filter not in roles:
@@ -61,7 +61,7 @@ class Command(BaseCommand):
 
         for college in colleges:
             for role in roles:
-                permission, created = Permission.objects.get_or_create(
+                permission, created = Permission.objects.all_colleges().get_or_create(
                     college=college,
                     role=role,
                     defaults={'permissions_json': get_default_permissions(role)}

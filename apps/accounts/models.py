@@ -23,6 +23,7 @@ class UserType(models.TextChoices):
     """User type categorization for high-level access control."""
     SUPER_ADMIN = 'super_admin', 'Super Admin'
     COLLEGE_ADMIN = 'college_admin', 'College Admin'
+    CENTRAL_MANAGER = 'central_manager', 'Central Store Manager'
     TEACHER = 'teacher', 'Teacher'
     STUDENT = 'student', 'Student'
     PARENT = 'parent', 'Parent'
