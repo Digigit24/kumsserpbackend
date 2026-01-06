@@ -592,6 +592,13 @@ class MaterialIssueNoteViewSet(RelatedCollegeScopedModelViewSet):
     ordering_fields = ['issue_date', 'created_at']
     ordering = ['-issue_date']
 
+    def get_queryset(self):
+        """Return all for superuser/central_manager, college-scoped for others"""
+        user = self.request.user
+        if user.is_superuser or getattr(user, 'user_type', None) == 'central_manager':
+            return MaterialIssueNote.objects.select_related('indent', 'central_store', 'receiving_college')
+        return super().get_queryset()
+
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy', 'dispatch']:
             return [IsCentralStoreManager()]
