@@ -529,6 +529,41 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         serializer = self.get_serializer(indents, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def approved(self, request):
+        """List all approved indents (including super admin approved)"""
+        college_id = getattr(request.user, 'college_id', None)
+        indents = StoreIndent.objects.all_colleges().filter(
+            status__in=['approved', 'super_admin_approved']
+        )
+        if not request.user.is_superuser and college_id:
+            indents = indents.filter(college_id=college_id)
+        
+        serializer = self.get_serializer(indents, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], url_path='partial', permission_classes=[IsAuthenticated])
+    def partially_fulfilled(self, request):
+        """List all partially fulfilled indents"""
+        college_id = getattr(request.user, 'college_id', None)
+        indents = StoreIndent.objects.all_colleges().filter(status='partially_fulfilled')
+        if not request.user.is_superuser and college_id:
+            indents = indents.filter(college_id=college_id)
+            
+        serializer = self.get_serializer(indents, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def fulfilled(self, request):
+        """List all fulfilled indents"""
+        college_id = getattr(request.user, 'college_id', None)
+        indents = StoreIndent.objects.all_colleges().filter(status='fulfilled')
+        if not request.user.is_superuser and college_id:
+            indents = indents.filter(college_id=college_id)
+            
+        serializer = self.get_serializer(indents, many=True)
+        return Response(serializer.data)
+
     @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
     def issue_materials(self, request, pk=None):
         """Phase 9.8: Create MaterialIssueNote (only after super admin approval)"""

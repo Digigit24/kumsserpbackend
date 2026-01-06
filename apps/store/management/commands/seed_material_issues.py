@@ -44,8 +44,8 @@ class Command(BaseCommand):
         if created:
             self.stdout.write(f'Created Central Store: {central_store.name}')
 
-        # 3. Get or create a College
-        college = College.objects.filter(is_active=True).exclude(id=1).first()
+        # 3. Get the primary College (user is likely logged in as this college's admin)
+        college = College.objects.filter(is_active=True).first()
         if not college:
             college = College.objects.create(
                 code='COL001',
@@ -59,6 +59,8 @@ class Command(BaseCommand):
                 pincode='123456'
             )
             self.stdout.write(f'Created College: {college.name}')
+        else:
+            self.stdout.write(f'Using College: {college.name} (ID: {college.id})')
 
         # 4. Create Store Category and Items
         category, _ = StoreCategory.objects.all_colleges().get_or_create(
