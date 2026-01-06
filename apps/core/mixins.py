@@ -279,8 +279,12 @@ class RelatedCollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet
         queryset = super().get_queryset()
         college_id = self.get_college_id(required=False)
         user = getattr(self.request, 'user', None)
-
-        if college_id == 'all' or (user and (user.is_superuser or user.is_staff) and not college_id):
+        is_global_user = (
+            user.is_superuser or 
+            user.is_staff or 
+            getattr(user, 'user_type', None) == 'central_manager'
+        )
+        if college_id == 'all' or (user and is_global_user and not college_id):
             return queryset
 
         if not college_id:
