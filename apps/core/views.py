@@ -610,12 +610,12 @@ class PermissionViewSet(CollegeScopedModelViewSet):
 
         # If response.data is a dict (happens with pagination)
         if isinstance(response.data, dict):
-            response.data['user_permissions'] = user_permissions
+            response.data['user_context'] = user_permissions
         else:
             # If not paginated, response.data is a list
             response.data = {
                 'results': response.data,
-                'user_permissions': user_permissions
+                'user_context': user_permissions
             }
 
         return response
@@ -676,7 +676,7 @@ class PermissionViewSet(CollegeScopedModelViewSet):
         user_permissions = get_user_permissions(request.user, college)
 
         # Add to response data
-        response.data['user_permissions'] = user_permissions
+        response.data['user_context'] = user_permissions
 
         return response
 
