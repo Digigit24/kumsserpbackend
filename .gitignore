@@ -24,7 +24,7 @@ wheels/
 *.egg
 
 # Django
-*.log
+# *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -52,6 +52,6 @@ htmlcov/
 .pytest_cache/
 
 # Logs
-logs/
-*.log
-.env
+# logs/
+# *.log
+# 

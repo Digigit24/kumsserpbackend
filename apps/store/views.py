@@ -549,13 +549,41 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         return Response(MaterialIssueNoteDetailSerializer(min_note).data)
 
 
-class MaterialIssueNoteViewSet(RelatedCollegeScopedModelViewSet):
+class MaterialIssueNoteViewSet(viewsets.ModelViewSet):
     queryset = MaterialIssueNote.objects.select_related('indent', 'central_store', 'receiving_college')
-    related_college_lookup = 'receiving_college_id'
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'receiving_college', 'issue_date']
     search_fields = ['min_number']
     ordering_fields = ['issue_date', 'created_at']
     ordering = ['-issue_date']
+    
+    def get_queryset(self):
+        """
+        Custom queryset filtering:
+        - Superusers, staff, and central_managers see all material issues
+        - College users see only material issues for their college
+        """
+        queryset = super().get_queryset()
+        user = self.request.user
+        
+        # Global users see everything
+        is_global_user = (
+            user.is_superuser or 
+            user.is_staff or 
+            getattr(user, 'user_type', None) == 'central_manager'
+        )
+        
+        if is_global_user:
+            return queryset
+        
+        # College users see only their college's material issues
+        college_id = getattr(user, 'college_id', None)
+        if college_id:
+            return queryset.filter(receiving_college_id=college_id)
+        
+        # No college? No results
+        return queryset.none()
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy', 'dispatch']:
