@@ -34,6 +34,7 @@ from .serializers import (
     TokenWithUserSerializer,
     RoleSerializer,
     RoleListSerializer,
+    RoleTreeSerializer,
     UserRoleSerializer,
     DepartmentSerializer,
     DepartmentListSerializer,
@@ -419,6 +420,103 @@ class RoleViewSet(CollegeScopedModelViewSet):
     def perform_destroy(self, instance):
         """Soft delete instead of hard delete."""
         instance.soft_delete()
+
+
+    @extend_schema(
+        summary="Get hierarchical role tree",
+        description="Return full role hierarchy as a nested tree.",
+        responses={200: OpenApiTypes.OBJECT},
+        tags=['Roles']
+    )
+    @action(detail=False, methods=['get'])
+    def tree(self, request):
+        """Get hierarchical role tree."""
+        roots = self.get_queryset().filter(parent__isnull=True).order_by('display_order', 'name')
+        serializer = RoleTreeSerializer(roots, many=True)
+        return Response({'tree': serializer.data})
+
+    @extend_schema(
+        summary="Add child role",
+        description="Create a new role as a child of the given role.",
+        request=RoleSerializer,
+        responses={201: RoleSerializer},
+        tags=['Roles']
+    )
+    @action(detail=True, methods=['post'])
+    def add_child(self, request, pk=None):
+        """Add child role to this role."""
+        parent_role = self.get_object()
+        serializer = RoleSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(parent=parent_role, **self._college_save_kwargs(serializer, include_created=True))
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        summary="Get team members for role",
+        description="Get users under this role based on hierarchy.",
+        responses={200: OpenApiTypes.OBJECT},
+        tags=['Roles']
+    )
+    @action(detail=True, methods=['get'])
+    def team_members(self, request, pk=None):
+        """Get all team members under this role."""
+        role = self.get_object()
+        assignments = role.get_team_members()
+        members = []
+        for assignment in assignments:
+            members.append({
+                'user_id': assignment.user_id,
+                'name': assignment.user.get_full_name(),
+                'role': assignment.role.name,
+                'level': assignment.role.level,
+            })
+        return Response({
+            'role': role.name,
+            'team_members': members,
+            'total': len(members)
+        })
+
+    @extend_schema(
+        summary="Get role hierarchy path",
+        description="Get the ancestor chain from root to this role.",
+        responses={200: OpenApiTypes.OBJECT},
+        tags=['Roles']
+    )
+    @action(detail=True, methods=['get'])
+    def hierarchy_path(self, request, pk=None):
+        """Get ancestors path from root to this role."""
+        role = self.get_object()
+        ancestors = role.get_ancestors(include_self=True)
+        path_data = [{
+            'id': item.id,
+            'name': item.name,
+            'level': item.level
+        } for item in sorted(ancestors, key=lambda r: r.level)]
+        return Response({'path': path_data})
+
+    @extend_schema(
+        summary="Get role descendants",
+        description="Get all descendant roles under this role.",
+        responses={200: OpenApiTypes.OBJECT},
+        tags=['Roles']
+    )
+    @action(detail=True, methods=['get'])
+    def descendants(self, request, pk=None):
+        """Get all descendants for this role."""
+        role = self.get_object()
+        descendants = role.get_descendants(include_self=False)
+        data = [{
+            'id': item.id,
+            'name': item.name,
+            'code': item.code,
+            'level': item.level,
+            'parent': item.parent_id
+        } for item in descendants]
+        return Response({
+            'role': role.name,
+            'descendants': data,
+            'total': len(data)
+        })
 
 
 # ============================================================================

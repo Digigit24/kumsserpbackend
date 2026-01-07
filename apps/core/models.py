@@ -758,6 +758,7 @@ class TeamMembership(CollegeScopedModel):
             ('teacher_student', 'Teacher-Student'),
             ('hod_faculty', 'HOD-Faculty'),
             ('hod_student', 'HOD-Student'),
+            ('hierarchy', 'Hierarchy'),
         ],
         help_text="Type of relationship"
     )
