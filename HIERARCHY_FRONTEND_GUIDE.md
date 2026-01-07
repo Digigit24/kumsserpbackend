@@ -62,6 +62,11 @@ Response:
 }
 ```
 
+Notes:
+- The tree is built from `parent` relationships. Create/update roles with the correct `parent` to form the structure.
+- Sibling ordering is controlled by `display_order`, then `name`.
+- Multiple top-level roots are supported (roles with `parent = null`).
+
 ### B) Add Child Role
 ```
 POST /api/v1/accounts/roles/{role_id}/add_child/
@@ -121,6 +126,9 @@ Response:
   "total": 1
 }
 ```
+
+Note:
+- Use this to show the people under a node (if your UI needs names inside each box).
 
 ### D) Get Hierarchy Path
 ```
@@ -191,7 +199,36 @@ Recommended features:
 
 ---
 
-## 5) Team & Permission Linking
+## 5) How To Build A Complex Org Tree (Frontend Guidance)
+
+To reproduce a diagram like the screenshot:
+
+1) Create a root role (e.g., CEO) with `parent = null`.
+2) For each box under the root, create a child role using `add_child`.
+3) For deeper levels, keep adding children under the correct parent.
+4) Set `display_order` to control sibling order left-to-right.
+5) If you need multiple independent branches (e.g., a separate college unit),
+   create multiple root roles.
+
+Minimal payload to create a node:
+```json
+{
+  "name": "Viceprincipal",
+  "code": "VICE_PRINCIPAL",
+  "description": "",
+  "permissions": {},
+  "is_organizational_position": true,
+  "display_order": 10
+}
+```
+
+Notes:
+- `code` must be unique per college and is forced to uppercase.
+- Use consistent `display_order` spacing (e.g., 10, 20, 30) to make inserts easy.
+
+---
+
+## 6) Team & Permission Linking
 
 Team is auto-derived from hierarchy:
 - When a user gets assigned a role, the system creates TeamMembership entries
@@ -202,7 +239,7 @@ Frontend does NOT need to manually assign team members; it is automatic.
 
 ---
 
-## 6) Headers and Auth
+## 7) Headers and Auth
 
 All endpoints require authentication. For college-scoped access:
 - Header: `X-College-ID: <college-id>`
@@ -210,7 +247,7 @@ All endpoints require authentication. For college-scoped access:
 
 ---
 
-## 7) Error Handling Notes
+## 8) Error Handling Notes
 
 Common backend validations:
 - Role code must be unique per college
@@ -226,7 +263,7 @@ Expected error response:
 
 ---
 
-## 8) Quick Frontend Data Flow
+## 9) Quick Frontend Data Flow
 
 ```
 GET /roles/tree/ -> render tree
@@ -236,8 +273,14 @@ Click add child -> POST /roles/{id}/add_child/ -> update tree
 
 ---
 
-## 9) Notes for Frontend Developer
+## 10) Notes for Frontend Developer
 
 This hierarchy is used only under Admin.
 The rest of the application can continue to use roles/permissions as-is.
 If needed, we can add drag-and-drop reorder later.
+
+For large trees:
+- Fetch `/roles/tree/` once, then lazy-load team members per node.
+- If you need a "show people inside each node" view, either:
+  - call `/team_members/` on node select, or
+  - request a backend enhancement to embed a compact user list in the tree payload.
