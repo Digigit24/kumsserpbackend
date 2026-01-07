@@ -721,13 +721,21 @@ class UserProfileViewSet(CollegeScopedModelViewSet):
     )
     @action(detail=False, methods=['get'])
     def me(self, request):
-        """Get current user's profile."""
-        try:
-            profile = UserProfile.objects.get(user=request.user)
-            serializer = self.get_serializer(profile)
-            return Response(serializer.data)
-        except UserProfile.DoesNotExist:
+        """Get or create current user's profile."""
+        if not request.user.college_id:
             return Response(
-                {'error': 'Profile not found for current user'},
-                status=status.HTTP_404_NOT_FOUND
+                {'error': 'User has no college assigned'},
+                status=status.HTTP_400_BAD_REQUEST
             )
+
+        profile, created = UserProfile.objects.get_or_create(
+            user=request.user,
+            defaults={'college_id': request.user.college_id}
+        )
+
+        if profile.college_id != request.user.college_id:
+            profile.college_id = request.user.college_id
+            profile.save(update_fields=['college', 'updated_at'])
+
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data)

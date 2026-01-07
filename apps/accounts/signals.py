@@ -16,6 +16,16 @@ def create_user_profile(sender, instance, created, **kwargs):
     Only creates profile if the user has a college assigned.
     """
     if created and instance.college_id:
+        UserProfile.objects.get_or_create(
+            user=instance,
+            defaults={'college': instance.college}
+        )
+def create_user_profile(sender, instance, created, **kwargs):
+    """
+    Automatically create a UserProfile when a User is created.
+    Only creates profile if the user has a college assigned.
+    """
+    if created and instance.college_id:
         # Check if profile already exists
         if not hasattr(instance, 'profile'):
             UserProfile.objects.create(
