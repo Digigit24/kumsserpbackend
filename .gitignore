@@ -52,6 +52,5 @@ htmlcov/
 .pytest_cache/
 
 # Logs
-# logs/
-# *.log
-# 
+logs/
+*.log

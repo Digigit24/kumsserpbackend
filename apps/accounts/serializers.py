@@ -498,11 +498,13 @@ class RoleSerializer(TenantAuditMixin, serializers.ModelSerializer):
         fields = [
             'id', 'college', 'college_name',
             'name', 'code', 'description', 'permissions',
+            'parent', 'is_organizational_position', 'level',
             'display_order', 'is_active',
             'created_by_name', 'updated_by_name', 'created_at', 'updated_at'
         ]
         read_only_fields = [
             'id', 'college_name',
+            'level',
             'created_by_name', 'updated_by_name', 'created_at', 'updated_at'
         ]
 
@@ -518,6 +520,23 @@ class RoleSerializer(TenantAuditMixin, serializers.ModelSerializer):
         if query.exists():
             raise serializers.ValidationError("Role with this code already exists in this college.")
         return value.upper()
+
+class RoleTreeSerializer(serializers.ModelSerializer):
+    """Serializer for nested role hierarchy tree."""
+    children = serializers.SerializerMethodField()
+    parent_name = serializers.CharField(source='parent.name', read_only=True)
+
+    class Meta:
+        model = Role
+        fields = [
+            'id', 'name', 'code', 'description',
+            'parent', 'parent_name', 'level',
+            'is_organizational_position', 'children'
+        ]
+
+    def get_children(self, obj):
+        children = obj.children.filter(is_active=True).order_by('display_order', 'name')
+        return RoleTreeSerializer(children, many=True).data
 
 
 # ============================================================================

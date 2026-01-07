@@ -593,11 +593,8 @@ class PermissionViewSet(CollegeScopedModelViewSet):
 
     def list(self, request, *args, **kwargs):
         """
-        List all permissions and include current user's permissions in the response.
+        Return only the logged-in user's permissions.
         """
-        response = super().list(request, *args, **kwargs)
-
-        # Add user permissions to the response
         from apps.core.permissions.manager import get_user_permissions
         from apps.core.utils import get_current_college_id
 
@@ -608,17 +605,14 @@ class PermissionViewSet(CollegeScopedModelViewSet):
 
         user_permissions = get_user_permissions(request.user, college)
 
-        # If response.data is a dict (happens with pagination)
-        if isinstance(response.data, dict):
-            response.data['user_context'] = user_permissions
-        else:
-            # If not paginated, response.data is a list
-            response.data = {
-                'results': response.data,
-                'user_context': user_permissions
-            }
-
-        return response
+        return Response({
+            'user_id': str(request.user.id),
+            'username': request.user.username,
+            'is_superadmin': getattr(request.user, 'is_superadmin', False),
+            'college_id': college_id,
+            'role': getattr(request.user, 'user_type', 'student'),
+            'permissions': user_permissions,
+        })
 
     def retrieve(self, request, *args, **kwargs):
         """

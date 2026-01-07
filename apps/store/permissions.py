@@ -21,8 +21,13 @@ class IsCentralStoreManagerOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
+
         if request.method in SAFE_METHODS:
-            return request.user.is_superuser or request.user.user_type == 'central_manager'
+            return (
+                request.user.is_superuser
+                or request.user.user_type in ['central_manager', 'college_admin', 'store_manager']
+            )
+
         return request.user.is_superuser or request.user.user_type == 'central_manager'
 
 

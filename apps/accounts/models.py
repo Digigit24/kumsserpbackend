@@ -262,6 +262,22 @@ class Role(CollegeScopedModel):
         default=0,
         help_text="Display order in UI"
     )
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='children',
+        help_text="Parent role in organizational hierarchy"
+    )
+    is_organizational_position = models.BooleanField(
+        default=True,
+        help_text="Whether this is an organizational position"
+    )
+    level = models.IntegerField(
+        default=0,
+        help_text="Hierarchy level (0=top, increases downward)"
+    )
 
     class Meta:
         db_table = 'role'
@@ -282,6 +298,62 @@ class Role(CollegeScopedModel):
 
     def __str__(self):
         return f"{self.name} ({self.college.short_name})"
+
+    def get_descendants(self, include_self=False):
+        """Return all descendant roles in the hierarchy."""
+        descendants = []
+        queue = list(self.children.filter(is_active=True))
+
+        while queue:
+            role = queue.pop(0)
+            descendants.append(role)
+            queue.extend(role.children.filter(is_active=True))
+
+        if include_self:
+            return [self] + descendants
+        return descendants
+
+    def get_ancestors(self, include_self=False):
+        """Return all ancestor roles up to the root."""
+        ancestors = []
+        current = self.parent
+        while current:
+            ancestors.append(current)
+            current = current.parent
+
+        if include_self:
+            return ancestors + [self]
+        return ancestors
+
+    def get_team_members(self):
+        """Return users assigned to descendant roles."""
+        descendant_roles = self.get_descendants(include_self=False)
+        if not descendant_roles:
+            return []
+        role_ids = [role.id for role in descendant_roles]
+        assignments = UserRole.objects.filter(
+            college_id=self.college_id,
+            role_id__in=role_ids,
+            is_active=True
+        ).select_related('user', 'role')
+        return assignments
+
+    def clean(self):
+        """Validate hierarchy constraints to prevent cycles."""
+        if self.parent_id and self.parent_id == self.id:
+            raise ValidationError("Role cannot be its own parent.")
+        if self.parent:
+            ancestors = self.parent.get_ancestors(include_self=True)
+            if self in ancestors:
+                raise ValidationError("Role hierarchy cannot be circular.")
+
+    def save(self, *args, **kwargs):
+        """Auto-calculate level based on parent."""
+        if self.parent:
+            self.level = self.parent.level + 1
+        else:
+            self.level = 0
+        super().save(*args, **kwargs)
 
 
 # ============================================================================
@@ -412,6 +484,22 @@ class Department(CollegeScopedModel):
         default=0,
         help_text="Display order in UI"
     )
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='children',
+        help_text="Parent role in organizational hierarchy"
+    )
+    is_organizational_position = models.BooleanField(
+        default=True,
+        help_text="Whether this is an organizational position"
+    )
+    level = models.IntegerField(
+        default=0,
+        help_text="Hierarchy level (0=top, increases downward)"
+    )
 
     class Meta:
         db_table = 'department'
@@ -432,6 +520,62 @@ class Department(CollegeScopedModel):
 
     def __str__(self):
         return f"{self.name} ({self.college.short_name})"
+
+    def get_descendants(self, include_self=False):
+        """Return all descendant roles in the hierarchy."""
+        descendants = []
+        queue = list(self.children.filter(is_active=True))
+
+        while queue:
+            role = queue.pop(0)
+            descendants.append(role)
+            queue.extend(role.children.filter(is_active=True))
+
+        if include_self:
+            return [self] + descendants
+        return descendants
+
+    def get_ancestors(self, include_self=False):
+        """Return all ancestor roles up to the root."""
+        ancestors = []
+        current = self.parent
+        while current:
+            ancestors.append(current)
+            current = current.parent
+
+        if include_self:
+            return ancestors + [self]
+        return ancestors
+
+    def get_team_members(self):
+        """Return users assigned to descendant roles."""
+        descendant_roles = self.get_descendants(include_self=False)
+        if not descendant_roles:
+            return []
+        role_ids = [role.id for role in descendant_roles]
+        assignments = UserRole.objects.filter(
+            college_id=self.college_id,
+            role_id__in=role_ids,
+            is_active=True
+        ).select_related('user', 'role')
+        return assignments
+
+    def clean(self):
+        """Validate hierarchy constraints to prevent cycles."""
+        if self.parent_id and self.parent_id == self.id:
+            raise ValidationError("Role cannot be its own parent.")
+        if self.parent:
+            ancestors = self.parent.get_ancestors(include_self=True)
+            if self in ancestors:
+                raise ValidationError("Role hierarchy cannot be circular.")
+
+    def save(self, *args, **kwargs):
+        """Auto-calculate level based on parent."""
+        if self.parent:
+            self.level = self.parent.level + 1
+        else:
+            self.level = 0
+        super().save(*args, **kwargs)
 
 
 # ============================================================================
