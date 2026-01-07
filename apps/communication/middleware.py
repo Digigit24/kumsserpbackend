@@ -39,7 +39,9 @@ class TokenAuthMiddleware(BaseMiddleware):
             
             if token_key:
                 scope["user"] = await get_user(token_key)
-            elif "user" not in scope:
+                logger.debug(f"WS User authenticated: {scope['user']}")
+            else:
+                logger.debug("WS No token found in query params")
                 scope["user"] = AnonymousUser()
         except Exception as e:
             logger.error(f"TokenAuthMiddleware error: {str(e)}")

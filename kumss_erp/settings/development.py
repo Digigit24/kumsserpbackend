@@ -30,3 +30,10 @@ CORS_ALLOW_CREDENTIALS = True
 SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
+
+# WebSocket Channel Layer - use InMemory for development to avoid Redis dependency
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
