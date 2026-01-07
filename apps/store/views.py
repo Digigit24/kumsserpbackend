@@ -529,6 +529,41 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         serializer = self.get_serializer(indents, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def approved(self, request):
+        """List all approved indents (including super admin approved)"""
+        college_id = getattr(request.user, 'college_id', None)
+        indents = StoreIndent.objects.all_colleges().filter(
+            status__in=['approved', 'super_admin_approved']
+        )
+        if not request.user.is_superuser and college_id:
+            indents = indents.filter(college_id=college_id)
+        
+        serializer = self.get_serializer(indents, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], url_path='partial', permission_classes=[IsAuthenticated])
+    def partially_fulfilled(self, request):
+        """List all partially fulfilled indents"""
+        college_id = getattr(request.user, 'college_id', None)
+        indents = StoreIndent.objects.all_colleges().filter(status='partially_fulfilled')
+        if not request.user.is_superuser and college_id:
+            indents = indents.filter(college_id=college_id)
+            
+        serializer = self.get_serializer(indents, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def fulfilled(self, request):
+        """List all fulfilled indents"""
+        college_id = getattr(request.user, 'college_id', None)
+        indents = StoreIndent.objects.all_colleges().filter(status='fulfilled')
+        if not request.user.is_superuser and college_id:
+            indents = indents.filter(college_id=college_id)
+            
+        serializer = self.get_serializer(indents, many=True)
+        return Response(serializer.data)
+
     @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
     def issue_materials(self, request, pk=None):
         """Phase 9.8: Create MaterialIssueNote (only after super admin approval)"""
@@ -584,6 +619,27 @@ class MaterialIssueNoteViewSet(viewsets.ModelViewSet):
         
         # No college? No results
         return queryset.none()
+
+    def get_queryset(self):
+        """Return all for superuser/central_manager, college-scoped for college_admin/others"""
+        user = self.request.user
+
+        # Superuser and central_manager see all
+        if user.is_superuser or getattr(user, 'user_type', None) == 'central_manager':
+            return MaterialIssueNote.objects.select_related('indent', 'central_store', 'receiving_college').all()
+
+        # College admin sees their college's material issues
+        if getattr(user, 'user_type', None) == 'college_admin':
+            college_id = getattr(user, 'college_id', None) or self.request.headers.get('X-College-Id')
+            if college_id:
+                return MaterialIssueNote.objects.filter(receiving_college_id=college_id).select_related('indent', 'central_store', 'receiving_college')
+
+        # Regular users with college header
+        college_id = self.request.headers.get('X-College-Id')
+        if college_id:
+            return MaterialIssueNote.objects.filter(receiving_college_id=college_id).select_related('indent', 'central_store', 'receiving_college')
+
+        return MaterialIssueNote.objects.none()
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy', 'dispatch']:

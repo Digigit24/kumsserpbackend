@@ -1060,7 +1060,7 @@ class MaterialIssueNote(AuditModel):
         super().save(*args, **kwargs)
 
     def dispatch(self):
-        self.status = 'dispatched'
+        self.status = 'in_transit'
         self.dispatch_date = timezone.now()
         self.save(update_fields=['status', 'dispatch_date', 'updated_at'])
 
