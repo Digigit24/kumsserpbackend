@@ -1,0 +1,172 @@
+DEBUG 2026-01-07 15:56:22,601 selector_events 4264 15884 Using selector: SelectSelector
+DEBUG 2026-01-07 15:56:24,537 selector_events 15840 15632 Using selector: SelectSelector
+INFO 2026-01-07 15:56:25,425 autoreload 15840 15632 Watching for file changes with StatReloader
+INFO 2026-01-07 15:56:25,425 autoreload 15840 15632 Watching for file changes with StatReloader
+INFO 2026-01-07 15:57:37,586 autoreload 15840 15632 C:\Users\vaibh\Desktop\Rohit\DigiTech Task\DigiTech Task\kumss clg final\kum\kumsserpbackend\apps\communication\consumers.py changed, reloading.
+INFO 2026-01-07 15:57:37,586 autoreload 15840 15632 C:\Users\vaibh\Desktop\Rohit\DigiTech Task\DigiTech Task\kumss clg final\kum\kumsserpbackend\apps\communication\consumers.py changed, reloading.
+DEBUG 2026-01-07 15:57:39,011 selector_events 15480 1724 Using selector: SelectSelector
+INFO 2026-01-07 15:57:40,031 autoreload 15480 1724 Watching for file changes with StatReloader
+INFO 2026-01-07 15:57:40,031 autoreload 15480 1724 Watching for file changes with StatReloader
+INFO 2026-01-07 15:57:44,652 server 15480 14856 HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+INFO 2026-01-07 15:57:44,652 server 15480 14856 Configuring endpoint tcp:port=8000:interface=127.0.0.1
+INFO 2026-01-07 15:57:44,653 server 15480 14856 Listening on TCP address 127.0.0.1:8000
+INFO 2026-01-07 15:57:46,506 runserver 15480 14856 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:62978]
+INFO 2026-01-07 15:57:46,506 runserver 15480 14856 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:62978]
+DEBUG 2026-01-07 15:57:46,506 http_protocol 15480 14856 Upgraded connection ['127.0.0.1', 62978] to WebSocket
+DEBUG 2026-01-07 15:57:46,508 middleware 15480 11496 Attempting WebSocket authentication with token: cfaf5a59a8...
+DEBUG 2026-01-07 15:57:46,508 middleware 15480 11496 Attempting WebSocket authentication with token: cfaf5a59a8...
+DEBUG 2026-01-07 15:57:48,867 middleware 15480 14856 WS User authenticated: admin admin (admin)
+DEBUG 2026-01-07 15:57:48,867 middleware 15480 14856 WS User authenticated: admin admin (admin)
+DEBUG 2026-01-07 15:57:48,868 ws_protocol 15480 14856 WebSocket ['127.0.0.1', 62978] open and established
+INFO 2026-01-07 15:57:48,869 runserver 15480 14856 WebSocket CONNECT /ws/notifications/ [127.0.0.1:62978]
+INFO 2026-01-07 15:57:48,869 runserver 15480 14856 WebSocket CONNECT /ws/notifications/ [127.0.0.1:62978]
+DEBUG 2026-01-07 15:57:48,869 ws_protocol 15480 14856 WebSocket ['127.0.0.1', 62978] accepted by application
+INFO 2026-01-07 15:57:49,126 runserver 15480 14856 WebSocket HANDSHAKING /ws/chat/ [127.0.0.1:62984]
+INFO 2026-01-07 15:57:49,126 runserver 15480 14856 WebSocket HANDSHAKING /ws/chat/ [127.0.0.1:62984]
+DEBUG 2026-01-07 15:57:49,126 http_protocol 15480 14856 Upgraded connection ['127.0.0.1', 62984] to WebSocket
+DEBUG 2026-01-07 15:57:49,127 middleware 15480 11496 Attempting WebSocket authentication with token: cfaf5a59a8...
+DEBUG 2026-01-07 15:57:49,127 middleware 15480 11496 Attempting WebSocket authentication with token: cfaf5a59a8...
+DEBUG 2026-01-07 15:57:49,710 middleware 15480 14856 WS User authenticated: admin admin (admin)
+DEBUG 2026-01-07 15:57:49,710 middleware 15480 14856 WS User authenticated: admin admin (admin)
+DEBUG 2026-01-07 15:57:49,747 ws_protocol 15480 14856 WebSocket ['127.0.0.1', 62984] open and established
+INFO 2026-01-07 15:57:49,748 runserver 15480 14856 WebSocket CONNECT /ws/chat/ [127.0.0.1:62984]
+INFO 2026-01-07 15:57:49,748 runserver 15480 14856 WebSocket CONNECT /ws/chat/ [127.0.0.1:62984]
+DEBUG 2026-01-07 15:57:49,748 ws_protocol 15480 14856 WebSocket ['127.0.0.1', 62984] accepted by application
+DEBUG 2026-01-07 15:59:57,401 http_protocol 15480 14856 HTTP b'GET' request for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:00:00,440 http_protocol 15480 14856 HTTP 200 response started for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:00:00,440 http_protocol 15480 14856 HTTP close for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:00:00,440 http_protocol 15480 14856 HTTP response complete for ['127.0.0.1', 63066]
+INFO 2026-01-07 16:00:00,441 runserver 15480 14856 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.04, 127.0.0.1:63066][0m
+INFO 2026-01-07 16:00:00,441 runserver 15480 14856 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.04, 127.0.0.1:63066][0m
+DEBUG 2026-01-07 16:00:01,881 http_protocol 15480 14856 HTTP b'OPTIONS' request for ['127.0.0.1', 63073]
+DEBUG 2026-01-07 16:00:01,890 http_protocol 15480 14856 HTTP 200 response started for ['127.0.0.1', 63073]
+DEBUG 2026-01-07 16:00:01,890 http_protocol 15480 14856 HTTP close for ['127.0.0.1', 63073]
+DEBUG 2026-01-07 16:00:01,891 http_protocol 15480 14856 HTTP response complete for ['127.0.0.1', 63073]
+INFO 2026-01-07 16:00:01,892 runserver 15480 14856 [mHTTP OPTIONS /api/v1/accounts/roles/?page=1&page_size=20 200 [0.01, 127.0.0.1:63073][0m
+INFO 2026-01-07 16:00:01,892 runserver 15480 14856 [mHTTP OPTIONS /api/v1/accounts/roles/?page=1&page_size=20 200 [0.01, 127.0.0.1:63073][0m
+DEBUG 2026-01-07 16:00:01,904 http_protocol 15480 14856 HTTP b'GET' request for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:00:04,075 mixins 15480 9108 Filtering by college_id: all
+DEBUG 2026-01-07 16:00:04,075 mixins 15480 9108 Filtering by college_id: all
+DEBUG 2026-01-07 16:00:04,075 mixins 15480 9108 Using 'all' mode for superuser/staff
+DEBUG 2026-01-07 16:00:04,075 mixins 15480 9108 Using 'all' mode for superuser/staff
+DEBUG 2026-01-07 16:00:04,076 mixins 15480 9108 Filter query with college_id: all
+DEBUG 2026-01-07 16:00:04,076 mixins 15480 9108 Filter query with college_id: all
+DEBUG 2026-01-07 16:00:08,624 http_protocol 15480 14856 HTTP 200 response started for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:00:08,657 http_protocol 15480 14856 HTTP close for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:00:08,658 http_protocol 15480 14856 HTTP response complete for ['127.0.0.1', 63066]
+INFO 2026-01-07 16:00:08,658 runserver 15480 14856 [mHTTP GET /api/v1/accounts/roles/?page=1&page_size=20 200 [6.75, 127.0.0.1:63066][0m
+INFO 2026-01-07 16:00:08,658 runserver 15480 14856 [mHTTP GET /api/v1/accounts/roles/?page=1&page_size=20 200 [6.75, 127.0.0.1:63066][0m
+DEBUG 2026-01-07 16:00:11,501 http_protocol 15480 14856 HTTP b'OPTIONS' request for ['127.0.0.1', 63073]
+DEBUG 2026-01-07 16:00:11,505 http_protocol 15480 14856 HTTP 200 response started for ['127.0.0.1', 63073]
+DEBUG 2026-01-07 16:00:11,510 http_protocol 15480 14856 HTTP close for ['127.0.0.1', 63073]
+DEBUG 2026-01-07 16:00:11,511 http_protocol 15480 14856 HTTP response complete for ['127.0.0.1', 63073]
+INFO 2026-01-07 16:00:11,513 runserver 15480 14856 [mHTTP OPTIONS /api/v1/accounts/roles/6/ 200 [0.01, 127.0.0.1:63073][0m
+INFO 2026-01-07 16:00:11,513 runserver 15480 14856 [mHTTP OPTIONS /api/v1/accounts/roles/6/ 200 [0.01, 127.0.0.1:63073][0m
+DEBUG 2026-01-07 16:00:11,519 http_protocol 15480 14856 HTTP b'GET' request for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:00:13,697 mixins 15480 15684 Filtering by college_id: all
+DEBUG 2026-01-07 16:00:13,697 mixins 15480 15684 Filtering by college_id: all
+DEBUG 2026-01-07 16:00:13,697 mixins 15480 15684 Using 'all' mode for superuser/staff
+DEBUG 2026-01-07 16:00:13,697 mixins 15480 15684 Using 'all' mode for superuser/staff
+DEBUG 2026-01-07 16:00:13,698 mixins 15480 15684 Filter query with college_id: all
+DEBUG 2026-01-07 16:00:13,698 mixins 15480 15684 Filter query with college_id: all
+DEBUG 2026-01-07 16:00:14,281 http_protocol 15480 14856 HTTP 200 response started for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:00:14,314 http_protocol 15480 14856 HTTP close for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:00:14,322 http_protocol 15480 14856 HTTP response complete for ['127.0.0.1', 63066]
+INFO 2026-01-07 16:00:14,324 runserver 15480 14856 [mHTTP GET /api/v1/accounts/roles/6/ 200 [2.80, 127.0.0.1:63066][0m
+INFO 2026-01-07 16:00:14,324 runserver 15480 14856 [mHTTP GET /api/v1/accounts/roles/6/ 200 [2.80, 127.0.0.1:63066][0m
+DEBUG 2026-01-07 16:00:30,458 http_protocol 15480 14856 HTTP b'GET' request for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:00:32,887 http_protocol 15480 14856 HTTP 200 response started for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:00:32,887 http_protocol 15480 14856 HTTP close for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:00:32,888 http_protocol 15480 14856 HTTP response complete for ['127.0.0.1', 63066]
+INFO 2026-01-07 16:00:32,888 runserver 15480 14856 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.43, 127.0.0.1:63066][0m
+INFO 2026-01-07 16:00:32,888 runserver 15480 14856 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.43, 127.0.0.1:63066][0m
+DEBUG 2026-01-07 16:00:47,939 http_protocol 15480 14856 HTTP b'OPTIONS' request for ['127.0.0.1', 63073]
+DEBUG 2026-01-07 16:00:47,950 http_protocol 15480 14856 HTTP 200 response started for ['127.0.0.1', 63073]
+DEBUG 2026-01-07 16:00:47,950 http_protocol 15480 14856 HTTP close for ['127.0.0.1', 63073]
+DEBUG 2026-01-07 16:00:47,950 http_protocol 15480 14856 HTTP response complete for ['127.0.0.1', 63073]
+INFO 2026-01-07 16:00:47,951 runserver 15480 14856 [mHTTP OPTIONS /api/v1/accounts/roles/5/ 200 [0.01, 127.0.0.1:63073][0m
+INFO 2026-01-07 16:00:47,951 runserver 15480 14856 [mHTTP OPTIONS /api/v1/accounts/roles/5/ 200 [0.01, 127.0.0.1:63073][0m
+DEBUG 2026-01-07 16:00:47,953 http_protocol 15480 14856 HTTP b'GET' request for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:00:51,419 mixins 15480 3884 Filtering by college_id: all
+DEBUG 2026-01-07 16:00:51,419 mixins 15480 3884 Filtering by college_id: all
+DEBUG 2026-01-07 16:00:51,420 mixins 15480 3884 Using 'all' mode for superuser/staff
+DEBUG 2026-01-07 16:00:51,420 mixins 15480 3884 Using 'all' mode for superuser/staff
+DEBUG 2026-01-07 16:00:51,420 mixins 15480 3884 Filter query with college_id: all
+DEBUG 2026-01-07 16:00:51,420 mixins 15480 3884 Filter query with college_id: all
+DEBUG 2026-01-07 16:00:52,712 http_protocol 15480 14856 HTTP 200 response started for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:00:52,712 http_protocol 15480 14856 HTTP close for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:00:52,713 http_protocol 15480 14856 HTTP response complete for ['127.0.0.1', 63066]
+INFO 2026-01-07 16:00:52,713 runserver 15480 14856 [mHTTP GET /api/v1/accounts/roles/5/ 200 [4.76, 127.0.0.1:63066][0m
+INFO 2026-01-07 16:00:52,713 runserver 15480 14856 [mHTTP GET /api/v1/accounts/roles/5/ 200 [4.76, 127.0.0.1:63066][0m
+DEBUG 2026-01-07 16:01:02,892 http_protocol 15480 14856 HTTP b'GET' request for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:01:05,329 http_protocol 15480 14856 HTTP 200 response started for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:01:05,329 http_protocol 15480 14856 HTTP close for ['127.0.0.1', 63066]
+DEBUG 2026-01-07 16:01:05,329 http_protocol 15480 14856 HTTP response complete for ['127.0.0.1', 63066]
+INFO 2026-01-07 16:01:05,329 runserver 15480 14856 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.44, 127.0.0.1:63066][0m
+INFO 2026-01-07 16:01:05,329 runserver 15480 14856 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.44, 127.0.0.1:63066][0m
+INFO 2026-01-07 16:01:42,529 autoreload 15480 1724 C:\Users\vaibh\Desktop\Rohit\DigiTech Task\DigiTech Task\kumss clg final\kum\kumsserpbackend\apps\store\views.py changed, reloading.
+INFO 2026-01-07 16:01:42,529 autoreload 15480 1724 C:\Users\vaibh\Desktop\Rohit\DigiTech Task\DigiTech Task\kumss clg final\kum\kumsserpbackend\apps\store\views.py changed, reloading.
+DEBUG 2026-01-07 16:01:43,850 selector_events 16136 15664 Using selector: SelectSelector
+INFO 2026-01-07 16:01:44,933 autoreload 16136 15664 Watching for file changes with StatReloader
+INFO 2026-01-07 16:01:44,933 autoreload 16136 15664 Watching for file changes with StatReloader
+INFO 2026-01-07 16:01:49,968 server 16136 8232 HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+INFO 2026-01-07 16:01:49,972 server 16136 8232 Configuring endpoint tcp:port=8000:interface=127.0.0.1
+INFO 2026-01-07 16:01:49,973 server 16136 8232 Listening on TCP address 127.0.0.1:8000
+INFO 2026-01-07 16:01:50,253 runserver 16136 8232 WebSocket HANDSHAKING /ws/chat/ [127.0.0.1:63151]
+INFO 2026-01-07 16:01:50,253 runserver 16136 8232 WebSocket HANDSHAKING /ws/chat/ [127.0.0.1:63151]
+DEBUG 2026-01-07 16:01:50,254 http_protocol 16136 8232 Upgraded connection ['127.0.0.1', 63151] to WebSocket
+DEBUG 2026-01-07 16:01:50,256 middleware 16136 8776 Attempting WebSocket authentication with token: cfaf5a59a8...
+DEBUG 2026-01-07 16:01:50,256 middleware 16136 8776 Attempting WebSocket authentication with token: cfaf5a59a8...
+DEBUG 2026-01-07 16:01:52,781 middleware 16136 8232 WS User authenticated: admin admin (admin)
+DEBUG 2026-01-07 16:01:52,781 middleware 16136 8232 WS User authenticated: admin admin (admin)
+DEBUG 2026-01-07 16:01:52,782 ws_protocol 16136 8232 WebSocket ['127.0.0.1', 63151] open and established
+INFO 2026-01-07 16:01:52,782 runserver 16136 8232 WebSocket CONNECT /ws/chat/ [127.0.0.1:63151]
+INFO 2026-01-07 16:01:52,782 runserver 16136 8232 WebSocket CONNECT /ws/chat/ [127.0.0.1:63151]
+DEBUG 2026-01-07 16:01:52,783 ws_protocol 16136 8232 WebSocket ['127.0.0.1', 63151] accepted by application
+INFO 2026-01-07 16:01:52,810 runserver 16136 8232 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:63156]
+INFO 2026-01-07 16:01:52,810 runserver 16136 8232 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:63156]
+DEBUG 2026-01-07 16:01:52,811 http_protocol 16136 8232 Upgraded connection ['127.0.0.1', 63156] to WebSocket
+DEBUG 2026-01-07 16:01:52,812 middleware 16136 8776 Attempting WebSocket authentication with token: cfaf5a59a8...
+DEBUG 2026-01-07 16:01:52,812 middleware 16136 8776 Attempting WebSocket authentication with token: cfaf5a59a8...
+DEBUG 2026-01-07 16:01:53,334 middleware 16136 8232 WS User authenticated: admin admin (admin)
+DEBUG 2026-01-07 16:01:53,334 middleware 16136 8232 WS User authenticated: admin admin (admin)
+DEBUG 2026-01-07 16:01:53,335 ws_protocol 16136 8232 WebSocket ['127.0.0.1', 63156] open and established
+INFO 2026-01-07 16:01:53,335 runserver 16136 8232 WebSocket CONNECT /ws/notifications/ [127.0.0.1:63156]
+INFO 2026-01-07 16:01:53,335 runserver 16136 8232 WebSocket CONNECT /ws/notifications/ [127.0.0.1:63156]
+DEBUG 2026-01-07 16:01:53,336 ws_protocol 16136 8232 WebSocket ['127.0.0.1', 63156] accepted by application
+DEBUG 2026-01-07 16:01:55,229 http_protocol 16136 8232 HTTP b'GET' request for ['127.0.0.1', 63158]
+DEBUG 2026-01-07 16:01:57,848 mixins 16136 6916 Filtering by college_id: all
+DEBUG 2026-01-07 16:01:57,848 mixins 16136 6916 Filtering by college_id: all
+DEBUG 2026-01-07 16:01:57,848 mixins 16136 6916 Using 'all' mode for superuser/staff
+DEBUG 2026-01-07 16:01:57,848 mixins 16136 6916 Using 'all' mode for superuser/staff
+DEBUG 2026-01-07 16:01:57,849 mixins 16136 6916 Filter query with college_id: all
+DEBUG 2026-01-07 16:01:57,849 mixins 16136 6916 Filter query with college_id: all
+DEBUG 2026-01-07 16:01:58,204 http_protocol 16136 8232 HTTP b'OPTIONS' request for ['127.0.0.1', 63163]
+DEBUG 2026-01-07 16:01:58,212 http_protocol 16136 8232 HTTP 200 response started for ['127.0.0.1', 63163]
+DEBUG 2026-01-07 16:01:58,212 http_protocol 16136 8232 HTTP close for ['127.0.0.1', 63163]
+DEBUG 2026-01-07 16:01:58,213 http_protocol 16136 8232 HTTP response complete for ['127.0.0.1', 63163]
+INFO 2026-01-07 16:01:58,214 runserver 16136 8232 [mHTTP OPTIONS /api/v1/accounts/roles/2/ 200 [0.01, 127.0.0.1:63163][0m
+INFO 2026-01-07 16:01:58,214 runserver 16136 8232 [mHTTP OPTIONS /api/v1/accounts/roles/2/ 200 [0.01, 127.0.0.1:63163][0m
+DEBUG 2026-01-07 16:01:58,218 http_protocol 16136 8232 HTTP b'GET' request for ['127.0.0.1', 63164]
+DEBUG 2026-01-07 16:01:58,435 http_protocol 16136 8232 HTTP 200 response started for ['127.0.0.1', 63158]
+DEBUG 2026-01-07 16:01:58,435 http_protocol 16136 8232 HTTP close for ['127.0.0.1', 63158]
+DEBUG 2026-01-07 16:01:58,435 http_protocol 16136 8232 HTTP response complete for ['127.0.0.1', 63158]
+INFO 2026-01-07 16:01:58,436 runserver 16136 8232 [mHTTP GET /api/v1/core/colleges/?page_size=1000 200 [3.21, 127.0.0.1:63158][0m
+INFO 2026-01-07 16:01:58,436 runserver 16136 8232 [mHTTP GET /api/v1/core/colleges/?page_size=1000 200 [3.21, 127.0.0.1:63158][0m
+DEBUG 2026-01-07 16:02:00,275 mixins 16136 10852 Filtering by college_id: all
+DEBUG 2026-01-07 16:02:00,275 mixins 16136 10852 Filtering by college_id: all
+DEBUG 2026-01-07 16:02:00,275 mixins 16136 10852 Using 'all' mode for superuser/staff
+DEBUG 2026-01-07 16:02:00,275 mixins 16136 10852 Using 'all' mode for superuser/staff
+DEBUG 2026-01-07 16:02:00,276 mixins 16136 10852 Filter query with college_id: all
+DEBUG 2026-01-07 16:02:00,276 mixins 16136 10852 Filter query with college_id: all
+DEBUG 2026-01-07 16:02:00,847 http_protocol 16136 8232 HTTP 200 response started for ['127.0.0.1', 63164]
+DEBUG 2026-01-07 16:02:00,847 http_protocol 16136 8232 HTTP close for ['127.0.0.1', 63164]
+DEBUG 2026-01-07 16:02:00,847 http_protocol 16136 8232 HTTP response complete for ['127.0.0.1', 63164]
+INFO 2026-01-07 16:02:00,847 runserver 16136 8232 [mHTTP GET /api/v1/accounts/roles/2/ 200 [2.63, 127.0.0.1:63164][0m
+INFO 2026-01-07 16:02:00,847 runserver 16136 8232 [mHTTP GET /api/v1/accounts/roles/2/ 200 [2.63, 127.0.0.1:63164][0m
+DEBUG 2026-01-07 16:02:05,336 http_protocol 16136 8232 HTTP b'GET' request for ['127.0.0.1', 63164]
+DEBUG 2026-01-07 16:02:07,795 http_protocol 16136 8232 HTTP 200 response started for ['127.0.0.1', 63164]
+DEBUG 2026-01-07 16:02:07,795 http_protocol 16136 8232 HTTP close for ['127.0.0.1', 63164]
+DEBUG 2026-01-07 16:02:07,795 http_protocol 16136 8232 HTTP response complete for ['127.0.0.1', 63164]
+INFO 2026-01-07 16:02:07,796 runserver 16136 8232 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.46, 127.0.0.1:63164][0m
+INFO 2026-01-07 16:02:07,796 runserver 16136 8232 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.46, 127.0.0.1:63164][0m

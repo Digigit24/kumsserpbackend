@@ -284,9 +284,15 @@ class CentralStoreViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='list', permission_classes=[IsCentralStoreManager])
     def stores_list(self, request):
         """GET /api/v1/store/central-stores/list/ - List all stores"""
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = CentralStoreListSerializer(queryset, many=True)
-        return Response(serializer.data)
+        central_qs = CentralStore.objects.select_related('manager').all()
+        college_qs = CollegeStore.objects.all_colleges().select_related('college', 'manager')
+
+        central_data = CentralStoreListSerializer(central_qs, many=True).data
+        college_data = CollegeStoreListSerializer(college_qs, many=True).data
+        for entry in college_data:
+            entry['store_type'] = 'College Store'
+
+        return Response(central_data + college_data)
 
 
 class ProcurementRequirementViewSet(viewsets.ModelViewSet):
