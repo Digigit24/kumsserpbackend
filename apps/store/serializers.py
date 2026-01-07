@@ -415,7 +415,7 @@ class MaterialIssueItemCreateSerializer(serializers.ModelSerializer):
 class MaterialIssueNoteListSerializer(serializers.ModelSerializer):
     class Meta:
         model = MaterialIssueNote
-        fields = ['id', 'min_number', 'indent', 'status', 'issue_date']
+        fields = '__all__'
 
 
 class MaterialIssueNoteDetailSerializer(serializers.ModelSerializer):
