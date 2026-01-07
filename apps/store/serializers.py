@@ -114,7 +114,7 @@ class CentralStoreListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CentralStore
-        fields = ['id', 'name', 'code', 'manager', 'manager_name', 'store_type', 'created_at', 'is_active']
+        fields = '__all__'
 
     def get_store_type(self, obj):
         return 'Central Store'
