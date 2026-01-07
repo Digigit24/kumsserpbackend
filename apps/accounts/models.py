@@ -262,6 +262,22 @@ class Role(CollegeScopedModel):
         default=0,
         help_text="Display order in UI"
     )
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='children',
+        help_text="Parent role in organizational hierarchy"
+    )
+    is_organizational_position = models.BooleanField(
+        default=True,
+        help_text="Whether this is an organizational position"
+    )
+    level = models.IntegerField(
+        default=0,
+        help_text="Hierarchy level (0=top, increases downward)"
+    )
 
     class Meta:
         db_table = 'role'
@@ -282,6 +298,46 @@ class Role(CollegeScopedModel):
 
     def __str__(self):
         return f"{self.name} ({self.college.short_name})"
+
+    def save(self, *args, **kwargs):
+        """Auto-calculate level based on parent"""
+        if self.parent:
+            self.level = self.parent.level + 1
+        else:
+            self.level = 0
+        super().save(*args, **kwargs)
+
+    def get_descendants(self, include_self=False):
+        """Get all child roles recursively"""
+        descendants = []
+        if include_self:
+            descendants.append(self)
+        for child in self.children.filter(is_active=True):
+            descendants.append(child)
+            descendants.extend(child.get_descendants())
+        return descendants
+
+    def get_ancestors(self, include_self=False):
+        """Get all parent roles recursively"""
+        ancestors = []
+        if include_self:
+            ancestors.append(self)
+        current = self.parent
+        while current:
+            ancestors.append(current)
+            current = current.parent
+        return ancestors
+
+    def get_team_members(self):
+        """Get all users under this role in hierarchy"""
+        from apps.accounts.models import UserRole
+        descendant_roles = self.get_descendants(include_self=True)
+        role_ids = [role.id for role in descendant_roles]
+        user_roles = UserRole.objects.filter(
+            role_id__in=role_ids,
+            is_active=True
+        ).select_related('user')
+        return [ur.user for ur in user_roles]
 
 
 # ============================================================================

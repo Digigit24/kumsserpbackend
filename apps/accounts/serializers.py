@@ -489,20 +489,40 @@ class RoleListSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'college_name']
 
 
+class RoleTreeSerializer(serializers.ModelSerializer):
+    """Serializer for role tree with children."""
+    children = serializers.SerializerMethodField()
+    parent_name = serializers.CharField(source='parent.name', read_only=True)
+
+    class Meta:
+        model = Role
+        fields = [
+            'id', 'name', 'code', 'description',
+            'parent', 'parent_name', 'level',
+            'is_organizational_position', 'children', 'is_active'
+        ]
+
+    def get_children(self, obj):
+        children = obj.children.filter(is_active=True).order_by('display_order', 'name')
+        return RoleTreeSerializer(children, many=True).data
+
+
 class RoleSerializer(TenantAuditMixin, serializers.ModelSerializer):
     """Full serializer for Role model."""
     college_name = serializers.CharField(source='college.short_name', read_only=True)
+    parent_name = serializers.CharField(source='parent.name', read_only=True)
 
     class Meta:
         model = Role
         fields = [
             'id', 'college', 'college_name',
             'name', 'code', 'description', 'permissions',
+            'parent', 'parent_name', 'level', 'is_organizational_position',
             'display_order', 'is_active',
             'created_by_name', 'updated_by_name', 'created_at', 'updated_at'
         ]
         read_only_fields = [
-            'id', 'college_name',
+            'id', 'college_name', 'parent_name', 'level',
             'created_by_name', 'updated_by_name', 'created_at', 'updated_at'
         ]
 

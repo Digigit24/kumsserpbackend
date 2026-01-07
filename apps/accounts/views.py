@@ -34,6 +34,7 @@ from .serializers import (
     TokenWithUserSerializer,
     RoleSerializer,
     RoleListSerializer,
+    RoleTreeSerializer,
     UserRoleSerializer,
     DepartmentSerializer,
     DepartmentListSerializer,
@@ -414,7 +415,73 @@ class RoleViewSet(CollegeScopedModelViewSet):
         """Use different serializers for different actions."""
         if self.action == 'list':
             return RoleListSerializer
+        elif self.action == 'tree':
+            return RoleTreeSerializer
         return RoleSerializer
+
+    @action(detail=False, methods=['get'])
+    def tree(self, request):
+        """Get hierarchical role tree"""
+        college_id = request.user.college_id
+        root_roles = Role.objects.filter(
+            college_id=college_id,
+            parent__isnull=True,
+            is_active=True
+        ).order_by('display_order', 'name')
+        serializer = RoleTreeSerializer(root_roles, many=True)
+        return Response({'tree': serializer.data})
+
+    @action(detail=True, methods=['post'])
+    def add_child(self, request, pk=None):
+        """Add child role to this role"""
+        parent_role = self.get_object()
+        data = request.data.copy()
+        data['parent'] = parent_role.id
+        data['college'] = parent_role.college_id
+        serializer = RoleSerializer(data=data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        child_role = serializer.save()
+        return Response({
+            'id': child_role.id,
+            'name': child_role.name,
+            'parent': parent_role.id,
+            'level': child_role.level,
+            'created': True
+        }, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['get'])
+    def team_members(self, request, pk=None):
+        """Get all team members under this role"""
+        role = self.get_object()
+        members = role.get_team_members()
+        member_data = [{
+            'user_id': str(user.id),
+            'name': user.get_full_name(),
+            'username': user.username,
+            'user_type': user.user_type
+        } for user in members]
+        return Response({
+            'role': role.name,
+            'team_members': member_data,
+            'total': len(member_data)
+        })
+
+    @action(detail=True, methods=['get'])
+    def hierarchy_path(self, request, pk=None):
+        """Get ancestors path from root to this role"""
+        role = self.get_object()
+        ancestors = role.get_ancestors(include_self=True)
+        ancestors.reverse()
+        path = [{'id': str(r.id), 'name': r.name, 'level': r.level} for r in ancestors]
+        return Response({'path': path})
+
+    @action(detail=True, methods=['get'])
+    def descendants(self, request, pk=None):
+        """Get all descendants of this role"""
+        role = self.get_object()
+        descendants = role.get_descendants()
+        desc_data = [{'id': str(r.id), 'name': r.name, 'level': r.level} for r in descendants]
+        return Response({'descendants': desc_data, 'total': len(desc_data)})
 
     def perform_destroy(self, instance):
         """Soft delete instead of hard delete."""

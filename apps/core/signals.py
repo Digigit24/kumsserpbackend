@@ -238,3 +238,70 @@ def log_user_logout(sender, request, user, **kwargs):
             )
         except Exception:
             pass
+
+
+@receiver(post_save, sender='accounts.UserRole')
+def create_team_memberships_on_role_assignment(sender, instance, created, **kwargs):
+    """
+    Auto-create TeamMembership entries when user assigned to hierarchical role.
+    When user gets a role, create team relationships with all parent role holders.
+    """
+    if not created or not instance.is_active:
+        return
+
+    role = instance.role
+    user = instance.user
+    college = instance.college
+
+    # Get all ancestor roles
+    ancestors = role.get_ancestors()
+
+    # For each ancestor role, find users and create TeamMembership
+    for ancestor_role in ancestors:
+        # Get all active users with this ancestor role
+        from apps.accounts.models import UserRole
+        ancestor_user_roles = UserRole.objects.filter(
+            role=ancestor_role,
+            college=college,
+            is_active=True
+        ).select_related('user')
+
+        for ancestor_ur in ancestor_user_roles:
+            leader = ancestor_ur.user
+
+            # Determine relationship type based on role names/levels
+            relationship_type = determine_relationship_type(ancestor_role, role)
+
+            # Create TeamMembership if doesn't exist
+            from apps.core.models import TeamMembership
+            TeamMembership.objects.get_or_create(
+                college=college,
+                leader=leader,
+                member=user,
+                relationship_type=relationship_type,
+                resource='general',
+                defaults={'is_active': True}
+            )
+
+
+def determine_relationship_type(leader_role, member_role):
+    """
+    Determine relationship type based on role codes/names.
+    Returns appropriate relationship type string.
+    """
+    leader_code = leader_role.code.upper()
+    member_code = member_role.code.upper()
+
+    # Map based on common role patterns
+    if 'HOD' in leader_code or 'HEAD' in leader_code:
+        if 'TEACHER' in member_code or 'FACULTY' in member_code:
+            return 'hod_faculty'
+        elif 'STUDENT' in member_code:
+            return 'hod_student'
+
+    if 'TEACHER' in leader_code or 'FACULTY' in leader_code:
+        if 'STUDENT' in member_code:
+            return 'teacher_student'
+
+    # Default: generic hierarchy relationship
+    return 'hierarchy'
