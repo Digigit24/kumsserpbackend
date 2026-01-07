@@ -489,6 +489,44 @@ class CentralStore(AuditModel):
         return f"{self.name} ({self.code})"
 
 
+class CollegeStore(CollegeScopedModel):
+    """College-level store managed by college admins"""
+    college = models.ForeignKey(
+        College,
+        on_delete=models.CASCADE,
+        related_name='college_stores',
+        help_text="College reference"
+    )
+    name = models.CharField(max_length=200)
+    code = models.CharField(max_length=20)
+    address_line1 = models.CharField(max_length=300, null=True, blank=True)
+    address_line2 = models.CharField(max_length=300, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    state = models.CharField(max_length=100, null=True, blank=True)
+    pincode = models.CharField(max_length=10, null=True, blank=True)
+    manager = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='managed_college_stores'
+    )
+    contact_phone = models.CharField(max_length=20, null=True, blank=True)
+    contact_email = models.EmailField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'college_store'
+        unique_together = ['college', 'code']
+        ordering = ['college', 'name']
+        indexes = [
+            models.Index(fields=['college', 'is_active']),
+            models.Index(fields=['code']),
+        ]
+
+    def __str__(self):
+        return f"{self.college.name} - {self.name}"
+
+
 class ProcurementRequirement(AuditModel):
     requirement_number = models.CharField(max_length=50, unique=True)
     central_store = models.ForeignKey(CentralStore, on_delete=models.CASCADE, related_name='requirements')
