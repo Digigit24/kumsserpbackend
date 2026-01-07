@@ -85,6 +85,7 @@ CHANNEL_LAYERS = {
 }
 
 MIDDLEWARE = [
+    'django.middleware.gzip.GZipMiddleware',  # Compress all responses
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # CORS - must be before CommonMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -98,6 +99,9 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 
 ]
+
+# GZip compression settings - compress all responses regardless of size
+GZIP_MINIMUM_SIZE = 0  # Compress even tiny responses
 # Debug Toolbar
 INTERNAL_IPS = [
     "127.0.0.1",
