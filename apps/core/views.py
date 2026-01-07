@@ -565,6 +565,12 @@ class ActivityLogViewSet(CollegeScopedReadOnlyModelViewSet):
     ordering_fields = ['timestamp']
     ordering = ['-timestamp']
 
+    @action(detail=False, methods=['delete'])
+    def clear_logs(self, request):
+        """Delete all activity logs for the authenticated user's college."""
+        deleted_count, _ = ActivityLog.objects.filter(college=request.user.college).delete()
+        return Response({'message': f'{deleted_count} activity logs cleared'}, status=status.HTTP_200_OK)
+
 
 # ============================================================================
 # PERMISSION SYSTEM VIEWSETS
