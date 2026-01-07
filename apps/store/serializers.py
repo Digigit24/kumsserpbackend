@@ -325,6 +325,7 @@ class InspectionNoteSerializer(serializers.ModelSerializer):
 
 class IndentItemSerializer(serializers.ModelSerializer):
     available_stock_in_central = serializers.SerializerMethodField()
+    central_store_item_name = serializers.CharField(source='central_store_item.name', read_only=True)
 
     class Meta:
         model = IndentItem

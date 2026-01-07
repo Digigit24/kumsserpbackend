@@ -169,4 +169,4 @@ class BulkAttendanceSerializer(serializers.Serializer):
     status = serializers.CharField(max_length=20, help_text="Attendance status")
     class_obj = serializers.IntegerField(help_text="Class ID")
     section = serializers.IntegerField(help_text="Section ID")
-    remarks = serializers.CharField(required=False, allow_blank=True, help_text="Remarks")
+    remarks = serializers.CharField(required=False, allow_null=True, allow_blank=True, help_text="Remarks")

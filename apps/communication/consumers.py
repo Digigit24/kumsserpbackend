@@ -1,22 +1,21 @@
-import json
 import logging
-from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
-class ChatConsumer(AsyncWebsocketConsumer):
+
+class ChatConsumer(AsyncJsonWebsocketConsumer):
     """
     Consumer for real-time chat between users.
     """
     async def connect(self):
-        self.user = self.scope["user"]
-        
-        if self.user.is_authenticated:
-            # Join a personal room based on user ID
-            self.room_group_name = f"user_{self.user.id}"
+        self.user = self.scope.get("user")
+
+        if self.user and self.user.is_authenticated:
+            self.room_group_name = f"chat_user_{self.user.id}"
             await self.channel_layer.group_add(
                 self.room_group_name,
                 self.channel_name
@@ -32,81 +31,68 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.channel_name
             )
 
-    async def receive(self, text_data):
+    async def receive_json(self, content, **kwargs):
         """
         Handle incoming WebSocket messages.
         Expects JSON: {"receiver_id": int, "message": str, "attachment": str (optional)}
         """
-        try:
-            data = json.loads(text_data)
-            receiver_id = data.get("receiver_id")
-            message_content = data.get("message", "").strip()
-            attachment = data.get("attachment")
+        receiver_id = content.get("receiver_id")
+        message_content = (content.get("message") or "").strip()
+        attachment = content.get("attachment")
 
-            # Validate input
-            if not receiver_id:
-                await self.send(text_data=json.dumps({
-                    "type": "error",
-                    "error": "receiver_id is required"
-                }))
-                return
+        if not receiver_id:
+            await self.send_json({
+                "type": "error",
+                "error": "receiver_id is required"
+            })
+            return
 
-            if not message_content and not attachment:
-                await self.send(text_data=json.dumps({
-                    "type": "error",
-                    "error": "message or attachment is required"
-                }))
-                return
+        if not message_content and not attachment:
+            await self.send_json({
+                "type": "error",
+                "error": "message or attachment is required"
+            })
+            return
 
-            # Save message to database
-            saved_msg = await self.save_message(receiver_id, message_content, attachment)
+        saved_msg = await self.save_message(receiver_id, message_content, attachment)
 
-            if saved_msg:
-                # Send message to receiver's group
-                receiver_group = f"user_{receiver_id}"
-                await self.channel_layer.group_send(
-                    receiver_group,
-                    {
-                        "type": "chat_message",
-                        "id": saved_msg.id,
-                        "sender_id": self.user.id,
-                        "sender_name": self.user.get_full_name(),
-                        "message": message_content,
-                        "attachment": attachment,
-                        "timestamp": str(saved_msg.timestamp),
-                    }
-                )
+        if saved_msg:
+            attachment_url = None
+            if saved_msg.attachment:
+                try:
+                    attachment_url = saved_msg.attachment.url
+                except Exception:
+                    attachment_url = str(saved_msg.attachment)
 
-                # Send confirmation back to sender
-                await self.send(text_data=json.dumps({
-                    "type": "message_sent",
+            receiver_group = f"chat_user_{receiver_id}"
+            await self.channel_layer.group_send(
+                receiver_group,
+                {
+                    "type": "chat_message",
                     "id": saved_msg.id,
-                    "status": "delivered"
-                }))
-            else:
-                await self.send(text_data=json.dumps({
-                    "type": "error",
-                    "error": "Failed to send message. Receiver not found."
-                }))
+                    "sender_id": self.user.id,
+                    "sender_name": self.user.get_full_name(),
+                    "message": message_content,
+                    "attachment": attachment_url,
+                    "timestamp": saved_msg.timestamp.isoformat(),
+                }
+            )
 
-        except json.JSONDecodeError:
-            logger.error(f"Invalid JSON received from user {self.user.id}")
-            await self.send(text_data=json.dumps({
+            await self.send_json({
+                "type": "message_sent",
+                "id": saved_msg.id
+            })
+        else:
+            await self.send_json({
                 "type": "error",
-                "error": "Invalid JSON format"
-            }))
-        except Exception as e:
-            logger.error(f"Error in ChatConsumer.receive: {str(e)}", exc_info=True)
-            await self.send(text_data=json.dumps({
-                "type": "error",
-                "error": "An error occurred while processing your message"
-            }))
+                "error": "Failed to send message. Receiver not found."
+            })
 
     async def chat_message(self, event):
         """
         Receive message from channel group and send to WebSocket.
         """
-        await self.send(text_data=json.dumps(event))
+        await self.send_json(event)
 
     @database_sync_to_async
     def save_message(self, receiver_id, message, attachment=None):
@@ -127,22 +113,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return None
 
 
-class NotificationConsumer(AsyncWebsocketConsumer):
+class NotificationConsumer(AsyncJsonWebsocketConsumer):
     """
     Consumer for real-time system notifications and alerts.
     """
     async def connect(self):
-        self.user = self.scope["user"]
-        
-        if self.user.is_authenticated:
-            # Join room based on user ID and optional college ID
-            self.user_room = f"notifications_{self.user.id}"
+        self.user = self.scope.get("user")
+
+        if self.user and self.user.is_authenticated:
+            self.user_room = f"user_{self.user.id}"
             await self.channel_layer.group_add(
                 self.user_room,
                 self.channel_name
             )
-            
-            # If user has a college, join college-wide room
+
             college_id = getattr(self.user, 'college_id', None)
             if college_id:
                 self.college_room = f"college_notifications_{college_id}"
@@ -150,7 +134,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
                     self.college_room,
                     self.channel_name
                 )
-            
+
             await self.accept()
         else:
             await self.close()
@@ -169,6 +153,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
     async def notify(self, event):
         """
-        Generic notification handler.
+        Notification handler.
         """
-        await self.send(text_data=json.dumps(event))
+        await self.send_json(event)

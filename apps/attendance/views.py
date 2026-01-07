@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db import transaction, IntegrityError
 from drf_spectacular.utils import (
     extend_schema,
     extend_schema_view,
@@ -92,6 +93,65 @@ class StudentAttendanceViewSet(CollegeScopedModelViewSet):
             return StudentAttendanceListSerializer
         return StudentAttendanceSerializer
 
+
+    def get_queryset(self):
+        queryset = StudentAttendance.objects.all_colleges()
+        college_id = self.get_college_id(required=False)
+        user = getattr(self.request, 'user', None)
+        is_global_user = (
+            user and (
+                user.is_superuser or
+                user.is_staff or
+                getattr(user, 'user_type', None) == 'central_manager'
+            )
+        )
+
+        if college_id == 'all' or (is_global_user and not college_id):
+            return queryset
+
+        if not college_id:
+            college_id = self.get_college_id(required=True)
+
+        return queryset.filter(class_obj__college_id=college_id)
+
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+        defaults = {
+            'class_obj': data['class_obj'],
+            'section': data['section'],
+            'status': data['status'],
+            'remarks': data.get('remarks', ''),
+            'check_in_time': data.get('check_in_time'),
+            'check_out_time': data.get('check_out_time'),
+            'marked_by': request.user,
+        }
+
+        try:
+            with transaction.atomic():
+                attendance, created = StudentAttendance.objects.all_colleges().update_or_create(
+                    student=data['student'],
+                    date=data['date'],
+                    defaults=defaults
+                )
+        except IntegrityError:
+            attendance = StudentAttendance.objects.all_colleges().get(
+                student=data['student'],
+                date=data['date']
+            )
+            for key, value in defaults.items():
+                setattr(attendance, key, value)
+            attendance.save()
+            created = False
+
+        output_serializer = self.get_serializer(attendance)
+        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        headers = self.get_success_headers(output_serializer.data) if created else {}
+        return Response(output_serializer.data, status=status_code, headers=headers)
+
     @extend_schema(
         summary="Bulk mark attendance",
         request=BulkAttendanceSerializer,
@@ -120,17 +180,31 @@ class StudentAttendanceViewSet(CollegeScopedModelViewSet):
 
         attendance_records = []
         for student in students:
-            attendance, created = StudentAttendance.objects.update_or_create(
-                student=student,
-                date=date,
-                defaults={
-                    'class_obj': class_obj,
-                    'section': section,
-                    'status': status_value,
-                    'remarks': remarks,
-                    'marked_by': request.user,
-                }
-            )
+            try:
+                with transaction.atomic():
+                    attendance, created = StudentAttendance.objects.all_colleges().update_or_create(
+                        student=student,
+                        date=date,
+                        defaults={
+                            'class_obj': class_obj,
+                            'section': section,
+                            'status': status_value,
+                            'remarks': remarks,
+                            'marked_by': request.user,
+                        }
+                    )
+            except IntegrityError:
+                attendance = StudentAttendance.objects.all_colleges().get(
+                    student=student,
+                    date=date
+                )
+                attendance.class_obj = class_obj
+                attendance.section = section
+                attendance.status = status_value
+                attendance.remarks = remarks
+                attendance.marked_by = request.user
+                attendance.save()
+
             attendance_records.append(attendance)
 
         output_serializer = StudentAttendanceSerializer(attendance_records, many=True)

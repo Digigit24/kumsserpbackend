@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Q
 import uuid
 from drf_spectacular.utils import (
     extend_schema,
@@ -597,6 +598,9 @@ class PermissionViewSet(CollegeScopedModelViewSet):
         """
         from apps.core.permissions.manager import get_user_permissions
         from apps.core.utils import get_current_college_id
+        from apps.academic.models import SubjectAssignment
+        from apps.accounts.models import UserRole
+        from apps.accounts.serializers import CollegeBasicSerializer
 
         college = None
         college_id = get_current_college_id()
@@ -604,14 +608,54 @@ class PermissionViewSet(CollegeScopedModelViewSet):
             college = College.objects.filter(id=college_id).first()
 
         user_permissions = get_user_permissions(request.user, college)
+        accessible_college_ids = set()
+
+        if getattr(request.user, 'college_id', None):
+            accessible_college_ids.add(request.user.college_id)
+
+        role_college_ids = UserRole.objects.all_colleges().filter(
+            user=request.user,
+            is_active=True
+        ).values_list('college_id', flat=True).distinct()
+        accessible_college_ids.update([cid for cid in role_college_ids if cid])
+
+        if (getattr(request.user, 'is_superadmin', False) or getattr(request.user, 'is_staff', False)) and not request.user.college_id:
+            colleges = College.objects.all_colleges().filter(is_active=True)
+            accessible_college_data = CollegeBasicSerializer(colleges, many=True).data
+            accessible_college_ids = set(colleges.values_list('id', flat=True))
+        else:
+            colleges = College.objects.all_colleges().filter(
+                id__in=list(accessible_college_ids),
+                is_active=True
+            )
+            accessible_college_data = CollegeBasicSerializer(colleges, many=True).data
+
+        assigned_class_ids = []
+        assigned_section_ids = []
+        if getattr(request.user, 'user_type', None) == 'teacher':
+            teacher_assignments = SubjectAssignment.objects.filter(
+                Q(teacher=request.user) | Q(lab_instructor=request.user)
+            )
+            assigned_class_ids = list(
+                teacher_assignments.values_list('class_obj_id', flat=True).distinct()
+            )
+            assigned_section_ids = list(
+                teacher_assignments.filter(section__isnull=False)
+                .values_list('section_id', flat=True).distinct()
+            )
 
         return Response({
-            'user_id': str(request.user.id),
-            'username': request.user.username,
-            'is_superadmin': getattr(request.user, 'is_superadmin', False),
-            'college_id': college_id,
-            'role': getattr(request.user, 'user_type', 'student'),
-            'permissions': user_permissions,
+            'user_permissions': user_permissions,
+            'user_context': {
+                'userId': str(request.user.id),
+                'userType': getattr(request.user, 'user_type', 'student'),
+                'college_id': getattr(request.user, 'college_id', None),
+                'assigned_class_ids': assigned_class_ids,
+                'assigned_section_ids': assigned_section_ids,
+                'accessible_colleges': list(accessible_college_ids),
+            },
+            'user_type': getattr(request.user, 'user_type', 'student'),
+            'accessible_colleges': accessible_college_data,
         })
 
     def retrieve(self, request, *args, **kwargs):
@@ -658,9 +702,12 @@ class PermissionViewSet(CollegeScopedModelViewSet):
 
         response = super().retrieve(request, *args, **kwargs)
 
-        # Add user permissions to the response
+        # Add user context to the response
         from apps.core.permissions.manager import get_user_permissions
         from apps.core.utils import get_current_college_id
+        from apps.academic.models import SubjectAssignment
+        from apps.accounts.models import UserRole
+        from apps.accounts.serializers import CollegeBasicSerializer
 
         college = None
         college_id = get_current_college_id()
@@ -668,9 +715,54 @@ class PermissionViewSet(CollegeScopedModelViewSet):
             college = College.objects.filter(id=college_id).first()
 
         user_permissions = get_user_permissions(request.user, college)
+        accessible_college_ids = set()
+
+        if getattr(request.user, 'college_id', None):
+            accessible_college_ids.add(request.user.college_id)
+
+        role_college_ids = UserRole.objects.all_colleges().filter(
+            user=request.user,
+            is_active=True
+        ).values_list('college_id', flat=True).distinct()
+        accessible_college_ids.update([cid for cid in role_college_ids if cid])
+
+        if (getattr(request.user, 'is_superadmin', False) or getattr(request.user, 'is_staff', False)) and not request.user.college_id:
+            colleges = College.objects.all_colleges().filter(is_active=True)
+            accessible_college_data = CollegeBasicSerializer(colleges, many=True).data
+            accessible_college_ids = set(colleges.values_list('id', flat=True))
+        else:
+            colleges = College.objects.all_colleges().filter(
+                id__in=list(accessible_college_ids),
+                is_active=True
+            )
+            accessible_college_data = CollegeBasicSerializer(colleges, many=True).data
+
+        assigned_class_ids = []
+        assigned_section_ids = []
+        if getattr(request.user, 'user_type', None) == 'teacher':
+            teacher_assignments = SubjectAssignment.objects.filter(
+                Q(teacher=request.user) | Q(lab_instructor=request.user)
+            )
+            assigned_class_ids = list(
+                teacher_assignments.values_list('class_obj_id', flat=True).distinct()
+            )
+            assigned_section_ids = list(
+                teacher_assignments.filter(section__isnull=False)
+                .values_list('section_id', flat=True).distinct()
+            )
 
         # Add to response data
-        response.data['user_context'] = user_permissions
+        response.data['user_permissions'] = user_permissions
+        response.data['user_context'] = {
+            'userId': str(request.user.id),
+            'userType': getattr(request.user, 'user_type', 'student'),
+            'college_id': getattr(request.user, 'college_id', None),
+            'assigned_class_ids': assigned_class_ids,
+            'assigned_section_ids': assigned_section_ids,
+            'accessible_colleges': list(accessible_college_ids),
+        }
+        response.data['user_type'] = getattr(request.user, 'user_type', 'student')
+        response.data['accessible_colleges'] = accessible_college_data
 
         return response
 
