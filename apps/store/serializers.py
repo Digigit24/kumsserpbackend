@@ -11,6 +11,7 @@ from .models import (
     StoreCredit,
     SupplierMaster,
     CentralStore,
+    CollegeStore,
     ProcurementRequirement,
     RequirementItem,
     SupplierQuotation,
@@ -118,6 +119,22 @@ class CentralStoreListSerializer(serializers.ModelSerializer):
 
     def get_store_type(self, obj):
         return 'Central Store'
+
+
+class CollegeStoreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CollegeStore
+        fields = '__all__'
+
+
+class CollegeStoreListSerializer(serializers.ModelSerializer):
+    """List college stores with manager details"""
+    manager_name = serializers.CharField(source='manager.get_full_name', read_only=True, allow_null=True)
+    college_name = serializers.CharField(source='college.name', read_only=True)
+
+    class Meta:
+        model = CollegeStore
+        fields = '__all__'
 
 
 class RequirementItemSerializer(serializers.ModelSerializer):

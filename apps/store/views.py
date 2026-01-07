@@ -19,6 +19,7 @@ from .models import (
     StoreCredit,
     SupplierMaster,
     CentralStore,
+    CollegeStore,
     ProcurementRequirement,
     SupplierQuotation,
     PurchaseOrder,
@@ -44,6 +45,8 @@ from .serializers import (
     SupplierMasterUpdateSerializer,
     CentralStoreSerializer,
     CentralStoreListSerializer,
+    CollegeStoreSerializer,
+    CollegeStoreListSerializer,
     ProcurementRequirementListSerializer,
     ProcurementRequirementDetailSerializer,
     ProcurementRequirementCreateSerializer,
@@ -74,6 +77,7 @@ from .permissions import (
     IsCEOOrFinance,
     CanApproveIndent,
     CanReceiveMaterials,
+    CanManageCollegeStore,
 )
 from .utils import generate_po_pdf, generate_min_pdf, generate_grn_pdf
 
@@ -205,6 +209,23 @@ class SupplierMasterViewSet(viewsets.ModelViewSet):
         supplier.verification_date = supplier.verification_date or supplier.updated_at
         supplier.save(update_fields=['is_verified', 'verification_date', 'updated_at'])
         return Response({'status': 'verified'})
+
+
+class CollegeStoreViewSet(CollegeScopedModelViewSet):
+    """Viewset for college-specific stores"""
+    queryset = CollegeStore.objects.all_colleges().select_related('college', 'manager')
+    serializer_class = CollegeStoreSerializer
+    permission_classes = [CanManageCollegeStore]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['is_active', 'college']
+    search_fields = ['name', 'code', 'city']
+    ordering_fields = ['name', 'code', 'created_at']
+    ordering = ['college', 'name']
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return CollegeStoreListSerializer
+        return CollegeStoreSerializer
 
 
 class CentralStoreViewSet(viewsets.ModelViewSet):

@@ -15,6 +15,7 @@ from .views import (
     StoreCreditViewSet,
     SupplierMasterViewSet,
     CentralStoreViewSet,
+    CollegeStoreViewSet,
     ProcurementRequirementViewSet,
     SupplierQuotationViewSet,
     PurchaseOrderViewSet,
@@ -45,6 +46,7 @@ router.register(r'credits', StoreCreditViewSet, basename='storecredit')
 
 router.register(r'suppliers', SupplierMasterViewSet, basename='supplier')
 router.register(r'central-stores', CentralStoreViewSet, basename='centralstore')
+router.register(r'college-stores', CollegeStoreViewSet, basename='collegestore')
 router.register(r'procurement/requirements', ProcurementRequirementViewSet, basename='procurement-requirement')
 router.register(r'procurement/quotations', SupplierQuotationViewSet, basename='procurement-quotation')
 router.register(r'procurement/purchase-orders', PurchaseOrderViewSet, basename='purchase-order')

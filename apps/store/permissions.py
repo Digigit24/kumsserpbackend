@@ -65,3 +65,27 @@ class CanReceiveMaterials(BasePermission):
             return False
         college_id = get_current_college_id() or _user_college_id(request.user)
         return bool(college_id)
+
+
+class CanManageCollegeStore(BasePermission):
+    """
+    Only super_admin, college_admin, or central_store_manager can create/manage college stores
+    """
+    def has_permission(self, request, view):
+        user = request.user
+        if not user or not user.is_authenticated:
+            return False
+        
+        # Super admin has full access
+        if user.is_superuser:
+            return True
+        
+        # Central store manager can manage
+        if user.user_type == 'central_manager':
+            return True
+        
+        # College admin can manage stores for their college
+        if user.user_type == 'college_admin' and hasattr(user, 'college_id'):
+            return True
+        
+        return False
