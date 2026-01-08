@@ -154,7 +154,17 @@ class ApprovalRequestViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def review(self, request, pk=None):
         """Approve or reject an approval request."""
-        approval_request = self.get_object()
+        approval_request = ApprovalRequest.objects.filter(pk=pk).first()
+        if not approval_request:
+            approval_request = ApprovalRequest.objects.filter(
+                request_type='procurement_requirement',
+                object_id=pk
+            ).first()
+        if not approval_request:
+            return Response(
+                {'error': 'No approval request match'},
+                status=status.HTTP_404_NOT_FOUND
+            )
         serializer = ApproveRejectSerializer(data=request.data)
 
         if not serializer.is_valid():

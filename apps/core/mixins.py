@@ -27,14 +27,17 @@ class CollegeScopedMixin:
     def _requires_college(self):
         """
         Determine if the request must provide a college header.
-        Superusers/staff bypass the requirement and get unscoped access.
+        Superadmins/central managers bypass the requirement and get unscoped access.
         """
         user = getattr(self.request, 'user', None)
         is_global_user = (
-            user.is_superuser or 
-            user.is_staff or 
+            getattr(user, 'is_superadmin', False) or
+            getattr(user, 'is_superuser', False) or
             getattr(user, 'user_type', None) == 'central_manager'
         )
+        # If user is tied to a single college, header isn't required
+        if user and not is_global_user and getattr(user, 'college_id', None):
+            return False
         return not (user and is_global_user)
 
     def get_college_id(self, required=False):
@@ -58,7 +61,7 @@ class CollegeScopedMixin:
     def filter_queryset_by_college(self, queryset):
         """
         Scope queryset by college_id when available.
-        Supports 'all' value for superuser/staff to see all records.
+        Supports 'all' value for superadmin/central manager to see all records.
         """
         user = getattr(self.request, 'user', None)
         college_id = self.get_college_id(required=False)
@@ -66,22 +69,31 @@ class CollegeScopedMixin:
         # Log the college_id being used
         logger.debug(f"Filtering by college_id: {college_id}")
 
-        # Check if college_id is 'all' (superuser/staff global view)
+        # Global users (superadmins, central managers) without any header also get all records
+        is_global_user = (
+            getattr(user, 'is_superadmin', False) or
+            getattr(user, 'is_superuser', False) or
+            getattr(user, 'user_type', None) == 'central_manager'
+        )
+
+        # Non-global users are always scoped to their own college when available
+        if user and not is_global_user and getattr(user, 'college_id', None):
+            college_id = user.college_id
+
+        # Check if college_id is 'all' (superadmin/central manager global view)
         if college_id == 'all':
-            logger.debug("Using 'all' mode for superuser/staff")
+            if not (user and is_global_user):
+                raise ValidationError({
+                    'detail': f"{self.college_header}: 'all' is allowed only for superadmin or central manager."
+                })
+            logger.debug("Using 'all' mode for superadmin/central manager")
             manager = queryset.model.objects
             if hasattr(manager, 'all_colleges'):
                 return manager.all_colleges()
             return queryset.model._default_manager.all()
 
-        # Global users (superusers, staff, central managers) without any header also get all records
-        is_global_user = (
-            user.is_superuser or 
-            user.is_staff or 
-            getattr(user, 'user_type', None) == 'central_manager'
-        )
         if user and is_global_user and not college_id:
-            logger.debug("Superuser/staff detected, no college_id passed")
+            logger.debug("Superadmin/central manager detected, no college_id passed")
             manager = queryset.model.objects
             if hasattr(manager, 'all_colleges'):
                 return manager.all_colleges()
@@ -280,10 +292,14 @@ class RelatedCollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet
         college_id = self.get_college_id(required=False)
         user = getattr(self.request, 'user', None)
         is_global_user = (
-            user.is_superuser or 
-            user.is_staff or 
+            getattr(user, 'is_superadmin', False) or
+            getattr(user, 'is_superuser', False) or
             getattr(user, 'user_type', None) == 'central_manager'
         )
+
+        if user and not is_global_user and getattr(user, 'college_id', None):
+            college_id = user.college_id
+
         if college_id == 'all' or (user and is_global_user and not college_id):
             return queryset
 

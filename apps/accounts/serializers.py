@@ -650,7 +650,7 @@ class DepartmentSerializer(TenantAuditMixin, serializers.ModelSerializer):
 class UserProfileSerializer(TenantAuditMixin, serializers.ModelSerializer):
     """Full serializer for UserProfile model."""
     user_name = serializers.CharField(source='user.get_full_name', read_only=True)
-    college_name = serializers.CharField(source='college.short_name', read_only=True)
+    college_name = serializers.CharField(source='college.name', read_only=True)
     department_name = serializers.CharField(source='department.name', read_only=True)
 
     class Meta:
