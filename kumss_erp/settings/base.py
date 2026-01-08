@@ -324,6 +324,11 @@ SPECTACULAR_SETTINGS = {
 
 # Logging Configuration
 # https://docs.djangoproject.com/en/5.0/topics/logging/
+LOG_TO_FILE = config('LOG_TO_FILE', default=False, cast=bool)
+DEFAULT_LOG_HANDLERS = ['console']
+if LOG_TO_FILE:
+    DEFAULT_LOG_HANDLERS.append('file')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -342,32 +347,26 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'debug.log',
-            'formatter': 'verbose',
-        },
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console'],
+            'handlers': DEFAULT_LOG_HANDLERS,
             'level': 'INFO',
             'propagate': True,
         },
         'django.request': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
+            'handlers': DEFAULT_LOG_HANDLERS,
+            'level': 'INFO',
             'propagate': False,
         },
         'apps': { # Capture logs from all apps within the 'apps' directory
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'handlers': DEFAULT_LOG_HANDLERS,
+            'level': 'INFO',
             'propagate': True,
         },
         'corsheaders': { # Specifically log corsheaders middleware
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'handlers': DEFAULT_LOG_HANDLERS,
+            'level': 'INFO',
             'propagate': True,
         },
         'django.db.backends': { # Log SQL queries
@@ -377,7 +376,15 @@ LOGGING = {
         }
     },
     'root': {
-        'handlers': ['file', 'console'],
-        'level': 'DEBUG',
+        'handlers': DEFAULT_LOG_HANDLERS,
+        'level': 'INFO',
     },
 }
+
+if LOG_TO_FILE:
+    LOGGING['handlers']['file'] = {
+        'level': 'DEBUG',
+        'class': 'logging.FileHandler',
+        'filename': BASE_DIR / 'logs' / 'debug.log',
+        'formatter': 'verbose',
+    }

@@ -20,7 +20,7 @@ User = get_user_model()
 
 class StudentCategorySerializer(TenantAuditMixin, serializers.ModelSerializer):
     """Serializer for StudentCategory model."""
-    college_name = serializers.CharField(source='college.short_name', read_only=True)
+    college_name = serializers.CharField(source='college.name', read_only=True)
 
     class Meta:
         model = StudentCategory
@@ -56,7 +56,7 @@ class StudentGroupSerializer(TenantAuditMixin, serializers.ModelSerializer):
 
 class StudentListSerializer(serializers.ModelSerializer):
     """Serializer for listing students (minimal fields)."""
-    college_name = serializers.CharField(source='college.short_name', read_only=True)
+    college_name = serializers.CharField(source='college.name', read_only=True)
     program_name = serializers.CharField(source='program.short_name', read_only=True)
     current_class_name = serializers.CharField(source='current_class.name', read_only=True)
     full_name = serializers.CharField(source='get_full_name', read_only=True)
