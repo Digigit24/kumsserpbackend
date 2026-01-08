@@ -26,7 +26,7 @@ from .serializers import (
     BulkDeleteSerializer,
     BulkAttendanceSerializer,
 )
-from apps.core.mixins import CollegeScopedModelViewSet
+from apps.core.mixins import CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
 
 
 # ============================================================================
@@ -258,11 +258,12 @@ class StudentAttendanceViewSet(CollegeScopedModelViewSet):
         tags=['Attendance - Subjects']
     ),
 )
-class SubjectAttendanceViewSet(CollegeScopedModelViewSet):
+class SubjectAttendanceViewSet(RelatedCollegeScopedModelViewSet):
     """ViewSet for managing subject attendance."""
     queryset = SubjectAttendance.objects.all_colleges()
     serializer_class = SubjectAttendanceSerializer
     permission_classes = [IsAuthenticated]
+    related_college_lookup = 'student__college_id'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['student', 'subject_assignment', 'date', 'period', 'status', 'marked_by']
     search_fields = ['student__first_name', 'student__last_name']
