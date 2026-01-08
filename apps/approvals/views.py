@@ -170,8 +170,8 @@ class ApprovalRequestViewSet(viewsets.ModelViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if user is an approver
-        if request.user not in approval_request.approvers.all():
+        # Check if user is an approver (superusers bypass)
+        if not request.user.is_superuser and request.user not in approval_request.approvers.all():
             return Response(
                 {'error': 'You are not authorized to review this request'},
                 status=status.HTTP_403_FORBIDDEN
