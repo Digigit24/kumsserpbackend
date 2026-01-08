@@ -23,7 +23,7 @@ class CollegeMiddleware(MiddlewareMixin):
         """
         Extract college_id from request header and store in thread-local storage.
         Also store the request object for use in signals and models.
-        Supports special value 'all' for superuser/staff to access all colleges.
+        Supports special value 'all' for superadmin/central manager to access all colleges.
         Superadmins bypass college scoping entirely.
         """
         clear_current_college_id()
@@ -31,7 +31,8 @@ class CollegeMiddleware(MiddlewareMixin):
         # Superadmin and Central Managers bypass college scoping
         user = getattr(request, 'user', None)
         is_global_user = user and user.is_authenticated and (
-            getattr(user, 'is_superadmin', False) or 
+            getattr(user, 'is_superadmin', False) or
+            getattr(user, 'is_superuser', False) or
             getattr(user, 'user_type', None) == 'central_manager'
         )
         if is_global_user:
@@ -47,10 +48,8 @@ class CollegeMiddleware(MiddlewareMixin):
                 break
 
         if college_header:
-            # Check for special 'all' value for superuser/staff
+            # Check for special 'all' value; enforcement happens in view mixins
             if college_header.lower() == 'all':
-                # Set context to 'all'. Security checks are handled in view mixins
-                # because Token authentication hasn't run yet at this middleware stage.
                 set_current_college_id('all')
                 request.current_college = None
             else:

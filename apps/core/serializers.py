@@ -1,4 +1,4 @@
-"""
+﻿"""
 DRF Serializers for Core app models.
 """
 from rest_framework import serializers
@@ -214,7 +214,7 @@ class HolidaySerializer(TenantAuditMixin, serializers.ModelSerializer):
 
 class WeekendSerializer(TenantAuditMixin, serializers.ModelSerializer):
     """Serializer for Weekend model."""
-    college_name = serializers.CharField(source='college.short_name', read_only=True)
+    college_name = serializers.CharField(source='college.name', read_only=True)
     day_display = serializers.CharField(source='get_day_display', read_only=True)
 
     class Meta:
@@ -297,7 +297,7 @@ class NotificationSettingSerializer(TenantAuditMixin, serializers.ModelSerialize
 class ActivityLogSerializer(serializers.ModelSerializer):
     """Serializer for ActivityLog model (read-only)."""
     user_name = serializers.CharField(source='user.username', read_only=True)
-    college_name = serializers.CharField(source='college.short_name', read_only=True)
+    college_name = serializers.CharField(source='college.name', read_only=True)
     action_display = serializers.CharField(source='get_action_display', read_only=True)
 
     class Meta:
@@ -396,3 +396,4 @@ class TeamMembershipSerializer(TenantAuditMixin, serializers.ModelSerializer):
             'created_at', 'updated_at', 'created_by', 'updated_by', 'is_active'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'created_by', 'updated_by']
+
