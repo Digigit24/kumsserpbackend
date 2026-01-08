@@ -37,6 +37,9 @@ class StoreCategorySerializer(serializers.ModelSerializer):
 
 
 class StoreItemSerializer(serializers.ModelSerializer):
+    college_name = serializers.CharField(source='college.name', read_only=True)
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    central_store_name = serializers.CharField(source='central_store.name', read_only=True, allow_null=True)
     class Meta:
         model = StoreItem
         fields = '__all__'
@@ -60,12 +63,18 @@ class VendorSerializer(serializers.ModelSerializer):
 
 
 class StockReceiveSerializer(serializers.ModelSerializer):
+    item_name = serializers.CharField(source='item.name', read_only=True)
+    vendor_name = serializers.CharField(source='vendor.name', read_only=True, allow_null=True)
     class Meta:
         model = StockReceive
         fields = '__all__'
 
 
 class StoreSaleSerializer(serializers.ModelSerializer):
+    college_name = serializers.CharField(source='college.name', read_only=True)
+    student_name = serializers.CharField(source='student.get_full_name', read_only=True, allow_null=True)
+    teacher_name = serializers.CharField(source='teacher.get_full_name', read_only=True, allow_null=True)
+    sold_by_name = serializers.CharField(source='sold_by.get_full_name', read_only=True, allow_null=True)
     class Meta:
         model = StoreSale
         fields = '__all__'
@@ -96,12 +105,15 @@ class SaleItemSerializer(serializers.ModelSerializer):
 
 
 class PrintJobSerializer(serializers.ModelSerializer):
+    college_name = serializers.CharField(source='college.name', read_only=True)
+    teacher_name = serializers.CharField(source='teacher.get_full_name', read_only=True)
     class Meta:
         model = PrintJob
         fields = '__all__'
 
 
 class StoreCreditSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source='student.get_full_name', read_only=True)
     class Meta:
         model = StoreCredit
         fields = '__all__'
@@ -151,6 +163,8 @@ class CentralStoreListSerializer(serializers.ModelSerializer):
 
 
 class CollegeStoreSerializer(serializers.ModelSerializer):
+    college_name = serializers.CharField(source='college.name', read_only=True)
+    manager_name = serializers.CharField(source='manager.get_full_name', read_only=True, allow_null=True)
     class Meta:
         model = CollegeStore
         fields = '__all__'
@@ -167,6 +181,8 @@ class CollegeStoreListSerializer(serializers.ModelSerializer):
 
 
 class RequirementItemSerializer(serializers.ModelSerializer):
+    requirement_number = serializers.CharField(source='requirement.requirement_number', read_only=True)
+    category_name = serializers.CharField(source='category.name', read_only=True, allow_null=True)
     class Meta:
         model = RequirementItem
         fields = '__all__'
@@ -186,7 +202,7 @@ class ProcurementRequirementListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProcurementRequirement
         fields = ['id', 'requirement_number', 'title', 'status', 'urgency', 'requirement_date',
-                  'required_by_date', 'central_store', 'is_draft_submitted', 'is_quotation_approved', 'is_po_created']
+                  'required_by_date', 'central_store', 'central_store_name', 'is_draft_submitted', 'is_quotation_approved', 'is_po_created']
 
     def get_is_draft_submitted(self, obj):
         return obj.status in ['submitted', 'pending_approval', 'approved', 'quotations_received', 'po_created', 'fulfilled']
@@ -238,9 +254,12 @@ class QuotationItemCreateSerializer(serializers.ModelSerializer):
 
 
 class SupplierQuotationListSerializer(serializers.ModelSerializer):
+    requirement_number = serializers.CharField(source='requirement.requirement_number', read_only=True)
+    supplier_name = serializers.CharField(source='supplier.name', read_only=True)
     class Meta:
         model = SupplierQuotation
-        fields = ['id', 'quotation_number', 'requirement', 'supplier', 'quotation_date', 'status', 'is_selected']
+        fields = ['id', 'quotation_number', 'requirement', 'requirement_number', 'supplier', 'supplier_name',
+                  'quotation_date', 'status', 'is_selected']
 
 
 class SupplierQuotationDetailSerializer(serializers.ModelSerializer):
@@ -275,12 +294,20 @@ class PurchaseOrderItemCreateSerializer(serializers.ModelSerializer):
 
 
 class PurchaseOrderListSerializer(serializers.ModelSerializer):
+    supplier_name = serializers.CharField(source='supplier.name', read_only=True)
+    requirement_number = serializers.CharField(source='requirement.requirement_number', read_only=True)
+    central_store_name = serializers.CharField(source='central_store.name', read_only=True)
     class Meta:
         model = PurchaseOrder
-        fields = ['id', 'po_number', 'supplier', 'status', 'po_date', 'expected_delivery_date']
+        fields = ['id', 'po_number', 'supplier', 'supplier_name', 'requirement_number', 'central_store_name',
+                  'status', 'po_date', 'expected_delivery_date']
 
 
 class PurchaseOrderDetailSerializer(serializers.ModelSerializer):
+    supplier_name = serializers.CharField(source='supplier.name', read_only=True)
+    requirement_number = serializers.CharField(source='requirement.requirement_number', read_only=True)
+    quotation_number = serializers.CharField(source='quotation.quotation_number', read_only=True)
+    central_store_name = serializers.CharField(source='central_store.name', read_only=True)
     items = PurchaseOrderItemSerializer(many=True, read_only=True)
     supplier_details = SupplierMasterDetailSerializer(source='supplier', read_only=True)
 
@@ -305,6 +332,7 @@ class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
 
 
 class GoodsReceiptItemSerializer(serializers.ModelSerializer):
+    po_number = serializers.CharField(source='po_item.purchase_order.po_number', read_only=True)
     class Meta:
         model = GoodsReceiptItem
         fields = '__all__'
@@ -317,12 +345,20 @@ class GoodsReceiptItemCreateSerializer(serializers.ModelSerializer):
 
 
 class GoodsReceiptNoteListSerializer(serializers.ModelSerializer):
+    purchase_order_number = serializers.CharField(source='purchase_order.po_number', read_only=True)
+    supplier_name = serializers.CharField(source='supplier.name', read_only=True)
+    central_store_name = serializers.CharField(source='central_store.name', read_only=True)
     class Meta:
         model = GoodsReceiptNote
-        fields = ['id', 'grn_number', 'purchase_order', 'status', 'receipt_date']
+        fields = ['id', 'grn_number', 'purchase_order', 'purchase_order_number', 'supplier_name',
+                  'central_store_name', 'status', 'receipt_date']
 
 
 class GoodsReceiptNoteDetailSerializer(serializers.ModelSerializer):
+    purchase_order_number = serializers.CharField(source='purchase_order.po_number', read_only=True)
+    supplier_name = serializers.CharField(source='supplier.name', read_only=True)
+    central_store_name = serializers.CharField(source='central_store.name', read_only=True)
+    received_by_name = serializers.CharField(source='received_by.get_full_name', read_only=True, allow_null=True)
     items = GoodsReceiptItemSerializer(many=True, read_only=True)
     inspection = serializers.PrimaryKeyRelatedField(read_only=True)
 
@@ -347,12 +383,15 @@ class GoodsReceiptNoteCreateSerializer(serializers.ModelSerializer):
 
 
 class InspectionNoteSerializer(serializers.ModelSerializer):
+    grn_number = serializers.CharField(source='grn.grn_number', read_only=True)
+    inspector_name = serializers.CharField(source='inspector.get_full_name', read_only=True, allow_null=True)
     class Meta:
         model = InspectionNote
         fields = '__all__'
 
 
 class IndentItemSerializer(serializers.ModelSerializer):
+    indent_number = serializers.CharField(source='indent.indent_number', read_only=True)
     available_stock_in_central = serializers.SerializerMethodField()
     central_store_item_name = serializers.CharField(source='central_store_item.name', read_only=True)
 
@@ -392,6 +431,7 @@ class IndentItemCreateSerializer(serializers.ModelSerializer):
 
 
 class StoreIndentListSerializer(serializers.ModelSerializer):
+    requesting_store_manager_name = serializers.CharField(source='requesting_store_manager.get_full_name', read_only=True, allow_null=True)
     college_name = serializers.CharField(source='college.name', read_only=True)
     central_store_name = serializers.CharField(source='central_store.name', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
@@ -403,8 +443,8 @@ class StoreIndentListSerializer(serializers.ModelSerializer):
     class Meta:
         model = StoreIndent
         fields = ['id', 'indent_number', 'college', 'college_name', 'central_store',
-                  'central_store_name', 'status', 'status_display', 'priority', 'indent_date',
-                  'is_prepared', 'is_dispatched', 'is_in_transit', 'is_received']
+                  'central_store_name', 'requesting_store_manager_name', 'status', 'status_display', 'priority',
+                  'indent_date', 'is_prepared', 'is_dispatched', 'is_in_transit', 'is_received']
 
     def get_is_prepared(self, obj):
         return obj.material_issues.filter(status='prepared').exists()
@@ -480,6 +520,8 @@ class StoreIndentCreateSerializer(serializers.ModelSerializer):
 
 
 class MaterialIssueItemSerializer(serializers.ModelSerializer):
+    item_name = serializers.CharField(source='item.name', read_only=True)
+    indent_number = serializers.CharField(source='material_issue.indent.indent_number', read_only=True)
     class Meta:
         model = MaterialIssueItem
         fields = '__all__'
@@ -492,6 +534,11 @@ class MaterialIssueItemCreateSerializer(serializers.ModelSerializer):
 
 
 class MaterialIssueNoteListSerializer(serializers.ModelSerializer):
+    indent_number = serializers.CharField(source='indent.indent_number', read_only=True)
+    central_store_name = serializers.CharField(source='central_store.name', read_only=True)
+    receiving_college_name = serializers.CharField(source='receiving_college.name', read_only=True)
+    issued_by_name = serializers.CharField(source='issued_by.get_full_name', read_only=True, allow_null=True)
+    received_by_name = serializers.CharField(source='received_by.get_full_name', read_only=True, allow_null=True)
     class Meta:
         model = MaterialIssueNote
         fields = '__all__'
@@ -524,19 +571,34 @@ class MaterialIssueNoteCreateSerializer(serializers.ModelSerializer):
                 errors = {}
                 item = item_data.get('item')
                 issued_qty = item_data.get('issued_quantity')
+                indent_item = item_data.get('indent_item')
+                expected_qty = None
+                if indent_item:
+                    expected_qty = (
+                        indent_item.pending_quantity
+                        or indent_item.approved_quantity
+                        or indent_item.requested_quantity
+                    )
                 inventory = None
                 if item:
                     inventory = CentralStoreInventory.objects.filter(
                         central_store=central_store,
                         item=item
                     ).first()
+                if expected_qty is not None and issued_qty is not None:
+                    if issued_qty != expected_qty:
+                        errors['issued_quantity'] = (
+                            f'Issued quantity must fully fulfill the request. Expected: {expected_qty}.'
+                        )
                 if not inventory or (inventory.quantity_available or 0) <= 0:
                     errors['issued_quantity'] = 'Required stock not available in central inventory.'
-                elif issued_qty and issued_qty > inventory.quantity_available:
-                    errors['issued_quantity'] = (
-                        f'Required stock not available in central inventory. '
-                        f'Available: {inventory.quantity_available}'
-                    )
+                else:
+                    qty_to_check = expected_qty if expected_qty is not None else issued_qty
+                    if qty_to_check is not None and qty_to_check > inventory.quantity_available:
+                        errors['issued_quantity'] = (
+                            f'Required stock not available in central inventory. '
+                            f'Available: {inventory.quantity_available}'
+                        )
                 if errors:
                     has_errors = True
                 item_errors.append(errors)
@@ -558,7 +620,7 @@ class CentralStoreInventoryListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CentralStoreInventory
-        fields = ['id', 'item', 'item_display', 'central_store',
+        fields = ['id', 'item', 'item_display', 'central_store', 'central_store_name',
                   'quantity_on_hand', 'quantity_allocated', 'quantity_available',
                   'min_stock_level', 'reorder_point', 'max_stock_level',
                   'last_stock_update', 'unit_cost', 'is_active',
@@ -648,6 +710,10 @@ class CentralStoreInventorySerializer(CentralStoreInventoryListSerializer):
 
 
 class InventoryTransactionSerializer(serializers.ModelSerializer):
+    central_store_name = serializers.CharField(source='central_store.name', read_only=True)
+    item_name = serializers.CharField(source='item.name', read_only=True)
+    performed_by_name = serializers.CharField(source='performed_by.get_full_name', read_only=True, allow_null=True)
+    reference_type_name = serializers.CharField(source='reference_type.model', read_only=True, allow_null=True)
     class Meta:
         model = InventoryTransaction
         fields = '__all__'

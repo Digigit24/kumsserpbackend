@@ -25,6 +25,7 @@ from .models import (
     GoodsReceiptItem,
     StoreIndent,
     MaterialIssueNote,
+    MaterialIssueItem,
     CentralStoreInventory,
     InventoryTransaction,
 )
@@ -39,6 +40,15 @@ def _adjust_stock_from_sale(sale):
 
 
 @receiver(post_save, sender=StockReceive)
+
+def _has_issue_transaction(issue_item):
+    reference_type = ContentType.objects.get_for_model(MaterialIssueItem)
+    return InventoryTransaction.objects.filter(
+        transaction_type='issue',
+        reference_type=reference_type,
+        reference_id=issue_item.id,
+    ).exists()
+
 def stock_receive_post_save(sender, instance, created, **kwargs):
     if not created:
         return
@@ -261,34 +271,33 @@ def store_indent_post_save(sender, instance, created, **kwargs):
 def material_issue_post_save(sender, instance, created, **kwargs):
     """Phase 11.1: MaterialIssueNote signal - reduce central stock on dispatch, create college stock on receipt"""
 
-    if instance.status == 'dispatched':
-        # Prevent duplicate processing
-        if hasattr(instance, '_stock_reduced') and instance._stock_reduced:
-            return
+    reduce_statuses = {'dispatched', 'in_transit', 'received'}
+    if instance.status in reduce_statuses:
+        if not (hasattr(instance, '_stock_reduced') and instance._stock_reduced):
+            instance._stock_reduced = True
 
-        instance._stock_reduced = True
-
-        for issue_item in instance.items.all():
-            try:
-                inventory, _ = CentralStoreInventory.objects.get_or_create(
-                    central_store=instance.central_store,
-                    item=issue_item.item,
-                )
-                inventory.update_stock(
-                    -issue_item.issued_quantity,
-                    'issue',
-                    reference=issue_item,
-                    performed_by=instance.issued_by
-                )
-                issue_item.indent_item.update_issued_quantity(issue_item.issued_quantity)
-                print(f"[Store] Reduced central inventory for MIN {instance.min_number}: {issue_item.issued_quantity} units")
-            except Exception as exc:
-                print(f"[Store] Failed to reduce inventory for issue item {issue_item.id}: {exc}")
-                import traceback
-                traceback.print_exc()
+            for issue_item in instance.items.all():
+                try:
+                    if _has_issue_transaction(issue_item):
+                        continue
+                    inventory, _ = CentralStoreInventory.objects.get_or_create(
+                        central_store=instance.central_store,
+                        item=issue_item.item,
+                    )
+                    inventory.update_stock(
+                        -issue_item.issued_quantity,
+                        'issue',
+                        reference=issue_item,
+                        performed_by=instance.issued_by
+                    )
+                    issue_item.indent_item.update_issued_quantity(issue_item.issued_quantity)
+                    print(f"[Store] Reduced central inventory for MIN {instance.min_number}: {issue_item.issued_quantity} units")
+                except Exception as exc:
+                    print(f"[Store] Failed to reduce inventory for issue item {issue_item.id}: {exc}")
+                    import traceback
+                    traceback.print_exc()
 
     if instance.status == 'received':
-        # Prevent duplicate processing
         if hasattr(instance, '_college_stock_created') and instance._college_stock_created:
             return
 
@@ -314,21 +323,25 @@ def material_issue_post_save(sender, instance, created, **kwargs):
                 if created_item:
                     print(f"[Store] Created new college item: {college_item.name} for {instance.receiving_college.name}")
 
-                # 2. Create StockReceive for college
-                stock_receive = StockReceive.objects.create(
+                # 2. Create StockReceive for college (idempotent)
+                receive_date = instance.receipt_date.date() if instance.receipt_date else instance.issue_date
+                stock_receive_exists = StockReceive.objects.filter(
                     item=college_item,
-                    vendor=None,  # From central store, not vendor
-                    quantity=issue_item.issued_quantity,
-                    unit_price=issue_item.item.price,
-                    total_amount=issue_item.issued_quantity * issue_item.item.price,
-                    receive_date=instance.receipt_date.date() if instance.receipt_date else instance.issue_date,
                     invoice_number=instance.min_number,
-                    remarks=f'From MIN {instance.min_number}, Central Store {instance.central_store.name}'
-                )
-
-                # 3. Update college item stock (StockReceive signal will handle this automatically)
-                # But we'll do it explicitly to be sure
-                college_item.adjust_stock(issue_item.issued_quantity)
+                    quantity=issue_item.issued_quantity,
+                    receive_date=receive_date,
+                ).exists()
+                if not stock_receive_exists:
+                    StockReceive.objects.create(
+                        item=college_item,
+                        vendor=None,
+                        quantity=issue_item.issued_quantity,
+                        unit_price=issue_item.item.price,
+                        total_amount=issue_item.issued_quantity * issue_item.item.price,
+                        receive_date=receive_date,
+                        invoice_number=instance.min_number,
+                        remarks=f'From MIN {instance.min_number}, Central Store {instance.central_store.name}'
+                    )
 
                 print(f"[Store] Created college stock for MIN {instance.min_number}: {issue_item.issued_quantity} units of {college_item.name}")
 
@@ -346,6 +359,7 @@ def material_issue_post_save(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=InventoryTransaction)
+
 def inventory_transaction_post_save(sender, instance, created, **kwargs):
     if created:
         print(f"[Store] Inventory transaction {instance.transaction_number} recorded")
