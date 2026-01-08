@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import models
+from django.core.exceptions import ValidationError
 
 from apps.core.mixins import (
     CollegeScopedMixin, CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
@@ -691,7 +692,11 @@ class MaterialIssueNoteViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def mark_dispatched(self, request, pk=None):
         min_note = self.get_object()
-        min_note.dispatch()
+        try:
+            min_note.dispatch()
+        except ValidationError as exc:
+            detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
+            return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'status': min_note.status})
 
     @action(detail=True, methods=['post'])

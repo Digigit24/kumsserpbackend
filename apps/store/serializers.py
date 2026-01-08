@@ -41,6 +41,17 @@ class StoreItemSerializer(serializers.ModelSerializer):
         model = StoreItem
         fields = '__all__'
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        stock_quantity = attrs.get('stock_quantity')
+        if self.instance and stock_quantity is None:
+            stock_quantity = self.instance.stock_quantity
+        if stock_quantity is not None and stock_quantity < 0:
+            raise serializers.ValidationError({
+                'stock_quantity': 'Stock quantity cannot be negative.'
+            })
+        return attrs
+
 
 class VendorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,6 +75,24 @@ class SaleItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = SaleItem
         fields = '__all__'
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        item = attrs.get('item')
+        quantity = attrs.get('quantity')
+        if self.instance:
+            if item is None:
+                item = self.instance.item
+            if quantity is None:
+                quantity = self.instance.quantity
+        if item and quantity is not None:
+            if (item.stock_quantity or 0) <= 0:
+                raise serializers.ValidationError({'quantity': 'Required stock not available.'})
+            if quantity > item.stock_quantity:
+                raise serializers.ValidationError({
+                    'quantity': f'Required stock not available. Available: {item.stock_quantity}'
+                })
+        return attrs
 
 
 class PrintJobSerializer(serializers.ModelSerializer):
@@ -410,6 +439,38 @@ class StoreIndentCreateSerializer(serializers.ModelSerializer):
         model = StoreIndent
         fields = '__all__'
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        central_store = attrs.get('central_store')
+        items_data = attrs.get('items', [])
+        if central_store and items_data:
+            from .models import CentralStoreInventory
+            item_errors = []
+            has_errors = False
+            for item_data in items_data:
+                errors = {}
+                central_item = item_data.get('central_store_item')
+                requested_qty = item_data.get('requested_quantity')
+                inventory = None
+                if central_item:
+                    inventory = CentralStoreInventory.objects.filter(
+                        central_store=central_store,
+                        item=central_item
+                    ).first()
+                if not inventory or (inventory.quantity_available or 0) <= 0:
+                    errors['requested_quantity'] = 'Required stock not available in central inventory.'
+                elif requested_qty and requested_qty > inventory.quantity_available:
+                    errors['requested_quantity'] = (
+                        f'Required stock not available in central inventory. '
+                        f'Available: {inventory.quantity_available}'
+                    )
+                if errors:
+                    has_errors = True
+                item_errors.append(errors)
+            if has_errors:
+                raise serializers.ValidationError({'items': item_errors})
+        return attrs
+
     def create(self, validated_data):
         items_data = validated_data.pop('items', [])
         indent = StoreIndent.objects.create(**validated_data)
@@ -451,6 +512,38 @@ class MaterialIssueNoteCreateSerializer(serializers.ModelSerializer):
         model = MaterialIssueNote
         fields = '__all__'
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        central_store = attrs.get('central_store')
+        items_data = attrs.get('items', [])
+        if central_store and items_data:
+            from .models import CentralStoreInventory
+            item_errors = []
+            has_errors = False
+            for item_data in items_data:
+                errors = {}
+                item = item_data.get('item')
+                issued_qty = item_data.get('issued_quantity')
+                inventory = None
+                if item:
+                    inventory = CentralStoreInventory.objects.filter(
+                        central_store=central_store,
+                        item=item
+                    ).first()
+                if not inventory or (inventory.quantity_available or 0) <= 0:
+                    errors['issued_quantity'] = 'Required stock not available in central inventory.'
+                elif issued_qty and issued_qty > inventory.quantity_available:
+                    errors['issued_quantity'] = (
+                        f'Required stock not available in central inventory. '
+                        f'Available: {inventory.quantity_available}'
+                    )
+                if errors:
+                    has_errors = True
+                item_errors.append(errors)
+            if has_errors:
+                raise serializers.ValidationError({'items': item_errors})
+        return attrs
+
     def create(self, validated_data):
         items_data = validated_data.pop('items', [])
         min_note = MaterialIssueNote.objects.create(**validated_data)
@@ -482,6 +575,25 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
                   'quantity_allocated', 'quantity_available', 'min_stock_level',
                   'reorder_point', 'max_stock_level', 'unit_cost', 'is_active']
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        quantity_on_hand = attrs.get('quantity_on_hand')
+        quantity_allocated = attrs.get('quantity_allocated')
+        if quantity_on_hand is not None and quantity_on_hand < 0:
+            raise serializers.ValidationError({
+                'quantity_on_hand': 'Stock cannot go negative.'
+            })
+        if quantity_allocated is not None and quantity_allocated < 0:
+            raise serializers.ValidationError({
+                'quantity_allocated': 'Allocated quantity cannot be negative.'
+            })
+        if quantity_on_hand is not None and quantity_allocated is not None:
+            if quantity_allocated > quantity_on_hand:
+                raise serializers.ValidationError({
+                    'quantity_allocated': 'Allocated quantity cannot exceed on-hand quantity.'
+                })
+        return attrs
+
     def create(self, validated_data):
         item_name = validated_data.pop('item_name')
         from .models import StoreItem, StoreCategory
@@ -509,7 +621,30 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
 
 class CentralStoreInventorySerializer(CentralStoreInventoryListSerializer):
     """Default - same as list"""
-    pass
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        quantity_on_hand = attrs.get('quantity_on_hand')
+        quantity_allocated = attrs.get('quantity_allocated')
+        if self.instance:
+            if quantity_on_hand is None:
+                quantity_on_hand = self.instance.quantity_on_hand
+            if quantity_allocated is None:
+                quantity_allocated = self.instance.quantity_allocated
+        if quantity_on_hand is not None and quantity_on_hand < 0:
+            raise serializers.ValidationError({
+                'quantity_on_hand': 'Stock cannot go negative.'
+            })
+        if quantity_allocated is not None and quantity_allocated < 0:
+            raise serializers.ValidationError({
+                'quantity_allocated': 'Allocated quantity cannot be negative.'
+            })
+        if quantity_on_hand is not None and quantity_allocated is not None:
+            if quantity_allocated > quantity_on_hand:
+                raise serializers.ValidationError({
+                    'quantity_allocated': 'Allocated quantity cannot exceed on-hand quantity.'
+                })
+        return attrs
 
 
 class InventoryTransactionSerializer(serializers.ModelSerializer):

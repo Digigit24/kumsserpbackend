@@ -1098,6 +1098,25 @@ class MaterialIssueNote(AuditModel):
         super().save(*args, **kwargs)
 
     def dispatch(self):
+        for issue_item in self.items.all():
+            try:
+                inventory = CentralStoreInventory.objects.get(
+                    central_store=self.central_store,
+                    item=issue_item.item
+                )
+            except CentralStoreInventory.DoesNotExist:
+                raise ValidationError({'items': 'Item not available in central store inventory'})
+            if (inventory.quantity_available or 0) <= 0:
+                raise ValidationError({
+                    'items': f'Required stock not available for {issue_item.item.name}.'
+                })
+            if issue_item.issued_quantity > inventory.quantity_available:
+                raise ValidationError({
+                    'items': (
+                        f'Required stock not available for {issue_item.item.name}. '
+                        f'Available: {inventory.quantity_available}'
+                    )
+                })
         self.status = 'in_transit'
         self.dispatch_date = timezone.now()
         self.save(update_fields=['status', 'dispatch_date', 'updated_at'])
