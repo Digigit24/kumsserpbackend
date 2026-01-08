@@ -723,7 +723,7 @@ class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """Only super admin can create central inventory"""
-        if not request.user.is_superuser:
+        if not (request.user.is_superuser or request.user.user_type == 'central_manager'):
             return Response({'detail': 'Only super admin can add central inventory items'},
                           status=status.HTTP_403_FORBIDDEN)
         return super().create(request, *args, **kwargs)
