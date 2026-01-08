@@ -16950,3 +16950,1120 @@ DEBUG 2026-01-08 11:51:38,108 middleware 2668 11948 Attempting WebSocket authent
 INFO 2026-01-08 11:51:38,163 runserver 2668 4196 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:62630]
 INFO 2026-01-08 11:51:38,163 runserver 2668 4196 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:62630]
 DEBUG 2026-01-08 11:51:38,178 http_protocol 2668 4196 Upgraded connection ['127.0.0.1', 62630] to WebSocket
+DEBUG 2026-01-08 11:51:40,293 middleware 2668 11948 Attempting WebSocket authentication with token: 4a04e4bb65...
+DEBUG 2026-01-08 11:51:40,293 middleware 2668 11948 Attempting WebSocket authentication with token: 4a04e4bb65...
+DEBUG 2026-01-08 11:51:40,293 middleware 2668 4196 WS User authenticated: admin admin (admin)
+DEBUG 2026-01-08 11:51:40,293 middleware 2668 4196 WS User authenticated: admin admin (admin)
+DEBUG 2026-01-08 11:51:40,832 middleware 2668 4196 WS User authenticated: Mahadev Bhola (celiyo)
+DEBUG 2026-01-08 11:51:40,832 middleware 2668 4196 WS User authenticated: Mahadev Bhola (celiyo)
+DEBUG 2026-01-08 11:51:40,833 ws_protocol 2668 4196 WebSocket ['127.0.0.1', 62632] open and established
+DEBUG 2026-01-08 11:51:40,833 middleware 2668 11948 Attempting WebSocket authentication with token: 00c9b1e3bc...
+INFO 2026-01-08 11:51:40,833 runserver 2668 4196 WebSocket CONNECT /ws/notifications/ [127.0.0.1:62632]
+DEBUG 2026-01-08 11:51:40,833 middleware 2668 11948 Attempting WebSocket authentication with token: 00c9b1e3bc...
+INFO 2026-01-08 11:51:40,833 runserver 2668 4196 WebSocket CONNECT /ws/notifications/ [127.0.0.1:62632]
+DEBUG 2026-01-08 11:51:40,835 ws_protocol 2668 4196 WebSocket ['127.0.0.1', 62632] accepted by application
+DEBUG 2026-01-08 11:51:41,394 middleware 2668 4196 WS User authenticated: ram yadav (Ram)
+DEBUG 2026-01-08 11:51:41,394 middleware 2668 4196 WS User authenticated: ram yadav (Ram)
+DEBUG 2026-01-08 11:51:41,395 ws_protocol 2668 4196 WebSocket ['127.0.0.1', 62633] open and established
+INFO 2026-01-08 11:51:41,395 runserver 2668 4196 WebSocket CONNECT /ws/notifications/ [127.0.0.1:62633]
+INFO 2026-01-08 11:51:41,395 runserver 2668 4196 WebSocket CONNECT /ws/notifications/ [127.0.0.1:62633]
+DEBUG 2026-01-08 11:51:41,396 ws_protocol 2668 4196 WebSocket ['127.0.0.1', 62633] accepted by application
+DEBUG 2026-01-08 11:51:41,397 ws_protocol 2668 4196 WebSocket ['127.0.0.1', 62630] open and established
+INFO 2026-01-08 11:51:41,397 runserver 2668 4196 WebSocket CONNECT /ws/notifications/ [127.0.0.1:62630]
+INFO 2026-01-08 11:51:41,397 runserver 2668 4196 WebSocket CONNECT /ws/notifications/ [127.0.0.1:62630]
+DEBUG 2026-01-08 11:51:41,399 ws_protocol 2668 4196 WebSocket ['127.0.0.1', 62630] accepted by application
+INFO 2026-01-08 11:51:41,426 runserver 2668 4196 WebSocket HANDSHAKING /ws/chat/ [127.0.0.1:62637]
+INFO 2026-01-08 11:51:41,426 runserver 2668 4196 WebSocket HANDSHAKING /ws/chat/ [127.0.0.1:62637]
+DEBUG 2026-01-08 11:51:41,427 http_protocol 2668 4196 Upgraded connection ['127.0.0.1', 62637] to WebSocket
+DEBUG 2026-01-08 11:51:41,428 middleware 2668 11948 Attempting WebSocket authentication with token: 00c9b1e3bc...
+DEBUG 2026-01-08 11:51:41,428 middleware 2668 11948 Attempting WebSocket authentication with token: 00c9b1e3bc...
+DEBUG 2026-01-08 11:51:41,962 middleware 2668 4196 WS User authenticated: ram yadav (Ram)
+DEBUG 2026-01-08 11:51:41,962 middleware 2668 4196 WS User authenticated: ram yadav (Ram)
+DEBUG 2026-01-08 11:51:41,963 ws_protocol 2668 4196 WebSocket ['127.0.0.1', 62637] open and established
+INFO 2026-01-08 11:51:41,963 runserver 2668 4196 WebSocket CONNECT /ws/chat/ [127.0.0.1:62637]
+INFO 2026-01-08 11:51:41,963 runserver 2668 4196 WebSocket CONNECT /ws/chat/ [127.0.0.1:62637]
+DEBUG 2026-01-08 11:51:41,964 ws_protocol 2668 4196 WebSocket ['127.0.0.1', 62637] accepted by application
+DEBUG 2026-01-08 11:51:57,802 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62649]
+DEBUG 2026-01-08 11:51:59,726 http_protocol 2668 4196 HTTP disconnect for ['127.0.0.1', 62649]
+DEBUG 2026-01-08 11:51:59,729 ws_protocol 2668 4196 WebSocket closed for ['127.0.0.1', 62630]
+INFO 2026-01-08 11:51:59,729 runserver 2668 4196 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:62630]
+INFO 2026-01-08 11:51:59,729 runserver 2668 4196 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:62630]
+DEBUG 2026-01-08 11:51:59,730 ws_protocol 2668 4196 WebSocket closed for ['127.0.0.1', 62637]
+INFO 2026-01-08 11:51:59,730 runserver 2668 4196 WebSocket DISCONNECT /ws/chat/ [127.0.0.1:62637]
+INFO 2026-01-08 11:51:59,730 runserver 2668 4196 WebSocket DISCONNECT /ws/chat/ [127.0.0.1:62637]
+DEBUG 2026-01-08 11:52:00,500 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62665]
+INFO 2026-01-08 11:52:00,506 runserver 2668 4196 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:62666]
+INFO 2026-01-08 11:52:00,506 runserver 2668 4196 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:62666]
+DEBUG 2026-01-08 11:52:00,546 http_protocol 2668 4196 Upgraded connection ['127.0.0.1', 62666] to WebSocket
+DEBUG 2026-01-08 11:52:00,549 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62667]
+DEBUG 2026-01-08 11:52:00,620 ws_protocol 2668 4196 WebSocket closed for ['127.0.0.1', 62666]
+INFO 2026-01-08 11:52:00,623 runserver 2668 4196 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:62666]
+INFO 2026-01-08 11:52:00,623 runserver 2668 4196 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:62666]
+DEBUG 2026-01-08 11:52:00,629 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:00,645 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62669]
+DEBUG 2026-01-08 11:52:00,647 middleware 2668 11948 Attempting WebSocket authentication with token: 00c9b1e3bc...
+DEBUG 2026-01-08 11:52:00,647 middleware 2668 11948 Attempting WebSocket authentication with token: 00c9b1e3bc...
+DEBUG 2026-01-08 11:52:00,674 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62670]
+INFO 2026-01-08 11:52:00,687 runserver 2668 4196 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:62671]
+INFO 2026-01-08 11:52:00,687 runserver 2668 4196 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:62671]
+DEBUG 2026-01-08 11:52:00,690 http_protocol 2668 4196 Upgraded connection ['127.0.0.1', 62671] to WebSocket
+DEBUG 2026-01-08 11:52:00,704 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:52:00,705 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:52:00,706 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62665]
+INFO 2026-01-08 11:52:00,706 runserver 2668 4196 [mHTTP OPTIONS /api/v1/core/colleges/ 200 [0.21, 127.0.0.1:62665][0m
+INFO 2026-01-08 11:52:00,706 runserver 2668 4196 [mHTTP OPTIONS /api/v1/core/colleges/ 200 [0.21, 127.0.0.1:62665][0m
+DEBUG 2026-01-08 11:52:00,711 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62667]
+DEBUG 2026-01-08 11:52:00,754 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62667]
+DEBUG 2026-01-08 11:52:00,758 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62667]
+INFO 2026-01-08 11:52:00,764 runserver 2668 4196 [mHTTP OPTIONS /api/v1/approvals/notifications/?page_size=50 200 [0.21, 127.0.0.1:62667][0m
+INFO 2026-01-08 11:52:00,764 runserver 2668 4196 [mHTTP OPTIONS /api/v1/approvals/notifications/?page_size=50 200 [0.21, 127.0.0.1:62667][0m
+DEBUG 2026-01-08 11:52:00,771 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:00,780 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:00,790 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:00,806 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62668]
+INFO 2026-01-08 11:52:00,819 runserver 2668 4196 [mHTTP OPTIONS /api/v1/core/permissions/ 200 [0.19, 127.0.0.1:62668][0m
+INFO 2026-01-08 11:52:00,819 runserver 2668 4196 [mHTTP OPTIONS /api/v1/core/permissions/ 200 [0.19, 127.0.0.1:62668][0m
+DEBUG 2026-01-08 11:52:00,853 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62669]
+DEBUG 2026-01-08 11:52:00,856 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62669]
+DEBUG 2026-01-08 11:52:00,860 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62669]
+INFO 2026-01-08 11:52:00,864 runserver 2668 4196 [mHTTP OPTIONS /api/v1/core/permissions/ 200 [0.22, 127.0.0.1:62669][0m
+INFO 2026-01-08 11:52:00,864 runserver 2668 4196 [mHTTP OPTIONS /api/v1/core/permissions/ 200 [0.22, 127.0.0.1:62669][0m
+DEBUG 2026-01-08 11:52:00,868 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:52:00,874 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:00,952 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:52:01,222 middleware 2668 4196 WS User authenticated: ram yadav (Ram)
+DEBUG 2026-01-08 11:52:01,222 middleware 2668 4196 WS User authenticated: ram yadav (Ram)
+DEBUG 2026-01-08 11:52:01,222 middleware 2668 11948 Attempting WebSocket authentication with token: 00c9b1e3bc...
+DEBUG 2026-01-08 11:52:01,222 middleware 2668 11948 Attempting WebSocket authentication with token: 00c9b1e3bc...
+DEBUG 2026-01-08 11:52:01,757 middleware 2668 4196 WS User authenticated: ram yadav (Ram)
+DEBUG 2026-01-08 11:52:01,757 middleware 2668 4196 WS User authenticated: ram yadav (Ram)
+DEBUG 2026-01-08 11:52:01,758 ws_protocol 2668 4196 WebSocket ['127.0.0.1', 62671] open and established
+INFO 2026-01-08 11:52:01,758 runserver 2668 4196 WebSocket CONNECT /ws/notifications/ [127.0.0.1:62671]
+INFO 2026-01-08 11:52:01,758 runserver 2668 4196 WebSocket CONNECT /ws/notifications/ [127.0.0.1:62671]
+DEBUG 2026-01-08 11:52:01,759 ws_protocol 2668 4196 WebSocket ['127.0.0.1', 62671] accepted by application
+INFO 2026-01-08 11:52:01,781 runserver 2668 4196 WebSocket HANDSHAKING /ws/chat/ [127.0.0.1:62684]
+INFO 2026-01-08 11:52:01,781 runserver 2668 4196 WebSocket HANDSHAKING /ws/chat/ [127.0.0.1:62684]
+DEBUG 2026-01-08 11:52:01,782 http_protocol 2668 4196 Upgraded connection ['127.0.0.1', 62684] to WebSocket
+DEBUG 2026-01-08 11:52:01,783 middleware 2668 11948 Attempting WebSocket authentication with token: 00c9b1e3bc...
+DEBUG 2026-01-08 11:52:01,783 middleware 2668 11948 Attempting WebSocket authentication with token: 00c9b1e3bc...
+DEBUG 2026-01-08 11:52:02,325 middleware 2668 4196 WS User authenticated: ram yadav (Ram)
+DEBUG 2026-01-08 11:52:02,325 middleware 2668 4196 WS User authenticated: ram yadav (Ram)
+DEBUG 2026-01-08 11:52:02,326 ws_protocol 2668 4196 WebSocket ['127.0.0.1', 62684] open and established
+INFO 2026-01-08 11:52:02,326 runserver 2668 4196 WebSocket CONNECT /ws/chat/ [127.0.0.1:62684]
+INFO 2026-01-08 11:52:02,326 runserver 2668 4196 WebSocket CONNECT /ws/chat/ [127.0.0.1:62684]
+DEBUG 2026-01-08 11:52:02,327 ws_protocol 2668 4196 WebSocket ['127.0.0.1', 62684] accepted by application
+DEBUG 2026-01-08 11:52:03,552 mixins 2668 13440 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:03,552 mixins 2668 13440 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:03,552 mixins 2668 13440 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:03,552 mixins 2668 13440 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:03,553 mixins 2668 13440 Filtering college model with college_id=3
+DEBUG 2026-01-08 11:52:03,553 mixins 2668 13440 Filtering college model with college_id=3
+DEBUG 2026-01-08 11:52:03,907 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:52:03,908 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:52:03,908 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62678]
+INFO 2026-01-08 11:52:03,908 runserver 2668 4196 [mHTTP GET /api/v1/attendance/subject-attendance/?page=1&page_size=10 200 [2.96, 127.0.0.1:62678][0m
+INFO 2026-01-08 11:52:03,908 runserver 2668 4196 [mHTTP GET /api/v1/attendance/subject-attendance/?page=1&page_size=10 200 [2.96, 127.0.0.1:62678][0m
+DEBUG 2026-01-08 11:52:03,910 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:52:03,911 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:52:03,911 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62670]
+INFO 2026-01-08 11:52:03,911 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.24, 127.0.0.1:62670][0m
+INFO 2026-01-08 11:52:03,911 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.24, 127.0.0.1:62670][0m
+DEBUG 2026-01-08 11:52:04,118 mixins 2668 13440 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:04,118 mixins 2668 13440 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:04,152 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:52:04,153 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:52:04,153 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62673]
+INFO 2026-01-08 11:52:04,153 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/?page_size=50 200 [3.29, 127.0.0.1:62673][0m
+INFO 2026-01-08 11:52:04,153 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/?page_size=50 200 [3.29, 127.0.0.1:62673][0m
+DEBUG 2026-01-08 11:52:04,677 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:04,679 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:04,679 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62668]
+INFO 2026-01-08 11:52:04,680 runserver 2668 4196 [mHTTP GET /api/v1/core/permissions/ 200 [3.81, 127.0.0.1:62668][0m
+INFO 2026-01-08 11:52:04,680 runserver 2668 4196 [mHTTP GET /api/v1/core/permissions/ 200 [3.81, 127.0.0.1:62668][0m
+DEBUG 2026-01-08 11:52:04,742 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:04,748 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:04,749 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:04,749 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62672]
+INFO 2026-01-08 11:52:04,750 runserver 2668 4196 [mHTTP GET /api/v1/core/colleges/ 200 [3.98, 127.0.0.1:62672][0m
+INFO 2026-01-08 11:52:04,750 runserver 2668 4196 [mHTTP GET /api/v1/core/colleges/ 200 [3.98, 127.0.0.1:62672][0m
+DEBUG 2026-01-08 11:52:04,755 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62669]
+DEBUG 2026-01-08 11:52:04,758 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62669]
+DEBUG 2026-01-08 11:52:04,758 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62669]
+DEBUG 2026-01-08 11:52:04,758 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62669]
+INFO 2026-01-08 11:52:04,758 runserver 2668 4196 [mHTTP OPTIONS /api/v1/core/academic-years/ 200 [0.00, 127.0.0.1:62669][0m
+INFO 2026-01-08 11:52:04,758 runserver 2668 4196 [mHTTP OPTIONS /api/v1/core/academic-years/ 200 [0.00, 127.0.0.1:62669][0m
+DEBUG 2026-01-08 11:52:04,760 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:07,488 mixins 2668 12660 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:07,488 mixins 2668 12660 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:07,489 mixins 2668 12660 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:07,489 mixins 2668 12660 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:07,489 mixins 2668 12660 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:07,489 mixins 2668 12660 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:08,326 mixins 2668 12660 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:08,326 mixins 2668 12660 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:09,186 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:09,186 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:09,187 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62668]
+INFO 2026-01-08 11:52:09,187 runserver 2668 4196 [mHTTP GET /api/v1/core/permissions/ 200 [4.45, 127.0.0.1:62668][0m
+INFO 2026-01-08 11:52:09,187 runserver 2668 4196 [mHTTP GET /api/v1/core/permissions/ 200 [4.45, 127.0.0.1:62668][0m
+DEBUG 2026-01-08 11:52:16,722 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:16,722 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:16,722 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62672]
+INFO 2026-01-08 11:52:16,723 runserver 2668 4196 [mHTTP GET /api/v1/core/academic-years/ 200 [11.96, 127.0.0.1:62672][0m
+INFO 2026-01-08 11:52:16,723 runserver 2668 4196 [mHTTP GET /api/v1/core/academic-years/ 200 [11.96, 127.0.0.1:62672][0m
+DEBUG 2026-01-08 11:52:27,932 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:28,023 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:52:28,037 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62669]
+DEBUG 2026-01-08 11:52:28,109 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62667]
+DEBUG 2026-01-08 11:52:28,112 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:52:28,115 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62708]
+DEBUG 2026-01-08 11:52:28,123 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:28,124 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:28,125 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62668]
+INFO 2026-01-08 11:52:28,125 runserver 2668 4196 [mHTTP OPTIONS /api/v1/students/students/?page_size=1000 200 [0.19, 127.0.0.1:62668][0m
+INFO 2026-01-08 11:52:28,125 runserver 2668 4196 [mHTTP OPTIONS /api/v1/students/students/?page_size=1000 200 [0.19, 127.0.0.1:62668][0m
+DEBUG 2026-01-08 11:52:28,129 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62667]
+DEBUG 2026-01-08 11:52:28,130 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62667]
+DEBUG 2026-01-08 11:52:28,141 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62667]
+INFO 2026-01-08 11:52:28,142 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/sections/?page_size=100 200 [0.03, 127.0.0.1:62667][0m
+INFO 2026-01-08 11:52:28,142 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/sections/?page_size=100 200 [0.03, 127.0.0.1:62667][0m
+DEBUG 2026-01-08 11:52:28,143 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62669]
+DEBUG 2026-01-08 11:52:28,143 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62669]
+DEBUG 2026-01-08 11:52:28,159 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62669]
+INFO 2026-01-08 11:52:28,161 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/classes/?page_size=100 200 [0.12, 127.0.0.1:62669][0m
+INFO 2026-01-08 11:52:28,161 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/classes/?page_size=100 200 [0.12, 127.0.0.1:62669][0m
+DEBUG 2026-01-08 11:52:28,162 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:52:28,162 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:52:28,163 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62665]
+INFO 2026-01-08 11:52:28,163 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/classes/?page_size=100 200 [0.14, 127.0.0.1:62665][0m
+INFO 2026-01-08 11:52:28,163 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/classes/?page_size=100 200 [0.14, 127.0.0.1:62665][0m
+DEBUG 2026-01-08 11:52:28,164 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:28,165 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:28,168 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:52:28,169 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:52:28,170 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62707]
+INFO 2026-01-08 11:52:28,171 runserver 2668 4196 [mHTTP OPTIONS /api/v1/students/students/?page_size=1000 200 [0.06, 127.0.0.1:62707][0m
+INFO 2026-01-08 11:52:28,171 runserver 2668 4196 [mHTTP OPTIONS /api/v1/students/students/?page_size=1000 200 [0.06, 127.0.0.1:62707][0m
+DEBUG 2026-01-08 11:52:28,171 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62708]
+DEBUG 2026-01-08 11:52:28,172 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62708]
+DEBUG 2026-01-08 11:52:28,172 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62708]
+INFO 2026-01-08 11:52:28,172 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/sections/?page_size=100 200 [0.06, 127.0.0.1:62708][0m
+INFO 2026-01-08 11:52:28,172 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/sections/?page_size=100 200 [0.06, 127.0.0.1:62708][0m
+DEBUG 2026-01-08 11:52:28,194 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62667]
+DEBUG 2026-01-08 11:52:28,195 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:52:28,200 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:52:28,200 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:52:28,202 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:52:28,203 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62708]
+DEBUG 2026-01-08 11:52:28,203 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62669]
+DEBUG 2026-01-08 11:52:28,228 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:28,229 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:28,229 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62668]
+INFO 2026-01-08 11:52:28,230 runserver 2668 4196 [mHTTP OPTIONS /api/v1/students/students/?page=1&page_size=20 200 [0.06, 127.0.0.1:62668][0m
+INFO 2026-01-08 11:52:28,230 runserver 2668 4196 [mHTTP OPTIONS /api/v1/students/students/?page=1&page_size=20 200 [0.06, 127.0.0.1:62668][0m
+DEBUG 2026-01-08 11:52:28,232 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62667]
+DEBUG 2026-01-08 11:52:28,233 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62667]
+DEBUG 2026-01-08 11:52:28,235 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62667]
+INFO 2026-01-08 11:52:28,236 runserver 2668 4196 [mHTTP OPTIONS /api/v1/attendance/student-attendance/?date=2026-01-08&page_size=200 200 [0.04, 127.0.0.1:62667][0m
+INFO 2026-01-08 11:52:28,236 runserver 2668 4196 [mHTTP OPTIONS /api/v1/attendance/student-attendance/?date=2026-01-08&page_size=200 200 [0.04, 127.0.0.1:62667][0m
+DEBUG 2026-01-08 11:52:28,247 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:52:28,248 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:52:28,249 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62707]
+INFO 2026-01-08 11:52:28,249 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/sections/?page_size=100 200 [0.05, 127.0.0.1:62707][0m
+INFO 2026-01-08 11:52:28,249 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/sections/?page_size=100 200 [0.05, 127.0.0.1:62707][0m
+DEBUG 2026-01-08 11:52:28,250 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:52:28,250 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:52:28,251 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62665]
+INFO 2026-01-08 11:52:28,253 runserver 2668 4196 [mHTTP OPTIONS /api/v1/students/students/?page_size=1000 200 [0.05, 127.0.0.1:62665][0m
+INFO 2026-01-08 11:52:28,253 runserver 2668 4196 [mHTTP OPTIONS /api/v1/students/students/?page_size=1000 200 [0.05, 127.0.0.1:62665][0m
+DEBUG 2026-01-08 11:52:28,254 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62708]
+DEBUG 2026-01-08 11:52:28,255 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62708]
+DEBUG 2026-01-08 11:52:28,255 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62708]
+INFO 2026-01-08 11:52:28,256 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/classes/?page_size=100 200 [0.05, 127.0.0.1:62708][0m
+INFO 2026-01-08 11:52:28,256 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/classes/?page_size=100 200 [0.05, 127.0.0.1:62708][0m
+DEBUG 2026-01-08 11:52:28,256 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62669]
+DEBUG 2026-01-08 11:52:28,257 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62669]
+DEBUG 2026-01-08 11:52:28,258 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62669]
+INFO 2026-01-08 11:52:28,259 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/classes/?page_size=100 200 [0.06, 127.0.0.1:62669][0m
+INFO 2026-01-08 11:52:28,259 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/classes/?page_size=100 200 [0.06, 127.0.0.1:62669][0m
+DEBUG 2026-01-08 11:52:28,260 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:28,264 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:52:28,276 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:52:28,281 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62708]
+DEBUG 2026-01-08 11:52:28,282 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:52:28,282 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62667]
+DEBUG 2026-01-08 11:52:28,288 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62709]
+DEBUG 2026-01-08 11:52:28,302 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62708]
+DEBUG 2026-01-08 11:52:28,307 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62708]
+DEBUG 2026-01-08 11:52:28,308 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62708]
+INFO 2026-01-08 11:52:28,308 runserver 2668 4196 [mHTTP OPTIONS /api/v1/students/students/?page=1&page_size=20 200 [0.03, 127.0.0.1:62708][0m
+INFO 2026-01-08 11:52:28,308 runserver 2668 4196 [mHTTP OPTIONS /api/v1/students/students/?page=1&page_size=20 200 [0.03, 127.0.0.1:62708][0m
+DEBUG 2026-01-08 11:52:28,310 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:52:28,311 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:52:28,312 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62707]
+INFO 2026-01-08 11:52:28,313 runserver 2668 4196 [mHTTP OPTIONS /api/v1/students/students/?page_size=1000 200 [0.04, 127.0.0.1:62707][0m
+INFO 2026-01-08 11:52:28,313 runserver 2668 4196 [mHTTP OPTIONS /api/v1/students/students/?page_size=1000 200 [0.04, 127.0.0.1:62707][0m
+DEBUG 2026-01-08 11:52:28,315 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62667]
+DEBUG 2026-01-08 11:52:28,315 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62667]
+DEBUG 2026-01-08 11:52:28,316 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62667]
+INFO 2026-01-08 11:52:28,316 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/classes/?college=3&page_size=100&is_active=true 200 [0.03, 127.0.0.1:62667][0m
+INFO 2026-01-08 11:52:28,316 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/classes/?college=3&page_size=100&is_active=true 200 [0.03, 127.0.0.1:62667][0m
+DEBUG 2026-01-08 11:52:28,317 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:28,318 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:28,319 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62668]
+INFO 2026-01-08 11:52:28,319 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/sections/?page_size=100 200 [0.06, 127.0.0.1:62668][0m
+INFO 2026-01-08 11:52:28,319 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/sections/?page_size=100 200 [0.06, 127.0.0.1:62668][0m
+DEBUG 2026-01-08 11:52:28,325 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:30,737 mixins 2668 3720 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:30,737 mixins 2668 3720 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:30,737 mixins 2668 3720 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:30,737 mixins 2668 3720 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:30,738 mixins 2668 3720 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:30,738 mixins 2668 3720 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:30,738 mixins 2668 3720 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:30,738 mixins 2668 3720 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:30,773 mixins 2668 10300 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:30,773 mixins 2668 10300 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:30,780 mixins 2668 12324 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:30,780 mixins 2668 12324 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:30,783 mixins 2668 14192 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:30,783 mixins 2668 14192 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:30,783 mixins 2668 14192 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:30,783 mixins 2668 14192 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:30,784 mixins 2668 14192 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:30,784 mixins 2668 14192 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:30,785 mixins 2668 14192 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:30,785 mixins 2668 14192 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:30,803 mixins 2668 9084 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:30,803 mixins 2668 9084 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:30,803 mixins 2668 9084 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:30,803 mixins 2668 9084 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:30,804 mixins 2668 9084 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:30,804 mixins 2668 9084 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:30,804 mixins 2668 9084 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:30,804 mixins 2668 9084 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:30,832 mixins 2668 6928 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:30,832 mixins 2668 6928 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:30,832 mixins 2668 6928 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:30,832 mixins 2668 6928 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:30,832 mixins 2668 6928 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:30,832 mixins 2668 6928 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:30,833 mixins 2668 6928 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:30,833 mixins 2668 6928 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:30,852 mixins 2668 2676 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:30,852 mixins 2668 2676 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:30,853 mixins 2668 2676 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:30,853 mixins 2668 2676 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:30,853 mixins 2668 2676 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:30,853 mixins 2668 2676 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:30,854 mixins 2668 2676 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:30,854 mixins 2668 2676 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:32,969 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:52:32,970 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:52:32,970 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62665]
+INFO 2026-01-08 11:52:32,970 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100&is_active=true 200 [4.69, 127.0.0.1:62665][0m
+INFO 2026-01-08 11:52:32,970 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100&is_active=true 200 [4.69, 127.0.0.1:62665][0m
+DEBUG 2026-01-08 11:52:33,090 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:33,090 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:33,091 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62668]
+INFO 2026-01-08 11:52:33,091 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?college=3&page_size=100&is_active=true 200 [4.77, 127.0.0.1:62668][0m
+INFO 2026-01-08 11:52:33,091 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?college=3&page_size=100&is_active=true 200 [4.77, 127.0.0.1:62668][0m
+DEBUG 2026-01-08 11:52:33,095 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:52:33,096 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:52:33,096 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62673]
+INFO 2026-01-08 11:52:33,097 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [4.90, 127.0.0.1:62673][0m
+INFO 2026-01-08 11:52:33,097 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [4.90, 127.0.0.1:62673][0m
+DEBUG 2026-01-08 11:52:33,102 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:52:33,191 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:52:33,191 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:52:33,193 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62670]
+INFO 2026-01-08 11:52:33,193 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [4.99, 127.0.0.1:62670][0m
+INFO 2026-01-08 11:52:33,193 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [4.99, 127.0.0.1:62670][0m
+DEBUG 2026-01-08 11:52:33,195 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:52:33,921 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62721]
+DEBUG 2026-01-08 11:52:34,309 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:34,309 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:34,310 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62672]
+INFO 2026-01-08 11:52:34,311 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [6.15, 127.0.0.1:62672][0m
+INFO 2026-01-08 11:52:34,311 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [6.15, 127.0.0.1:62672][0m
+DEBUG 2026-01-08 11:52:34,313 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:34,544 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:52:34,545 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:52:34,545 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62678]
+INFO 2026-01-08 11:52:34,545 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page=1&page_size=20 200 [6.28, 127.0.0.1:62678][0m
+INFO 2026-01-08 11:52:34,545 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page=1&page_size=20 200 [6.28, 127.0.0.1:62678][0m
+DEBUG 2026-01-08 11:52:34,547 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:52:35,466 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62709]
+DEBUG 2026-01-08 11:52:35,467 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62709]
+DEBUG 2026-01-08 11:52:35,467 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62709]
+INFO 2026-01-08 11:52:35,467 runserver 2668 4196 [mHTTP GET /api/v1/attendance/student-attendance/?date=2026-01-08&page_size=200 200 [7.18, 127.0.0.1:62709][0m
+INFO 2026-01-08 11:52:35,467 runserver 2668 4196 [mHTTP GET /api/v1/attendance/student-attendance/?date=2026-01-08&page_size=200 200 [7.18, 127.0.0.1:62709][0m
+DEBUG 2026-01-08 11:52:35,682 mixins 2668 5784 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:35,682 mixins 2668 5784 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:35,683 mixins 2668 5784 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:35,683 mixins 2668 5784 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:35,683 mixins 2668 5784 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:35,684 mixins 2668 14216 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:35,683 mixins 2668 5784 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:35,684 mixins 2668 14216 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:35,685 mixins 2668 5784 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:35,685 mixins 2668 5784 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:36,718 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62721]
+DEBUG 2026-01-08 11:52:36,719 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62721]
+DEBUG 2026-01-08 11:52:36,719 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62721]
+INFO 2026-01-08 11:52:36,719 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.80, 127.0.0.1:62721][0m
+INFO 2026-01-08 11:52:36,719 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.80, 127.0.0.1:62721][0m
+DEBUG 2026-01-08 11:52:36,819 mixins 2668 9484 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:36,819 mixins 2668 9484 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:36,820 mixins 2668 9484 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:36,820 mixins 2668 9484 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:36,820 mixins 2668 9484 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:36,820 mixins 2668 9484 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:36,821 mixins 2668 9484 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:36,821 mixins 2668 9484 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:37,135 mixins 2668 14288 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:37,135 mixins 2668 14288 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:37,136 mixins 2668 14288 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:37,136 mixins 2668 14288 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:37,137 mixins 2668 14288 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:37,137 mixins 2668 14288 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:37,138 mixins 2668 14288 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:37,138 mixins 2668 14288 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:38,034 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:52:38,035 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:52:38,035 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62670]
+INFO 2026-01-08 11:52:38,035 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [4.84, 127.0.0.1:62670][0m
+INFO 2026-01-08 11:52:38,035 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [4.84, 127.0.0.1:62670][0m
+DEBUG 2026-01-08 11:52:38,037 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:52:38,040 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:52:38,040 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:52:38,041 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62673]
+INFO 2026-01-08 11:52:38,041 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [4.94, 127.0.0.1:62673][0m
+INFO 2026-01-08 11:52:38,041 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [4.94, 127.0.0.1:62673][0m
+DEBUG 2026-01-08 11:52:38,045 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:52:40,896 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:40,896 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:40,897 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62672]
+INFO 2026-01-08 11:52:40,897 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [6.58, 127.0.0.1:62672][0m
+INFO 2026-01-08 11:52:40,897 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [6.58, 127.0.0.1:62672][0m
+DEBUG 2026-01-08 11:52:40,899 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:41,162 mixins 2668 8444 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:41,162 mixins 2668 8444 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:41,162 mixins 2668 8444 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:41,162 mixins 2668 8444 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:41,163 mixins 2668 8444 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:41,163 mixins 2668 8444 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:41,163 mixins 2668 8444 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:41,163 mixins 2668 8444 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:41,173 mixins 2668 7600 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:41,173 mixins 2668 7600 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:41,432 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:52:41,432 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:52:41,432 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62678]
+INFO 2026-01-08 11:52:41,433 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page=1&page_size=20 200 [6.89, 127.0.0.1:62678][0m
+INFO 2026-01-08 11:52:41,433 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page=1&page_size=20 200 [6.89, 127.0.0.1:62678][0m
+DEBUG 2026-01-08 11:52:43,222 mixins 2668 14164 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:43,222 mixins 2668 14164 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:43,223 mixins 2668 14164 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:43,223 mixins 2668 14164 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:43,223 mixins 2668 14164 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:43,223 mixins 2668 14164 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:43,224 mixins 2668 14164 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:43,224 mixins 2668 14164 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:43,422 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:52:43,422 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:52:43,422 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62670]
+INFO 2026-01-08 11:52:43,423 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [5.39, 127.0.0.1:62670][0m
+INFO 2026-01-08 11:52:43,423 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [5.39, 127.0.0.1:62670][0m
+DEBUG 2026-01-08 11:52:43,425 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:52:43,496 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:52:43,496 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:52:43,497 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62673]
+INFO 2026-01-08 11:52:43,497 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [5.45, 127.0.0.1:62673][0m
+INFO 2026-01-08 11:52:43,497 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [5.45, 127.0.0.1:62673][0m
+DEBUG 2026-01-08 11:52:43,500 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:52:44,291 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:44,294 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:52:44,297 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:52:44,313 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:52:44,333 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:52:44,334 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62665]
+INFO 2026-01-08 11:52:44,337 runserver 2668 4196 [mHTTP OPTIONS /api/v1/attendance/student-attendance/?class_obj=6&date=2026-01-08&page_size=200 200 [0.04, 127.0.0.1:62665][0m
+INFO 2026-01-08 11:52:44,337 runserver 2668 4196 [mHTTP OPTIONS /api/v1/attendance/student-attendance/?class_obj=6&date=2026-01-08&page_size=200 200 [0.04, 127.0.0.1:62665][0m
+DEBUG 2026-01-08 11:52:44,342 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:44,343 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:52:44,345 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62668]
+INFO 2026-01-08 11:52:44,347 runserver 2668 4196 [mHTTP OPTIONS /api/v1/students/students/?page=1&page_size=20&class_obj=6 200 [0.06, 127.0.0.1:62668][0m
+INFO 2026-01-08 11:52:44,347 runserver 2668 4196 [mHTTP OPTIONS /api/v1/students/students/?page=1&page_size=20&class_obj=6 200 [0.06, 127.0.0.1:62668][0m
+DEBUG 2026-01-08 11:52:44,349 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:52:44,373 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62721]
+DEBUG 2026-01-08 11:52:45,845 mixins 2668 8976 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:45,845 mixins 2668 8976 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:45,845 mixins 2668 8976 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:45,845 mixins 2668 8976 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:45,845 mixins 2668 8976 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:45,845 mixins 2668 8976 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:45,846 mixins 2668 8976 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:45,846 mixins 2668 8976 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:45,898 mixins 2668 13352 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:45,898 mixins 2668 13352 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:46,656 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:46,656 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:46,657 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62672]
+INFO 2026-01-08 11:52:46,657 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [5.76, 127.0.0.1:62672][0m
+INFO 2026-01-08 11:52:46,657 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [5.76, 127.0.0.1:62672][0m
+DEBUG 2026-01-08 11:52:46,659 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:46,784 mixins 2668 8008 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:46,784 mixins 2668 8008 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:46,784 mixins 2668 8008 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:46,784 mixins 2668 8008 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:46,784 mixins 2668 8008 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:46,784 mixins 2668 8008 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:46,785 mixins 2668 8008 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:46,785 mixins 2668 8008 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:46,805 mixins 2668 2976 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:46,805 mixins 2668 2976 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:46,829 mixins 2668 13424 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:46,829 mixins 2668 13424 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:48,108 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:52:48,109 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:52:48,109 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62673]
+INFO 2026-01-08 11:52:48,109 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [4.61, 127.0.0.1:62673][0m
+INFO 2026-01-08 11:52:48,109 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [4.61, 127.0.0.1:62673][0m
+DEBUG 2026-01-08 11:52:48,111 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:52:48,111 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:52:48,112 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62670]
+INFO 2026-01-08 11:52:48,113 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [4.69, 127.0.0.1:62670][0m
+INFO 2026-01-08 11:52:48,113 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [4.69, 127.0.0.1:62670][0m
+DEBUG 2026-01-08 11:52:48,499 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:52:48,500 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:52:48,500 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62707]
+INFO 2026-01-08 11:52:48,500 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?class_obj=6&page_size=100&is_active=true 200 [4.20, 127.0.0.1:62707][0m
+INFO 2026-01-08 11:52:48,500 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?class_obj=6&page_size=100&is_active=true 200 [4.20, 127.0.0.1:62707][0m
+DEBUG 2026-01-08 11:52:49,079 mixins 2668 4344 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:49,079 mixins 2668 4344 Filtering by college_id: 3
+DEBUG 2026-01-08 11:52:49,080 mixins 2668 4344 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:49,080 mixins 2668 4344 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:52:49,080 mixins 2668 4344 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:49,080 mixins 2668 4344 Filtering model with college_id=3
+DEBUG 2026-01-08 11:52:49,080 mixins 2668 4344 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:49,080 mixins 2668 4344 Filter query with college_id: 3
+DEBUG 2026-01-08 11:52:50,316 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62721]
+DEBUG 2026-01-08 11:52:50,316 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62721]
+DEBUG 2026-01-08 11:52:50,316 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62721]
+INFO 2026-01-08 11:52:50,317 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page=1&page_size=20&class_obj=6 200 [5.94, 127.0.0.1:62721][0m
+INFO 2026-01-08 11:52:50,317 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page=1&page_size=20&class_obj=6 200 [5.94, 127.0.0.1:62721][0m
+DEBUG 2026-01-08 11:52:51,707 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:52:51,708 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:52:51,708 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62678]
+INFO 2026-01-08 11:52:51,708 runserver 2668 4196 [mHTTP GET /api/v1/attendance/student-attendance/?class_obj=6&date=2026-01-08&page_size=200 200 [7.36, 127.0.0.1:62678][0m
+INFO 2026-01-08 11:52:51,708 runserver 2668 4196 [mHTTP GET /api/v1/attendance/student-attendance/?class_obj=6&date=2026-01-08&page_size=200 200 [7.36, 127.0.0.1:62678][0m
+DEBUG 2026-01-08 11:52:52,679 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:52,680 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:52:52,680 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62672]
+INFO 2026-01-08 11:52:52,680 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [6.02, 127.0.0.1:62672][0m
+INFO 2026-01-08 11:52:52,680 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [6.02, 127.0.0.1:62672][0m
+DEBUG 2026-01-08 11:53:06,731 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:53:09,443 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:53:09,443 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:53:09,444 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62672]
+INFO 2026-01-08 11:53:09,444 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.71, 127.0.0.1:62672][0m
+INFO 2026-01-08 11:53:09,444 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.71, 127.0.0.1:62672][0m
+DEBUG 2026-01-08 11:53:12,608 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:53:12,644 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:53:12,645 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62721]
+DEBUG 2026-01-08 11:53:12,646 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:53:16,258 mixins 2668 11664 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:16,259 mixins 2668 4792 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:16,260 mixins 2668 13188 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:16,258 mixins 2668 11664 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:16,259 mixins 2668 4792 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:16,260 mixins 2668 13188 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:16,261 mixins 2668 10780 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:16,263 mixins 2668 4792 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:16,264 mixins 2668 13188 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:16,261 mixins 2668 10780 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:16,263 mixins 2668 4792 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:16,264 mixins 2668 13188 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:16,264 mixins 2668 10780 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:16,264 mixins 2668 4792 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:16,265 mixins 2668 13188 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:16,264 mixins 2668 10780 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:16,264 mixins 2668 4792 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:16,265 mixins 2668 13188 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:16,265 mixins 2668 10780 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:16,266 mixins 2668 4792 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:16,266 mixins 2668 13188 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:16,265 mixins 2668 10780 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:16,266 mixins 2668 10780 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:16,266 mixins 2668 13188 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:16,266 mixins 2668 4792 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:16,266 mixins 2668 10780 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:18,535 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62721]
+DEBUG 2026-01-08 11:53:18,535 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62721]
+DEBUG 2026-01-08 11:53:18,535 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62721]
+INFO 2026-01-08 11:53:18,535 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [5.89, 127.0.0.1:62721][0m
+INFO 2026-01-08 11:53:18,535 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [5.89, 127.0.0.1:62721][0m
+DEBUG 2026-01-08 11:53:18,539 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62721]
+DEBUG 2026-01-08 11:53:18,625 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:53:18,626 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:53:18,627 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62678]
+INFO 2026-01-08 11:53:18,627 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [5.98, 127.0.0.1:62678][0m
+INFO 2026-01-08 11:53:18,627 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [5.98, 127.0.0.1:62678][0m
+DEBUG 2026-01-08 11:53:18,630 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:53:19,917 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:53:19,918 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:53:19,918 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62670]
+INFO 2026-01-08 11:53:19,918 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page=1&page_size=20&class_obj=6 200 [7.27, 127.0.0.1:62670][0m
+INFO 2026-01-08 11:53:19,918 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page=1&page_size=20&class_obj=6 200 [7.27, 127.0.0.1:62670][0m
+DEBUG 2026-01-08 11:53:19,921 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:53:20,061 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:53:20,061 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:53:20,061 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62672]
+INFO 2026-01-08 11:53:20,062 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [7.45, 127.0.0.1:62672][0m
+INFO 2026-01-08 11:53:20,062 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [7.45, 127.0.0.1:62672][0m
+DEBUG 2026-01-08 11:53:20,064 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:53:21,027 mixins 2668 2084 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:21,027 mixins 2668 2084 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:21,165 mixins 2668 6920 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:21,165 mixins 2668 6920 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:21,165 mixins 2668 6920 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:21,165 mixins 2668 6920 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:21,166 mixins 2668 6920 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:21,166 mixins 2668 6920 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:21,166 mixins 2668 6920 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:21,166 mixins 2668 6920 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:22,379 mixins 2668 10744 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:22,379 mixins 2668 10744 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:22,379 mixins 2668 10744 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:22,379 mixins 2668 10744 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:22,379 mixins 2668 10744 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:22,379 mixins 2668 10744 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:22,380 mixins 2668 10744 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:22,380 mixins 2668 10744 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:22,418 ws_protocol 2668 4196 WebSocket closed for ['127.0.0.1', 62671]
+DEBUG 2026-01-08 11:53:22,459 mixins 2668 12952 Filtering by college_id: 3
+INFO 2026-01-08 11:53:22,461 runserver 2668 4196 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:62671]
+DEBUG 2026-01-08 11:53:22,459 mixins 2668 12952 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:22,462 mixins 2668 12952 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:22,462 mixins 2668 12952 Filtering for specific college_id: 3
+INFO 2026-01-08 11:53:22,461 runserver 2668 4196 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:62671]
+DEBUG 2026-01-08 11:53:22,465 http_protocol 2668 4196 HTTP disconnect for ['127.0.0.1', 62678]
+DEBUG 2026-01-08 11:53:22,465 mixins 2668 12952 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:22,465 mixins 2668 12952 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:22,467 http_protocol 2668 4196 HTTP disconnect for ['127.0.0.1', 62670]
+DEBUG 2026-01-08 11:53:22,477 ws_protocol 2668 4196 WebSocket closed for ['127.0.0.1', 62684]
+DEBUG 2026-01-08 11:53:22,477 mixins 2668 12952 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:22,477 mixins 2668 12952 Filter query with college_id: 3
+INFO 2026-01-08 11:53:22,480 runserver 2668 4196 WebSocket DISCONNECT /ws/chat/ [127.0.0.1:62684]
+INFO 2026-01-08 11:53:22,480 runserver 2668 4196 WebSocket DISCONNECT /ws/chat/ [127.0.0.1:62684]
+DEBUG 2026-01-08 11:53:22,497 http_protocol 2668 4196 HTTP disconnect for ['127.0.0.1', 62672]
+DEBUG 2026-01-08 11:53:22,498 http_protocol 2668 4196 HTTP disconnect for ['127.0.0.1', 62721]
+INFO 2026-01-08 11:53:23,051 runserver 2668 4196 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:62784]
+INFO 2026-01-08 11:53:23,051 runserver 2668 4196 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:62784]
+DEBUG 2026-01-08 11:53:23,106 http_protocol 2668 4196 Upgraded connection ['127.0.0.1', 62784] to WebSocket
+DEBUG 2026-01-08 11:53:23,109 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:53:23,112 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:53:23,114 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62709]
+DEBUG 2026-01-08 11:53:23,115 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62785]
+DEBUG 2026-01-08 11:53:23,156 middleware 2668 11948 Attempting WebSocket authentication with token: 00c9b1e3bc...
+DEBUG 2026-01-08 11:53:23,156 middleware 2668 11948 Attempting WebSocket authentication with token: 00c9b1e3bc...
+DEBUG 2026-01-08 11:53:23,160 ws_protocol 2668 4196 WebSocket closed for ['127.0.0.1', 62784]
+INFO 2026-01-08 11:53:23,166 runserver 2668 4196 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:62784]
+INFO 2026-01-08 11:53:23,166 runserver 2668 4196 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:62784]
+INFO 2026-01-08 11:53:23,169 runserver 2668 4196 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:62786]
+INFO 2026-01-08 11:53:23,169 runserver 2668 4196 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:62786]
+DEBUG 2026-01-08 11:53:23,173 http_protocol 2668 4196 Upgraded connection ['127.0.0.1', 62786] to WebSocket
+DEBUG 2026-01-08 11:53:23,686 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:53:23,689 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62792]
+DEBUG 2026-01-08 11:53:23,691 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62793]
+DEBUG 2026-01-08 11:53:23,707 middleware 2668 4196 WS User authenticated: ram yadav (Ram)
+DEBUG 2026-01-08 11:53:23,707 middleware 2668 4196 WS User authenticated: ram yadav (Ram)
+DEBUG 2026-01-08 11:53:23,710 middleware 2668 11948 Attempting WebSocket authentication with token: 00c9b1e3bc...
+DEBUG 2026-01-08 11:53:23,710 middleware 2668 11948 Attempting WebSocket authentication with token: 00c9b1e3bc...
+DEBUG 2026-01-08 11:53:24,248 middleware 2668 4196 WS User authenticated: ram yadav (Ram)
+DEBUG 2026-01-08 11:53:24,248 middleware 2668 4196 WS User authenticated: ram yadav (Ram)
+DEBUG 2026-01-08 11:53:24,249 ws_protocol 2668 4196 WebSocket ['127.0.0.1', 62786] open and established
+INFO 2026-01-08 11:53:24,249 runserver 2668 4196 WebSocket CONNECT /ws/notifications/ [127.0.0.1:62786]
+INFO 2026-01-08 11:53:24,249 runserver 2668 4196 WebSocket CONNECT /ws/notifications/ [127.0.0.1:62786]
+DEBUG 2026-01-08 11:53:24,250 ws_protocol 2668 4196 WebSocket ['127.0.0.1', 62786] accepted by application
+INFO 2026-01-08 11:53:24,267 runserver 2668 4196 WebSocket HANDSHAKING /ws/chat/ [127.0.0.1:62798]
+INFO 2026-01-08 11:53:24,267 runserver 2668 4196 WebSocket HANDSHAKING /ws/chat/ [127.0.0.1:62798]
+DEBUG 2026-01-08 11:53:24,269 http_protocol 2668 4196 Upgraded connection ['127.0.0.1', 62798] to WebSocket
+DEBUG 2026-01-08 11:53:24,270 middleware 2668 11948 Attempting WebSocket authentication with token: 00c9b1e3bc...
+DEBUG 2026-01-08 11:53:24,270 middleware 2668 11948 Attempting WebSocket authentication with token: 00c9b1e3bc...
+DEBUG 2026-01-08 11:53:24,804 middleware 2668 4196 WS User authenticated: ram yadav (Ram)
+DEBUG 2026-01-08 11:53:24,804 middleware 2668 4196 WS User authenticated: ram yadav (Ram)
+DEBUG 2026-01-08 11:53:24,805 ws_protocol 2668 4196 WebSocket ['127.0.0.1', 62798] open and established
+INFO 2026-01-08 11:53:24,805 runserver 2668 4196 WebSocket CONNECT /ws/chat/ [127.0.0.1:62798]
+INFO 2026-01-08 11:53:24,805 runserver 2668 4196 WebSocket CONNECT /ws/chat/ [127.0.0.1:62798]
+DEBUG 2026-01-08 11:53:24,805 ws_protocol 2668 4196 WebSocket ['127.0.0.1', 62798] accepted by application
+DEBUG 2026-01-08 11:53:25,502 mixins 2668 10032 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:25,502 mixins 2668 10032 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:25,502 mixins 2668 10032 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:25,502 mixins 2668 10032 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:25,503 mixins 2668 10032 Filtering college model with college_id=3
+DEBUG 2026-01-08 11:53:25,503 mixins 2668 10032 Filtering college model with college_id=3
+DEBUG 2026-01-08 11:53:25,914 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62785]
+DEBUG 2026-01-08 11:53:25,915 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62785]
+DEBUG 2026-01-08 11:53:25,915 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62785]
+INFO 2026-01-08 11:53:25,916 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.80, 127.0.0.1:62785][0m
+INFO 2026-01-08 11:53:25,916 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.80, 127.0.0.1:62785][0m
+DEBUG 2026-01-08 11:53:25,919 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62785]
+DEBUG 2026-01-08 11:53:26,016 mixins 2668 4028 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:26,016 mixins 2668 4028 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:26,020 mixins 2668 10032 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:26,020 mixins 2668 10032 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:26,140 mixins 2668 13744 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:26,140 mixins 2668 13744 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:26,140 mixins 2668 13744 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:26,140 mixins 2668 13744 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:26,140 mixins 2668 13744 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:26,140 mixins 2668 13744 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:26,141 mixins 2668 13744 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:26,141 mixins 2668 13744 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:26,182 mixins 2668 14176 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:26,182 mixins 2668 14176 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:26,182 mixins 2668 14176 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:26,182 mixins 2668 14176 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:26,183 mixins 2668 14176 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:26,183 mixins 2668 14176 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:26,183 mixins 2668 14176 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:26,183 mixins 2668 14176 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:26,232 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62709]
+DEBUG 2026-01-08 11:53:26,232 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62709]
+DEBUG 2026-01-08 11:53:26,233 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62709]
+INFO 2026-01-08 11:53:26,233 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/?page_size=50 200 [3.12, 127.0.0.1:62709][0m
+INFO 2026-01-08 11:53:26,233 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/?page_size=50 200 [3.12, 127.0.0.1:62709][0m
+DEBUG 2026-01-08 11:53:26,235 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62709]
+DEBUG 2026-01-08 11:53:26,585 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:53:26,585 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:53:26,585 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62673]
+INFO 2026-01-08 11:53:26,585 runserver 2668 4196 [mHTTP GET /api/v1/core/colleges/ 200 [3.47, 127.0.0.1:62673][0m
+INFO 2026-01-08 11:53:26,585 runserver 2668 4196 [mHTTP GET /api/v1/core/colleges/ 200 [3.47, 127.0.0.1:62673][0m
+DEBUG 2026-01-08 11:53:26,590 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:53:26,709 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:53:26,710 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:53:26,711 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62707]
+INFO 2026-01-08 11:53:26,711 runserver 2668 4196 [mHTTP GET /api/v1/core/permissions/ 200 [3.60, 127.0.0.1:62707][0m
+INFO 2026-01-08 11:53:26,711 runserver 2668 4196 [mHTTP GET /api/v1/core/permissions/ 200 [3.60, 127.0.0.1:62707][0m
+DEBUG 2026-01-08 11:53:26,717 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:53:26,775 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:53:26,853 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:53:28,193 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62793]
+DEBUG 2026-01-08 11:53:28,193 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62793]
+DEBUG 2026-01-08 11:53:28,193 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62793]
+INFO 2026-01-08 11:53:28,194 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [4.50, 127.0.0.1:62793][0m
+INFO 2026-01-08 11:53:28,194 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [4.50, 127.0.0.1:62793][0m
+DEBUG 2026-01-08 11:53:28,197 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62793]
+DEBUG 2026-01-08 11:53:28,327 mixins 2668 4832 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:28,327 mixins 2668 4832 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:28,328 mixins 2668 4832 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:28,328 mixins 2668 4832 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:28,329 mixins 2668 4832 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:28,329 mixins 2668 4832 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:28,329 mixins 2668 4832 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:28,329 mixins 2668 4832 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:28,468 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62792]
+DEBUG 2026-01-08 11:53:28,468 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62792]
+DEBUG 2026-01-08 11:53:28,468 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62792]
+INFO 2026-01-08 11:53:28,469 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [4.78, 127.0.0.1:62792][0m
+INFO 2026-01-08 11:53:28,469 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [4.78, 127.0.0.1:62792][0m
+DEBUG 2026-01-08 11:53:28,471 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62792]
+DEBUG 2026-01-08 11:53:28,746 mixins 2668 11524 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:28,746 mixins 2668 11524 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:29,060 mixins 2668 428 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:29,060 mixins 2668 428 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:29,061 mixins 2668 428 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:29,061 mixins 2668 428 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:29,061 mixins 2668 428 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:29,061 mixins 2668 428 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:29,209 mixins 2668 1476 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:29,209 mixins 2668 1476 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:29,209 mixins 2668 1476 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:29,209 mixins 2668 1476 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:29,209 mixins 2668 1476 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:29,209 mixins 2668 1476 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:29,210 mixins 2668 1476 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:29,210 mixins 2668 1476 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:29,268 mixins 2668 5336 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:29,268 mixins 2668 5336 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:29,269 mixins 2668 5336 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:29,269 mixins 2668 5336 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:29,269 mixins 2668 5336 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:29,269 mixins 2668 5336 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:29,270 mixins 2668 5336 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:29,270 mixins 2668 5336 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:29,608 mixins 2668 428 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:29,608 mixins 2668 428 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:29,714 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:53:29,715 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:53:29,715 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62791]
+INFO 2026-01-08 11:53:29,716 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [6.03, 127.0.0.1:62791][0m
+INFO 2026-01-08 11:53:29,716 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [6.03, 127.0.0.1:62791][0m
+DEBUG 2026-01-08 11:53:29,718 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:53:30,622 mixins 2668 13012 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:30,622 mixins 2668 13012 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:30,665 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:53:30,666 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62707]
+DEBUG 2026-01-08 11:53:30,666 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62707]
+INFO 2026-01-08 11:53:30,667 runserver 2668 4196 [mHTTP GET /api/v1/core/permissions/ 200 [3.95, 127.0.0.1:62707][0m
+INFO 2026-01-08 11:53:30,667 runserver 2668 4196 [mHTTP GET /api/v1/core/permissions/ 200 [3.95, 127.0.0.1:62707][0m
+DEBUG 2026-01-08 11:53:30,932 mixins 2668 12852 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:30,932 mixins 2668 12852 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:30,932 mixins 2668 12852 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:30,932 mixins 2668 12852 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:30,933 mixins 2668 12852 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:30,933 mixins 2668 12852 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:30,935 mixins 2668 12852 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:30,935 mixins 2668 12852 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:31,347 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:53:31,348 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62668]
+DEBUG 2026-01-08 11:53:31,348 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62668]
+INFO 2026-01-08 11:53:31,348 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100&is_active=true 200 [4.57, 127.0.0.1:62668][0m
+INFO 2026-01-08 11:53:31,348 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100&is_active=true 200 [4.57, 127.0.0.1:62668][0m
+DEBUG 2026-01-08 11:53:31,489 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:53:31,489 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62665]
+DEBUG 2026-01-08 11:53:31,490 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62665]
+INFO 2026-01-08 11:53:31,490 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?college=3&page_size=100&is_active=true 200 [4.64, 127.0.0.1:62665][0m
+INFO 2026-01-08 11:53:31,490 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?college=3&page_size=100&is_active=true 200 [4.64, 127.0.0.1:62665][0m
+DEBUG 2026-01-08 11:53:31,893 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62785]
+DEBUG 2026-01-08 11:53:31,894 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62785]
+DEBUG 2026-01-08 11:53:31,894 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62785]
+INFO 2026-01-08 11:53:31,894 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page=1&page_size=20 200 [5.98, 127.0.0.1:62785][0m
+INFO 2026-01-08 11:53:31,894 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page=1&page_size=20 200 [5.98, 127.0.0.1:62785][0m
+DEBUG 2026-01-08 11:53:31,897 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62785]
+DEBUG 2026-01-08 11:53:32,177 mixins 2668 13316 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:32,177 mixins 2668 13316 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:32,177 mixins 2668 13316 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:32,177 mixins 2668 13316 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:32,178 mixins 2668 13316 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:32,178 mixins 2668 13316 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:32,178 mixins 2668 13316 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:32,178 mixins 2668 13316 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:32,837 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62793]
+DEBUG 2026-01-08 11:53:32,837 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62793]
+DEBUG 2026-01-08 11:53:32,838 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62793]
+INFO 2026-01-08 11:53:32,838 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [4.64, 127.0.0.1:62793][0m
+INFO 2026-01-08 11:53:32,838 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [4.64, 127.0.0.1:62793][0m
+DEBUG 2026-01-08 11:53:32,841 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62793]
+DEBUG 2026-01-08 11:53:33,147 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62792]
+DEBUG 2026-01-08 11:53:33,148 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62792]
+DEBUG 2026-01-08 11:53:33,148 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62792]
+INFO 2026-01-08 11:53:33,148 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [4.68, 127.0.0.1:62792][0m
+INFO 2026-01-08 11:53:33,148 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [4.68, 127.0.0.1:62792][0m
+DEBUG 2026-01-08 11:53:33,150 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62792]
+DEBUG 2026-01-08 11:53:33,527 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62709]
+DEBUG 2026-01-08 11:53:33,528 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62709]
+DEBUG 2026-01-08 11:53:33,528 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62709]
+INFO 2026-01-08 11:53:33,528 runserver 2668 4196 [mHTTP GET /api/v1/attendance/student-attendance/?date=2026-01-08&page_size=200 200 [7.29, 127.0.0.1:62709][0m
+INFO 2026-01-08 11:53:33,528 runserver 2668 4196 [mHTTP GET /api/v1/attendance/student-attendance/?date=2026-01-08&page_size=200 200 [7.29, 127.0.0.1:62709][0m
+DEBUG 2026-01-08 11:53:34,434 mixins 2668 3116 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:34,434 mixins 2668 3116 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:34,434 mixins 2668 3116 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:34,434 mixins 2668 3116 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:34,435 mixins 2668 3116 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:34,435 mixins 2668 3116 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:34,435 mixins 2668 3116 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:34,435 mixins 2668 3116 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:35,328 mixins 2668 12264 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:35,328 mixins 2668 12264 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:35,598 mixins 2668 12500 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:35,598 mixins 2668 12500 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:35,599 mixins 2668 12500 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:35,599 mixins 2668 12500 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:35,599 mixins 2668 12500 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:35,599 mixins 2668 12500 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:35,599 mixins 2668 12500 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:35,599 mixins 2668 12500 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:35,813 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:53:35,813 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:53:35,813 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62791]
+INFO 2026-01-08 11:53:35,813 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [6.10, 127.0.0.1:62791][0m
+INFO 2026-01-08 11:53:35,813 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [6.10, 127.0.0.1:62791][0m
+DEBUG 2026-01-08 11:53:35,815 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:53:37,588 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62793]
+DEBUG 2026-01-08 11:53:37,589 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62793]
+DEBUG 2026-01-08 11:53:37,589 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62793]
+INFO 2026-01-08 11:53:37,589 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [4.75, 127.0.0.1:62793][0m
+INFO 2026-01-08 11:53:37,589 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [4.75, 127.0.0.1:62793][0m
+DEBUG 2026-01-08 11:53:37,591 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62793]
+DEBUG 2026-01-08 11:53:37,681 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:53:37,682 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62673]
+DEBUG 2026-01-08 11:53:37,682 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62673]
+INFO 2026-01-08 11:53:37,682 runserver 2668 4196 [mHTTP GET /api/v1/core/academic-years/ 200 [11.09, 127.0.0.1:62673][0m
+INFO 2026-01-08 11:53:37,682 runserver 2668 4196 [mHTTP GET /api/v1/core/academic-years/ 200 [11.09, 127.0.0.1:62673][0m
+DEBUG 2026-01-08 11:53:37,831 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62792]
+DEBUG 2026-01-08 11:53:37,831 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62792]
+DEBUG 2026-01-08 11:53:37,832 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62792]
+INFO 2026-01-08 11:53:37,832 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [4.68, 127.0.0.1:62792][0m
+INFO 2026-01-08 11:53:37,832 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [4.68, 127.0.0.1:62792][0m
+DEBUG 2026-01-08 11:53:37,834 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62792]
+DEBUG 2026-01-08 11:53:38,134 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62785]
+DEBUG 2026-01-08 11:53:38,134 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62785]
+DEBUG 2026-01-08 11:53:38,134 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62785]
+INFO 2026-01-08 11:53:38,134 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page=1&page_size=20 200 [6.24, 127.0.0.1:62785][0m
+INFO 2026-01-08 11:53:38,134 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page=1&page_size=20 200 [6.24, 127.0.0.1:62785][0m
+DEBUG 2026-01-08 11:53:38,228 mixins 2668 8312 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:38,228 mixins 2668 8312 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:38,228 mixins 2668 8312 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:38,228 mixins 2668 8312 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:38,229 mixins 2668 8312 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:38,229 mixins 2668 8312 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:38,229 mixins 2668 8312 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:38,229 mixins 2668 8312 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:39,951 mixins 2668 13200 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:39,951 mixins 2668 13200 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:40,348 mixins 2668 5320 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:40,348 mixins 2668 5320 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:40,348 mixins 2668 5320 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:40,348 mixins 2668 5320 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:40,349 mixins 2668 5320 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:40,349 mixins 2668 5320 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:40,349 mixins 2668 5320 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:40,349 mixins 2668 5320 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:41,795 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:53:41,795 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:53:41,796 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62791]
+INFO 2026-01-08 11:53:41,796 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [5.98, 127.0.0.1:62791][0m
+INFO 2026-01-08 11:53:41,796 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [5.98, 127.0.0.1:62791][0m
+DEBUG 2026-01-08 11:53:41,798 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:53:42,082 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62793]
+DEBUG 2026-01-08 11:53:42,083 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62793]
+DEBUG 2026-01-08 11:53:42,083 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62793]
+INFO 2026-01-08 11:53:42,083 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [4.49, 127.0.0.1:62793][0m
+INFO 2026-01-08 11:53:42,083 runserver 2668 4196 [mHTTP GET /api/v1/academic/sections/?page_size=100 200 [4.49, 127.0.0.1:62793][0m
+DEBUG 2026-01-08 11:53:42,648 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62792]
+DEBUG 2026-01-08 11:53:42,648 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62792]
+DEBUG 2026-01-08 11:53:42,649 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62792]
+INFO 2026-01-08 11:53:42,649 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [4.82, 127.0.0.1:62792][0m
+INFO 2026-01-08 11:53:42,649 runserver 2668 4196 [mHTTP GET /api/v1/academic/classes/?page_size=100 200 [4.82, 127.0.0.1:62792][0m
+DEBUG 2026-01-08 11:53:44,246 mixins 2668 12080 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:44,246 mixins 2668 12080 Filtering by college_id: 3
+DEBUG 2026-01-08 11:53:44,247 mixins 2668 12080 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:44,247 mixins 2668 12080 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:53:44,247 mixins 2668 12080 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:44,247 mixins 2668 12080 Filtering model with college_id=3
+DEBUG 2026-01-08 11:53:44,248 mixins 2668 12080 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:44,248 mixins 2668 12080 Filter query with college_id: 3
+DEBUG 2026-01-08 11:53:47,836 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:53:47,837 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:53:47,837 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62791]
+INFO 2026-01-08 11:53:47,837 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [6.04, 127.0.0.1:62791][0m
+INFO 2026-01-08 11:53:47,837 runserver 2668 4196 [mHTTP GET /api/v1/students/students/?page_size=1000 200 [6.04, 127.0.0.1:62791][0m
+DEBUG 2026-01-08 11:53:55,934 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:53:59,601 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:53:59,601 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:53:59,602 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62791]
+INFO 2026-01-08 11:53:59,602 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.67, 127.0.0.1:62791][0m
+INFO 2026-01-08 11:53:59,602 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.67, 127.0.0.1:62791][0m
+DEBUG 2026-01-08 11:54:24,318 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:54:28,069 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:54:28,069 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:54:28,069 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62791]
+INFO 2026-01-08 11:54:28,070 runserver 2668 4196 [mHTTP GET /api/v1/attendance/subject-attendance/?page=1&page_size=10 200 [3.75, 127.0.0.1:62791][0m
+INFO 2026-01-08 11:54:28,070 runserver 2668 4196 [mHTTP GET /api/v1/attendance/subject-attendance/?page=1&page_size=10 200 [3.75, 127.0.0.1:62791][0m
+DEBUG 2026-01-08 11:54:29,622 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:54:32,439 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:54:32,439 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:54:32,440 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62791]
+INFO 2026-01-08 11:54:32,440 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.82, 127.0.0.1:62791][0m
+INFO 2026-01-08 11:54:32,440 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.82, 127.0.0.1:62791][0m
+DEBUG 2026-01-08 11:54:50,128 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62870]
+DEBUG 2026-01-08 11:54:50,187 http_protocol 2668 4196 HTTP b'OPTIONS' request for ['127.0.0.1', 62869]
+DEBUG 2026-01-08 11:54:50,193 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62870]
+DEBUG 2026-01-08 11:54:50,193 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62870]
+DEBUG 2026-01-08 11:54:50,194 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62870]
+INFO 2026-01-08 11:54:50,194 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/class-times/?page=1&page_size=20 200 [0.07, 127.0.0.1:62870][0m
+INFO 2026-01-08 11:54:50,194 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/class-times/?page=1&page_size=20 200 [0.07, 127.0.0.1:62870][0m
+DEBUG 2026-01-08 11:54:50,195 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62869]
+DEBUG 2026-01-08 11:54:50,198 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62869]
+DEBUG 2026-01-08 11:54:50,199 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62869]
+INFO 2026-01-08 11:54:50,200 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/class-times/?page=1&page_size=20 200 [0.01, 127.0.0.1:62869][0m
+INFO 2026-01-08 11:54:50,200 runserver 2668 4196 [mHTTP OPTIONS /api/v1/academic/class-times/?page=1&page_size=20 200 [0.01, 127.0.0.1:62869][0m
+DEBUG 2026-01-08 11:54:50,205 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:54:53,501 mixins 2668 14044 Filtering by college_id: 3
+DEBUG 2026-01-08 11:54:53,501 mixins 2668 14044 Filtering by college_id: 3
+DEBUG 2026-01-08 11:54:53,501 mixins 2668 14044 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:54:53,501 mixins 2668 14044 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:54:53,501 mixins 2668 14044 Filtering model with college_id=3
+DEBUG 2026-01-08 11:54:53,501 mixins 2668 14044 Filtering model with college_id=3
+DEBUG 2026-01-08 11:54:53,502 mixins 2668 14044 Filter query with college_id: 3
+DEBUG 2026-01-08 11:54:53,502 mixins 2668 14044 Filter query with college_id: 3
+DEBUG 2026-01-08 11:54:56,988 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:54:56,989 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:54:56,989 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62791]
+INFO 2026-01-08 11:54:56,989 runserver 2668 4196 [mHTTP GET /api/v1/academic/class-times/?page=1&page_size=20 200 [6.78, 127.0.0.1:62791][0m
+INFO 2026-01-08 11:54:56,989 runserver 2668 4196 [mHTTP GET /api/v1/academic/class-times/?page=1&page_size=20 200 [6.78, 127.0.0.1:62791][0m
+DEBUG 2026-01-08 11:54:56,992 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:55:00,368 mixins 2668 8048 Filtering by college_id: 3
+DEBUG 2026-01-08 11:55:00,368 mixins 2668 8048 Filtering by college_id: 3
+DEBUG 2026-01-08 11:55:00,369 mixins 2668 8048 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:55:00,369 mixins 2668 8048 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:55:00,369 mixins 2668 8048 Filtering model with college_id=3
+DEBUG 2026-01-08 11:55:00,369 mixins 2668 8048 Filtering model with college_id=3
+DEBUG 2026-01-08 11:55:00,369 mixins 2668 8048 Filter query with college_id: 3
+DEBUG 2026-01-08 11:55:00,369 mixins 2668 8048 Filter query with college_id: 3
+DEBUG 2026-01-08 11:55:02,451 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:55:03,465 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:55:03,465 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62791]
+DEBUG 2026-01-08 11:55:03,465 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62791]
+INFO 2026-01-08 11:55:03,465 runserver 2668 4196 [mHTTP GET /api/v1/academic/class-times/?page=1&page_size=20 200 [6.47, 127.0.0.1:62791][0m
+INFO 2026-01-08 11:55:03,465 runserver 2668 4196 [mHTTP GET /api/v1/academic/class-times/?page=1&page_size=20 200 [6.47, 127.0.0.1:62791][0m
+DEBUG 2026-01-08 11:55:05,110 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:55:05,111 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:55:05,111 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 11:55:05,111 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.66, 127.0.0.1:62881][0m
+INFO 2026-01-08 11:55:05,111 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.66, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 11:55:05,258 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:55:07,600 mixins 2668 8064 Filtering by college_id: 3
+DEBUG 2026-01-08 11:55:07,600 mixins 2668 8064 Filtering by college_id: 3
+DEBUG 2026-01-08 11:55:07,600 mixins 2668 8064 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:55:07,600 mixins 2668 8064 Filtering for specific college_id: 3
+DEBUG 2026-01-08 11:55:07,601 mixins 2668 8064 Filtering model with college_id=3
+DEBUG 2026-01-08 11:55:07,601 mixins 2668 8064 Filtering model with college_id=3
+DEBUG 2026-01-08 11:55:07,601 mixins 2668 8064 Filter query with college_id: 3
+DEBUG 2026-01-08 11:55:07,601 mixins 2668 8064 Filter query with college_id: 3
+DEBUG 2026-01-08 11:55:10,586 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:55:10,587 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:55:10,587 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 11:55:10,587 runserver 2668 4196 [mHTTP GET /api/v1/academic/class-times/?page=1&page_size=20 200 [5.33, 127.0.0.1:62881][0m
+INFO 2026-01-08 11:55:10,587 runserver 2668 4196 [mHTTP GET /api/v1/academic/class-times/?page=1&page_size=20 200 [5.33, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 11:55:35,121 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:55:37,820 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:55:37,821 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:55:37,821 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 11:55:37,821 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.70, 127.0.0.1:62881][0m
+INFO 2026-01-08 11:55:37,821 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.70, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 11:56:07,838 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:56:10,545 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:56:10,545 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:56:10,546 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 11:56:10,546 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.71, 127.0.0.1:62881][0m
+INFO 2026-01-08 11:56:10,546 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.71, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 11:56:40,562 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:56:43,413 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:56:43,413 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:56:43,414 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 11:56:43,414 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.85, 127.0.0.1:62881][0m
+INFO 2026-01-08 11:56:43,414 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.85, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 11:57:13,420 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:57:16,114 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:57:16,114 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:57:16,115 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 11:57:16,115 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.70, 127.0.0.1:62881][0m
+INFO 2026-01-08 11:57:16,115 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.70, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 11:57:46,129 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:57:50,138 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:57:50,138 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:57:50,138 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 11:57:50,138 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [4.01, 127.0.0.1:62881][0m
+INFO 2026-01-08 11:57:50,138 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [4.01, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 11:58:20,156 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:58:23,252 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:58:23,253 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:58:23,253 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 11:58:23,253 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.10, 127.0.0.1:62881][0m
+INFO 2026-01-08 11:58:23,253 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.10, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 11:58:53,266 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:58:56,850 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:58:56,850 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:58:56,851 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 11:58:56,851 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.59, 127.0.0.1:62881][0m
+INFO 2026-01-08 11:58:56,851 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.59, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 11:59:26,862 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:59:29,515 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:59:29,515 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 11:59:29,515 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 11:59:29,516 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.65, 127.0.0.1:62881][0m
+INFO 2026-01-08 11:59:29,516 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.65, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 11:59:59,526 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:00:02,148 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:00:02,148 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:00:02,148 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 12:00:02,149 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.62, 127.0.0.1:62881][0m
+INFO 2026-01-08 12:00:02,149 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.62, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 12:00:32,156 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:00:34,885 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:00:34,885 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:00:34,885 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 12:00:34,885 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.73, 127.0.0.1:62881][0m
+INFO 2026-01-08 12:00:34,885 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.73, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 12:01:04,905 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:01:07,508 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:01:07,509 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:01:07,509 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 12:01:07,509 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.60, 127.0.0.1:62881][0m
+INFO 2026-01-08 12:01:07,509 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.60, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 12:01:37,526 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:01:41,203 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:01:41,204 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:01:41,204 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 12:01:41,204 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.68, 127.0.0.1:62881][0m
+INFO 2026-01-08 12:01:41,204 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.68, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 12:02:11,226 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:02:13,954 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:02:13,955 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:02:13,955 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 12:02:13,955 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.73, 127.0.0.1:62881][0m
+INFO 2026-01-08 12:02:13,955 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.73, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 12:02:43,972 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:02:47,903 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:02:47,903 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:02:47,903 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 12:02:47,903 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.93, 127.0.0.1:62881][0m
+INFO 2026-01-08 12:02:47,903 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.93, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 12:03:17,918 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:03:21,167 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:03:21,167 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:03:21,167 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 12:03:21,167 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.25, 127.0.0.1:62881][0m
+INFO 2026-01-08 12:03:21,167 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.25, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 12:03:51,180 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:03:54,083 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:03:54,083 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:03:54,084 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 12:03:54,084 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.90, 127.0.0.1:62881][0m
+INFO 2026-01-08 12:03:54,084 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.90, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 12:04:24,093 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:04:26,833 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:04:26,833 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:04:26,833 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 12:04:26,833 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.74, 127.0.0.1:62881][0m
+INFO 2026-01-08 12:04:26,833 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.74, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 12:04:56,843 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:04:59,898 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:04:59,899 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:04:59,899 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 12:04:59,899 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.06, 127.0.0.1:62881][0m
+INFO 2026-01-08 12:04:59,899 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.06, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 12:05:29,912 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:05:32,667 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:05:32,667 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:05:32,667 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 12:05:32,667 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.76, 127.0.0.1:62881][0m
+INFO 2026-01-08 12:05:32,667 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.76, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 12:06:02,677 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:06:05,387 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:06:05,388 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:06:05,388 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 12:06:05,388 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.71, 127.0.0.1:62881][0m
+INFO 2026-01-08 12:06:05,388 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.71, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 12:06:35,396 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:06:38,101 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:06:38,102 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:06:38,102 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 12:06:38,103 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.71, 127.0.0.1:62881][0m
+INFO 2026-01-08 12:06:38,103 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.71, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 12:07:08,120 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:07:10,731 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:07:10,731 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:07:10,731 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 12:07:10,732 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.61, 127.0.0.1:62881][0m
+INFO 2026-01-08 12:07:10,732 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.61, 127.0.0.1:62881][0m
+DEBUG 2026-01-08 12:07:40,747 http_protocol 2668 4196 HTTP b'GET' request for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:07:44,147 http_protocol 2668 4196 HTTP 200 response started for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:07:44,147 http_protocol 2668 4196 HTTP close for ['127.0.0.1', 62881]
+DEBUG 2026-01-08 12:07:44,147 http_protocol 2668 4196 HTTP response complete for ['127.0.0.1', 62881]
+INFO 2026-01-08 12:07:44,148 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.40, 127.0.0.1:62881][0m
+INFO 2026-01-08 12:07:44,148 runserver 2668 4196 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [3.40, 127.0.0.1:62881][0m
