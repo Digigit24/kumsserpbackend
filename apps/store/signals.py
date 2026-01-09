@@ -39,8 +39,6 @@ def _adjust_stock_from_sale(sale):
             line.item.adjust_stock(-line.quantity)
 
 
-@receiver(post_save, sender=StockReceive)
-
 def _has_issue_transaction(issue_item):
     reference_type = ContentType.objects.get_for_model(MaterialIssueItem)
     return InventoryTransaction.objects.filter(
@@ -49,6 +47,7 @@ def _has_issue_transaction(issue_item):
         reference_id=issue_item.id,
     ).exists()
 
+@receiver(post_save, sender=StockReceive)
 def stock_receive_post_save(sender, instance, created, **kwargs):
     if not created:
         return
