@@ -22,6 +22,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # CORS settings for development (if needed)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3030",
+    "https://kumss.celiyo.com"
+
 ]   
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
