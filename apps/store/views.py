@@ -139,7 +139,7 @@ class VendorViewSet(CollegeScopedModelViewSet):
 
 
 class StockReceiveViewSet(RelatedCollegeScopedModelViewSet):
-    queryset = StockReceive.objects.select_related('item', 'vendor')
+    queryset = StockReceive.objects.select_related('item__college', 'item__category', 'vendor')
     serializer_class = StockReceiveSerializer
     related_college_lookup = 'item__college_id'
     filterset_fields = ['item', 'vendor', 'receive_date', 'is_active']
@@ -158,7 +158,7 @@ class StoreSaleViewSet(CollegeScopedModelViewSet):
 
 
 class SaleItemViewSet(RelatedCollegeScopedModelViewSet):
-    queryset = SaleItem.objects.select_related('sale', 'item')
+    queryset = SaleItem.objects.select_related('sale__college', 'sale__student', 'sale__teacher', 'item__category')
     serializer_class = SaleItemSerializer
     related_college_lookup = 'sale__college_id'
     filterset_fields = ['sale', 'item', 'is_active']
@@ -178,7 +178,7 @@ class PrintJobViewSet(CollegeScopedModelViewSet):
 
 
 class StoreCreditViewSet(RelatedCollegeScopedModelViewSet):
-    queryset = StoreCredit.objects.select_related('student')
+    queryset = StoreCredit.objects.select_related('student__college')
     serializer_class = StoreCreditSerializer
     related_college_lookup = 'student__college_id'
     filterset_fields = ['student', 'transaction_type', 'date', 'is_active']
@@ -248,17 +248,23 @@ class CentralStoreViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'], permission_classes=[IsCentralStoreManager])
     def inventory(self, request, pk=None):
         store = self.get_object()
-        qs = CentralStoreInventory.objects.filter(central_store=store)
+        qs = CentralStoreInventory.objects.filter(central_store=store).select_related('item__category', 'item__central_store')
         serializer = CentralStoreInventorySerializer(qs, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=['get'], permission_classes=[IsCentralStoreManager])
     def stock_summary(self, request, pk=None):
+        from django.db.models import Sum, Count
         store = self.get_object()
-        qs = CentralStoreInventory.objects.filter(central_store=store)
-        total_items = qs.count()
-        total_qty = sum(item.quantity_on_hand for item in qs)
-        return Response({'central_store': store.id, 'total_items': total_items, 'total_quantity': total_qty})
+        summary = CentralStoreInventory.objects.filter(central_store=store).aggregate(
+            total_items=Count('id'),
+            total_quantity=Sum('quantity_on_hand')
+        )
+        return Response({
+            'central_store': store.id,
+            'total_items': summary['total_items'] or 0,
+            'total_quantity': summary['total_quantity'] or 0
+        })
 
     @action(detail=True, methods=['get'], permission_classes=[IsCentralStoreManager])
     def low_stock_alerts(self, request, pk=None):
@@ -267,7 +273,7 @@ class CentralStoreViewSet(viewsets.ModelViewSet):
         qs = CentralStoreInventory.objects.filter(
             central_store=store,
             quantity_available__lte=models.F('reorder_point')
-        )
+        ).select_related('item__category', 'item__central_store')
         serializer = CentralStoreInventorySerializer(qs, many=True)
         return Response(serializer.data)
 
@@ -278,7 +284,7 @@ class CentralStoreViewSet(viewsets.ModelViewSet):
         indents = StoreIndent.objects.filter(
             central_store=store,
             status='pending_approval'
-        )
+        ).select_related('college', 'requesting_store_manager', 'approved_by').prefetch_related('items__central_store_item')
         from .serializers import StoreIndentListSerializer
         serializer = StoreIndentListSerializer(indents, many=True)
         return Response(serializer.data)
@@ -298,13 +304,20 @@ class CentralStoreViewSet(viewsets.ModelViewSet):
 
 
 class ProcurementRequirementViewSet(viewsets.ModelViewSet):
-    queryset = ProcurementRequirement.objects.all().select_related('central_store')
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'urgency', 'requirement_date']
     search_fields = ['requirement_number', 'title']
     ordering_fields = ['requirement_date', 'required_by_date', 'created_at']
     ordering = ['-requirement_date']
+
+    def get_queryset(self):
+        qs = ProcurementRequirement.objects.all().select_related('central_store')
+        if self.action == 'list':
+            qs = qs.prefetch_related('quotations')
+        elif self.action == 'retrieve':
+            qs = qs.prefetch_related('items__category', 'quotations')
+        return qs
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -322,14 +335,15 @@ class ProcurementRequirementViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
     def quotations(self, request, pk=None):
         obj = self.get_object()
-        serializer = SupplierQuotationListSerializer(obj.quotations.all(), many=True)
+        quotations = obj.quotations.all().select_related('supplier', 'requirement__central_store')
+        serializer = SupplierQuotationListSerializer(quotations, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
     def compare_quotations(self, request, pk=None):
         """Phase 9.3: GET side-by-side comparison data"""
         obj = self.get_object()
-        quotations = obj.quotations.all()
+        quotations = obj.quotations.all().select_related('supplier', 'requirement__central_store').prefetch_related('items')
         comparison_data = []
         for quot in quotations:
             comparison_data.append({
@@ -352,12 +366,17 @@ class ProcurementRequirementViewSet(viewsets.ModelViewSet):
 
 
 class SupplierQuotationViewSet(viewsets.ModelViewSet):
-    queryset = SupplierQuotation.objects.all().select_related('requirement', 'supplier')
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['requirement', 'supplier', 'status', 'is_selected']
     search_fields = ['quotation_number']
     ordering_fields = ['quotation_date', 'created_at']
     ordering = ['-quotation_date']
+
+    def get_queryset(self):
+        qs = SupplierQuotation.objects.all().select_related('requirement__central_store', 'supplier')
+        if self.action in ['retrieve', 'compare_quotations']:
+            qs = qs.prefetch_related('items')
+        return qs
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -379,12 +398,17 @@ class SupplierQuotationViewSet(viewsets.ModelViewSet):
 
 
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
-    queryset = PurchaseOrder.objects.all().select_related('requirement', 'supplier', 'central_store')
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'supplier', 'po_date']
     search_fields = ['po_number']
     ordering_fields = ['po_date', 'created_at']
     ordering = ['-po_date']
+
+    def get_queryset(self):
+        qs = PurchaseOrder.objects.all().select_related('requirement__central_store', 'supplier', 'central_store', 'quotation')
+        if self.action == 'retrieve':
+            qs = qs.prefetch_related('items')
+        return qs
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy', 'send_to_supplier', 'acknowledge', 'generate_pdf']:
@@ -418,12 +442,17 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
 
 
 class GoodsReceiptNoteViewSet(viewsets.ModelViewSet):
-    queryset = GoodsReceiptNote.objects.all().select_related('purchase_order', 'supplier', 'central_store')
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['purchase_order', 'status', 'receipt_date']
     search_fields = ['grn_number']
     ordering_fields = ['receipt_date', 'created_at']
     ordering = ['-receipt_date']
+
+    def get_queryset(self):
+        qs = GoodsReceiptNote.objects.all().select_related('purchase_order__requirement', 'supplier', 'central_store', 'received_by')
+        if self.action == 'retrieve':
+            qs = qs.prefetch_related('items__po_item__purchase_order', 'inspection')
+        return qs
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy', 'submit_for_inspection', 'post_to_inventory']:
@@ -452,7 +481,7 @@ class GoodsReceiptNoteViewSet(viewsets.ModelViewSet):
 
 
 class InspectionNoteViewSet(viewsets.ModelViewSet):
-    queryset = InspectionNote.objects.all().select_related('grn')
+    queryset = InspectionNote.objects.all().select_related('grn__purchase_order', 'grn__supplier', 'inspector')
     serializer_class = InspectionNoteSerializer
     permission_classes = [IsCentralStoreManager]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -462,7 +491,6 @@ class InspectionNoteViewSet(viewsets.ModelViewSet):
 
 
 class StoreIndentViewSet(CollegeScopedModelViewSet):
-    queryset = StoreIndent.objects.all_colleges().select_related('college', 'central_store', 'requesting_store_manager', 'approved_by')
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'college', 'priority', 'indent_date']
@@ -480,9 +508,11 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         )
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = StoreIndent.objects.all_colleges().select_related('college', 'central_store', 'requesting_store_manager', 'approved_by')
         if self.action == 'list':
             qs = self._with_issue_flags(qs)
+        elif self.action == 'retrieve':
+            qs = qs.prefetch_related('items__central_store_item__category')
         return qs
 
 
@@ -557,20 +587,24 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
             indents = StoreIndent.objects.all_colleges().filter(status='pending_college_approval', college_id=college_id)
         else:
             indents = self.get_queryset().none()
+        indents = indents.select_related('college', 'central_store', 'requesting_store_manager')
+        indents = self._with_issue_flags(indents)
         serializer = self.get_serializer(indents, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=['get'], permission_classes=[IsCentralStoreManager])
     def pending_super_admin_approvals(self, request):
         """For super admin, list indents pending their approval"""
-        indents = StoreIndent.objects.all_colleges().filter(status='pending_super_admin')
+        indents = StoreIndent.objects.all_colleges().filter(status='pending_super_admin').select_related('college', 'central_store', 'requesting_store_manager')
+        indents = self._with_issue_flags(indents)
         serializer = self.get_serializer(indents, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=['get'], permission_classes=[CanApproveIndent])
     def pending_approvals(self, request):
         """Legacy endpoint - list all pending indents"""
-        indents = StoreIndent.objects.all_colleges().filter(status__in=['pending_college_approval', 'pending_super_admin'])
+        indents = StoreIndent.objects.all_colleges().filter(status__in=['pending_college_approval', 'pending_super_admin']).select_related('college', 'central_store', 'requesting_store_manager')
+        indents = self._with_issue_flags(indents)
         serializer = self.get_serializer(indents, many=True)
         return Response(serializer.data)
 
@@ -580,10 +614,10 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         college_id = getattr(request.user, 'college_id', None)
         indents = StoreIndent.objects.all_colleges().filter(
             status__in=['approved', 'super_admin_approved']
-        )
+        ).select_related('college', 'central_store', 'requesting_store_manager')
         if not request.user.is_superuser and college_id:
             indents = indents.filter(college_id=college_id)
-        
+        indents = self._with_issue_flags(indents)
         serializer = self.get_serializer(indents, many=True)
         return Response(serializer.data)
 
@@ -591,10 +625,10 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
     def partially_fulfilled(self, request):
         """List all partially fulfilled indents"""
         college_id = getattr(request.user, 'college_id', None)
-        indents = StoreIndent.objects.all_colleges().filter(status='partially_fulfilled')
+        indents = StoreIndent.objects.all_colleges().filter(status='partially_fulfilled').select_related('college', 'central_store', 'requesting_store_manager')
         if not request.user.is_superuser and college_id:
             indents = indents.filter(college_id=college_id)
-            
+        indents = self._with_issue_flags(indents)
         serializer = self.get_serializer(indents, many=True)
         return Response(serializer.data)
 
@@ -602,10 +636,10 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
     def fulfilled(self, request):
         """List all fulfilled indents"""
         college_id = getattr(request.user, 'college_id', None)
-        indents = StoreIndent.objects.all_colleges().filter(status='fulfilled')
+        indents = StoreIndent.objects.all_colleges().filter(status='fulfilled').select_related('college', 'central_store', 'requesting_store_manager')
         if not request.user.is_superuser and college_id:
             indents = indents.filter(college_id=college_id)
-            
+        indents = self._with_issue_flags(indents)
         serializer = self.get_serializer(indents, many=True)
         return Response(serializer.data)
 
@@ -630,59 +664,42 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
 
 
 class MaterialIssueNoteViewSet(viewsets.ModelViewSet):
-    queryset = MaterialIssueNote.objects.select_related('indent', 'central_store', 'receiving_college')
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'receiving_college', 'issue_date']
     search_fields = ['min_number']
     ordering_fields = ['issue_date', 'created_at']
     ordering = ['-issue_date']
-    
-    def get_queryset(self):
-        """
-        Custom queryset filtering:
-        - Superusers, staff, and central_managers see all material issues
-        - College users see only material issues for their college
-        """
-        queryset = super().get_queryset()
-        user = self.request.user
-        
-        # Global users see everything
-        is_global_user = (
-            user.is_superuser or 
-            user.is_staff or 
-            getattr(user, 'user_type', None) == 'central_manager'
-        )
-        
-        if is_global_user:
-            return queryset
-        
-        # College users see only their college's material issues
-        college_id = getattr(user, 'college_id', None)
-        if college_id:
-            return queryset.filter(receiving_college_id=college_id)
-        
-        # No college? No results
-        return queryset.none()
 
     def get_queryset(self):
         """Return all for superuser/central_manager, college-scoped for college_admin/others"""
         user = self.request.user
 
+        # Base query with optimizations
+        qs = MaterialIssueNote.objects.select_related(
+            'indent__college', 'indent__central_store',
+            'central_store', 'receiving_college',
+            'issued_by', 'received_by'
+        )
+
+        # Add prefetch for detail view
+        if self.action == 'retrieve':
+            qs = qs.prefetch_related('items__item__category', 'items__indent_item')
+
         # Superuser and central_manager see all
         if user.is_superuser or getattr(user, 'user_type', None) == 'central_manager':
-            return MaterialIssueNote.objects.select_related('indent', 'central_store', 'receiving_college').all()
+            return qs
 
         # College admin sees their college's material issues
         if getattr(user, 'user_type', None) == 'college_admin':
             college_id = getattr(user, 'college_id', None) or self.request.headers.get('X-College-Id')
             if college_id:
-                return MaterialIssueNote.objects.filter(receiving_college_id=college_id).select_related('indent', 'central_store', 'receiving_college')
+                return qs.filter(receiving_college_id=college_id)
 
         # Regular users with college header
         college_id = self.request.headers.get('X-College-Id')
         if college_id:
-            return MaterialIssueNote.objects.filter(receiving_college_id=college_id).select_related('indent', 'central_store', 'receiving_college')
+            return qs.filter(receiving_college_id=college_id)
 
         return MaterialIssueNote.objects.none()
 
@@ -724,12 +741,13 @@ class MaterialIssueNoteViewSet(viewsets.ModelViewSet):
 
 
 class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
-    queryset = CentralStoreInventory.objects.select_related('central_store', 'item')
+    queryset = CentralStoreInventory.objects.select_related('central_store__manager', 'item__category', 'item__central_store')
     serializer_class = CentralStoreInventorySerializer
     permission_classes = [IsAuthenticated]
     resource_name = 'store'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['central_store', 'item', 'quantity_available']
+    search_fields = ['item__name', 'item__code']
     ordering_fields = ['quantity_available', 'updated_at']
     ordering = ['quantity_available']
 
@@ -761,11 +779,11 @@ class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
 
 
 class InventoryTransactionViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = InventoryTransaction.objects.select_related('central_store', 'item')
+    queryset = InventoryTransaction.objects.select_related('central_store__manager', 'item__category', 'performed_by', 'reference_type')
     serializer_class = InventoryTransactionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['transaction_type', 'transaction_date', 'item', 'central_store']
     search_fields = ['transaction_number']
-    ordering_fields = ['-transaction_date']
+    ordering_fields = ['transaction_date']
     ordering = ['-transaction_date']

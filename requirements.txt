@@ -39,7 +39,7 @@ django-storages==1.14.6
 djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
 drf-spectacular==0.29.0
-elevenlabs==2.27.0
+#elevenlabs==2.27.0
 executing==2.2.1
 fabric==3.2.2
 git-filter-repo==2.47.0
