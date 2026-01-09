@@ -1,5 +1,4 @@
 """
-from apps.core.cache_mixins import CachedReadOnlyMixin, CachedStaticMixin
 DRF ViewSets for Students app with comprehensive API documentation.
 """
 from rest_framework import status, filters
@@ -14,6 +13,7 @@ from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiResponse,
 )
+from apps.core.cache_mixins import CachedReadOnlyMixin
 from drf_spectacular.types import OpenApiTypes
 
 from .models import (
