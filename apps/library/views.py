@@ -1,4 +1,5 @@
 from rest_framework import filters, viewsets
+from apps.core.cache_mixins import CachedReadOnlyMixin, CachedStaticMixin
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -61,7 +62,7 @@ class BookCategoryViewSet(CollegeScopedModelViewSet):
     ordering = ['name']
 
 
-class BookViewSet(CollegeScopedModelViewSet):
+class BookViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     queryset = Book.objects.all_colleges()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticated]

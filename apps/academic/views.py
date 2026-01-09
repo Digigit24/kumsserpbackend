@@ -13,6 +13,7 @@ from drf_spectacular.utils import (
     OpenApiResponse,
 )
 from drf_spectacular.types import OpenApiTypes
+from apps.core.cache_mixins import CachedStaticMixin
 
 from .models import (
     Faculty, Program, Class, Section, Subject, OptionalSubject,
@@ -81,7 +82,7 @@ from apps.core.mixins import CollegeScopedModelViewSet
         tags=['Academic - Faculties']
     ),
 )
-class FacultyViewSet(CollegeScopedModelViewSet):
+class FacultyViewSet(CachedStaticMixin, CollegeScopedModelViewSet):
     """ViewSet for managing faculties/departments."""
     queryset = Faculty.objects.all_colleges()
     serializer_class = FacultySerializer
@@ -148,7 +149,7 @@ class FacultyViewSet(CollegeScopedModelViewSet):
         tags=['Academic - Programs']
     ),
 )
-class ProgramViewSet(CollegeScopedModelViewSet):
+class ProgramViewSet(CachedStaticMixin, CollegeScopedModelViewSet):
     """ViewSet for managing academic programs."""
     queryset = Program.objects.all_colleges()
     serializer_class = ProgramSerializer
@@ -215,7 +216,7 @@ class ProgramViewSet(CollegeScopedModelViewSet):
         tags=['Academic - Classes']
     ),
 )
-class ClassViewSet(CollegeScopedModelViewSet):
+class ClassViewSet(CachedStaticMixin, CollegeScopedModelViewSet):
     """ViewSet for managing classes."""
     queryset = Class.objects.all_colleges()
     serializer_class = ClassSerializer
@@ -280,7 +281,7 @@ class ClassViewSet(CollegeScopedModelViewSet):
         tags=['Academic - Sections']
     ),
 )
-class SectionViewSet(CollegeScopedModelViewSet):
+class SectionViewSet(CachedStaticMixin, CollegeScopedModelViewSet):
     """ViewSet for managing sections."""
     queryset = Section.objects.all()
     serializer_class = SectionSerializer
@@ -361,7 +362,7 @@ class SectionViewSet(CollegeScopedModelViewSet):
         tags=['Academic - Subjects']
     ),
 )
-class SubjectViewSet(CollegeScopedModelViewSet):
+class SubjectViewSet(CachedStaticMixin, CollegeScopedModelViewSet):
     """ViewSet for managing subjects."""
     queryset = Subject.objects.all_colleges()
     serializer_class = SubjectSerializer
@@ -590,7 +591,7 @@ class SubjectAssignmentViewSet(CollegeScopedModelViewSet):
         tags=['Academic - Classrooms']
     ),
 )
-class ClassroomViewSet(CollegeScopedModelViewSet):
+class ClassroomViewSet(CachedStaticMixin, CollegeScopedModelViewSet):
     """ViewSet for managing classrooms."""
     queryset = Classroom.objects.all_colleges()
     serializer_class = ClassroomSerializer
@@ -716,7 +717,7 @@ class ClassTimeViewSet(CollegeScopedModelViewSet):
         tags=['Academic - Timetable']
     ),
 )
-class TimetableViewSet(CollegeScopedModelViewSet):
+class TimetableViewSet(CachedStaticMixin, CollegeScopedModelViewSet):
     """ViewSet for managing timetable entries."""
     queryset = Timetable.objects.all()
     serializer_class = TimetableSerializer

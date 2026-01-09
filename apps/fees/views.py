@@ -1,4 +1,5 @@
 from rest_framework import filters, viewsets
+from apps.core.cache_mixins import CachedReadOnlyMixin, CachedStaticMixin
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 

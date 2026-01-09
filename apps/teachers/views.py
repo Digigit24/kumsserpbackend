@@ -1,4 +1,5 @@
 """
+from apps.core.cache_mixins import CachedReadOnlyMixin, CachedStaticMixin
 DRF ViewSets for Teachers app with comprehensive API documentation.
 """
 from rest_framework import status, filters
@@ -76,7 +77,7 @@ from apps.core.mixins import CollegeScopedModelViewSet
         tags=['Teachers']
     ),
 )
-class TeacherViewSet(CollegeScopedModelViewSet):
+class TeacherViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     """ViewSet for managing teachers."""
     queryset = Teacher.objects.all_colleges()
     serializer_class = TeacherSerializer
