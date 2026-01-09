@@ -63,8 +63,6 @@ def store_sale_post_save(sender, instance, created, **kwargs):
     if not created:
         return
 
-    _adjust_stock_from_sale(instance)
-
     if instance.payment_status != 'paid':
         buyer = instance.student or None
         if buyer:
@@ -84,8 +82,8 @@ def store_sale_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=SaleItem)
 def sale_item_post_save(sender, instance, created, **kwargs):
-    if created and instance.sale:
-        _adjust_stock_from_sale(instance.sale)
+    if created and instance.item_id:
+        instance.item.adjust_stock(-instance.quantity)
 
 
 @receiver(post_save, sender=PrintJob)
@@ -219,11 +217,19 @@ def goods_receipt_post_save(sender, instance, created, **kwargs):
                     continue
 
                 # 3. Update/Create CentralStoreInventory
+                if po_item.unit_price is not None and po_item.unit_price > 0 and central_item.price != po_item.unit_price:
+                    central_item.price = po_item.unit_price
+                    central_item.save(update_fields=['price', 'updated_at'])
+
                 inventory, _ = CentralStoreInventory.objects.get_or_create(
                     central_store=instance.central_store,
                     item=central_item,
                     defaults={'unit_cost': po_item.unit_price}
                 )
+
+                if po_item.unit_price is not None and po_item.unit_price > 0 and inventory.unit_cost != po_item.unit_price:
+                    inventory.unit_cost = po_item.unit_price
+                    inventory.save(update_fields=['unit_cost', 'updated_at'])
 
                 # Update stock using the model method (creates transaction automatically)
                 inventory.update_stock(
@@ -289,6 +295,8 @@ def material_issue_post_save(sender, instance, created, **kwargs):
                         reference=issue_item,
                         performed_by=instance.issued_by
                     )
+                    if issue_item.item_id:
+                        issue_item.item.adjust_stock(-issue_item.issued_quantity)
                     issue_item.indent_item.update_issued_quantity(issue_item.issued_quantity)
                     print(f"[Store] Reduced central inventory for MIN {instance.min_number}: {issue_item.issued_quantity} units")
                 except Exception as exc:
@@ -305,6 +313,16 @@ def material_issue_post_save(sender, instance, created, **kwargs):
         for issue_item in instance.items.all():
             try:
                 # 1. Find or create college store item
+                inventory = CentralStoreInventory.objects.filter(
+                    central_store=instance.central_store,
+                    item=issue_item.item,
+                ).first()
+                unit_price = None
+                if inventory and inventory.unit_cost and inventory.unit_cost > 0:
+                    unit_price = inventory.unit_cost
+                else:
+                    unit_price = issue_item.item.price or Decimal('0.00')
+
                 college_item, created_item = StoreItem.objects.get_or_create(
                     college=instance.receiving_college,
                     code=issue_item.item.code,
@@ -312,7 +330,7 @@ def material_issue_post_save(sender, instance, created, **kwargs):
                         'name': issue_item.item.name,
                         'category': issue_item.item.category,
                         'unit': issue_item.unit,
-                        'price': issue_item.item.price,
+                        'price': unit_price,
                         'managed_by': 'college',
                         'description': issue_item.item.description,
                         'min_stock_level': issue_item.item.min_stock_level,
@@ -321,6 +339,9 @@ def material_issue_post_save(sender, instance, created, **kwargs):
 
                 if created_item:
                     print(f"[Store] Created new college item: {college_item.name} for {instance.receiving_college.name}")
+                elif unit_price and college_item.price != unit_price:
+                    college_item.price = unit_price
+                    college_item.save(update_fields=['price', 'updated_at'])
 
                 # 2. Create StockReceive for college (idempotent)
                 receive_date = instance.receipt_date.date() if instance.receipt_date else instance.issue_date
@@ -331,12 +352,13 @@ def material_issue_post_save(sender, instance, created, **kwargs):
                     receive_date=receive_date,
                 ).exists()
                 if not stock_receive_exists:
+                    total_amount = (unit_price or Decimal('0.00')) * (issue_item.issued_quantity or 0)
                     StockReceive.objects.create(
                         item=college_item,
                         vendor=None,
                         quantity=issue_item.issued_quantity,
-                        unit_price=issue_item.item.price,
-                        total_amount=issue_item.issued_quantity * issue_item.item.price,
+                        unit_price=unit_price or Decimal('0.00'),
+                        total_amount=total_amount,
                         receive_date=receive_date,
                         invoice_number=instance.min_number,
                         remarks=f'From MIN {instance.min_number}, Central Store {instance.central_store.name}'

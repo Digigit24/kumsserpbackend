@@ -198,6 +198,7 @@ class ProcurementRequirementListSerializer(serializers.ModelSerializer):
     is_draft_submitted = serializers.SerializerMethodField()
     is_quotation_approved = serializers.SerializerMethodField()
     is_po_created = serializers.SerializerMethodField()
+    central_store_name = serializers.CharField(source='central_store.name', read_only=True)
 
     class Meta:
         model = ProcurementRequirement
@@ -446,17 +447,23 @@ class StoreIndentListSerializer(serializers.ModelSerializer):
                   'central_store_name', 'requesting_store_manager_name', 'status', 'status_display', 'priority',
                   'indent_date', 'is_prepared', 'is_dispatched', 'is_in_transit', 'is_received']
 
+    def _get_issue_flag(self, obj, attr, status):
+        value = getattr(obj, attr, None)
+        if value is not None:
+            return bool(value)
+        return obj.material_issues.filter(status=status).exists()
+
     def get_is_prepared(self, obj):
-        return obj.material_issues.filter(status='prepared').exists()
+        return self._get_issue_flag(obj, 'has_prepared', 'prepared')
 
     def get_is_dispatched(self, obj):
-        return obj.material_issues.filter(status='dispatched').exists()
+        return self._get_issue_flag(obj, 'has_dispatched', 'dispatched')
 
     def get_is_in_transit(self, obj):
-        return obj.material_issues.filter(status='in_transit').exists()
+        return self._get_issue_flag(obj, 'has_in_transit', 'in_transit')
 
     def get_is_received(self, obj):
-        return obj.material_issues.filter(status='received').exists()
+        return self._get_issue_flag(obj, 'has_received', 'received')
 
 
 class StoreIndentDetailSerializer(serializers.ModelSerializer):
@@ -539,6 +546,7 @@ class MaterialIssueNoteListSerializer(serializers.ModelSerializer):
     receiving_college_name = serializers.CharField(source='receiving_college.name', read_only=True)
     issued_by_name = serializers.CharField(source='issued_by.get_full_name', read_only=True, allow_null=True)
     received_by_name = serializers.CharField(source='received_by.get_full_name', read_only=True, allow_null=True)
+    items = MaterialIssueItemSerializer(many=True, read_only=True)
     class Meta:
         model = MaterialIssueNote
         fields = '__all__'
