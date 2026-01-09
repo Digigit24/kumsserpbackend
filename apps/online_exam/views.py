@@ -1,4 +1,5 @@
 from rest_framework import filters, viewsets
+from apps.core.cache_mixins import CachedReadOnlyMixin
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -23,7 +24,7 @@ from .serializers import (
 )
 
 
-class QuestionBankViewSet(CollegeScopedModelViewSet):
+class QuestionBankViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     queryset = QuestionBank.objects.all_colleges()
     serializer_class = QuestionBankSerializer
     permission_classes = [IsAuthenticated]
@@ -34,7 +35,7 @@ class QuestionBankViewSet(CollegeScopedModelViewSet):
     ordering = ['name']
 
 
-class QuestionViewSet(viewsets.ModelViewSet):
+class QuestionViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
     permission_classes = [IsAuthenticated]
@@ -45,7 +46,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class QuestionOptionViewSet(viewsets.ModelViewSet):
+class QuestionOptionViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     queryset = QuestionOption.objects.all()
     serializer_class = QuestionOptionSerializer
     permission_classes = [IsAuthenticated]
@@ -55,7 +56,7 @@ class QuestionOptionViewSet(viewsets.ModelViewSet):
     ordering = ['created_at']
 
 
-class OnlineExamViewSet(CollegeScopedModelViewSet):
+class OnlineExamViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     queryset = OnlineExam.objects.all_colleges()
     serializer_class = OnlineExamSerializer
     permission_classes = [IsAuthenticated]
@@ -66,7 +67,7 @@ class OnlineExamViewSet(CollegeScopedModelViewSet):
     ordering = ['-start_datetime']
 
 
-class ExamQuestionViewSet(viewsets.ModelViewSet):
+class ExamQuestionViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     queryset = ExamQuestion.objects.all()
     serializer_class = ExamQuestionSerializer
     permission_classes = [IsAuthenticated]
@@ -76,7 +77,7 @@ class ExamQuestionViewSet(viewsets.ModelViewSet):
     ordering = ['order']
 
 
-class StudentExamAttemptViewSet(viewsets.ModelViewSet):
+class StudentExamAttemptViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     queryset = StudentExamAttempt.objects.all()
     serializer_class = StudentExamAttemptSerializer
     permission_classes = [IsAuthenticated]
@@ -86,7 +87,7 @@ class StudentExamAttemptViewSet(viewsets.ModelViewSet):
     ordering = ['-start_time']
 
 
-class StudentAnswerViewSet(viewsets.ModelViewSet):
+class StudentAnswerViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     queryset = StudentAnswer.objects.all()
     serializer_class = StudentAnswerSerializer
     permission_classes = [IsAuthenticated]
