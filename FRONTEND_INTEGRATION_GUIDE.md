@@ -1,7 +1,6 @@
 # Frontend Integration Guide - Real-Time Chat API
 
-> **Complete guide for React/JavaScript frontend developers**
-> **Everything you need to integrate the chat API into your frontend application**
+> **Complete guide for React/JavaScript frontend developers** > **Everything you need to integrate the chat API into your frontend application**
 
 ---
 
@@ -40,6 +39,7 @@ REACT_APP_WS_BASE_URL=http://localhost:8000/api/v1
 ```
 
 For production:
+
 ```env
 REACT_APP_API_BASE_URL=https://yourdomain.com/api/v1
 REACT_APP_WS_BASE_URL=https://yourdomain.com/api/v1
@@ -54,6 +54,7 @@ REACT_APP_WS_BASE_URL=https://yourdomain.com/api/v1
 **Endpoint:** `POST /auth/login/`
 
 **Request Headers:**
+
 ```javascript
 {
   "Content-Type": "application/json"
@@ -61,6 +62,7 @@ REACT_APP_WS_BASE_URL=https://yourdomain.com/api/v1
 ```
 
 **Request Payload:**
+
 ```javascript
 {
   "username": "john_doe",
@@ -69,6 +71,7 @@ REACT_APP_WS_BASE_URL=https://yourdomain.com/api/v1
 ```
 
 **Response (200 OK):**
+
 ```javascript
 {
   "key": "9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b",  // This is your auth token
@@ -94,45 +97,49 @@ REACT_APP_WS_BASE_URL=https://yourdomain.com/api/v1
 
 ```javascript
 // src/api/auth.js
-import axios from 'axios';
+import axios from "axios";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 export const login = async (username, password) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/auth/login/`, {
-      username,
-      password
-    }, {
-      headers: {
-        'Content-Type': 'application/json'
+    const response = await axios.post(
+      `${API_BASE_URL}/auth/login/`,
+      {
+        username,
+        password,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
-    });
+    );
 
     // Save token to localStorage
-    localStorage.setItem('authToken', response.data.key);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
-    localStorage.setItem('collegeId', response.data.college_id);
+    localStorage.setItem("authToken", response.data.key);
+    localStorage.setItem("user", JSON.stringify(response.data.user));
+    localStorage.setItem("collegeId", response.data.college_id);
 
     return response.data;
   } catch (error) {
-    console.error('Login failed:', error.response?.data);
+    console.error("Login failed:", error.response?.data);
     throw error;
   }
 };
 
 export const logout = () => {
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('user');
-  localStorage.removeItem('collegeId');
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("user");
+  localStorage.removeItem("collegeId");
 };
 
 export const getAuthToken = () => {
-  return localStorage.getItem('authToken');
+  return localStorage.getItem("authToken");
 };
 
 export const getCurrentUser = () => {
-  const userStr = localStorage.getItem('user');
+  const userStr = localStorage.getItem("user");
   return userStr ? JSON.parse(userStr) : null;
 };
 
@@ -145,28 +152,28 @@ export const isAuthenticated = () => {
 
 ```javascript
 // src/components/Login.jsx
-import React, { useState } from 'react';
-import { login } from '../api/auth';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { login } from "../api/auth";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       const data = await login(username, password);
-      console.log('Logged in as:', data.user.username);
-      navigate('/chat');
+      console.log("Logged in as:", data.user.username);
+      navigate("/chat");
     } catch (err) {
-      setError(err.response?.data?.detail || 'Login failed');
+      setError(err.response?.data?.detail || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -192,7 +199,7 @@ const Login = () => {
           required
         />
         <button type="submit" disabled={loading}>
-          {loading ? 'Logging in...' : 'Login'}
+          {loading ? "Logging in..." : "Login"}
         </button>
       </form>
     </div>
@@ -210,8 +217,8 @@ export default Login;
 
 ```javascript
 // src/api/client.js
-import axios from 'axios';
-import { getAuthToken } from './auth';
+import axios from "axios";
+import { getAuthToken } from "./auth";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -220,7 +227,7 @@ const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000, // 30 seconds
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -233,9 +240,9 @@ apiClient.interceptors.request.use(
     }
 
     // Add college ID if available
-    const collegeId = localStorage.getItem('collegeId');
+    const collegeId = localStorage.getItem("collegeId");
     if (collegeId) {
-      config.headers['X-College-ID'] = collegeId;
+      config.headers["X-College-ID"] = collegeId;
     }
 
     return config;
@@ -254,7 +261,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       // Unauthorized - redirect to login
       localStorage.clear();
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
@@ -272,6 +279,7 @@ export default apiClient;
 **Endpoint:** `GET /communication/chats/conversations/`
 
 **Request Headers:**
+
 ```javascript
 {
   "Authorization": "Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b",
@@ -282,55 +290,58 @@ export default apiClient;
 **Request Payload:** None (GET request)
 
 **Response (200 OK):**
+
 ```javascript
 [
   {
-    "conversation_id": 1,
-    "other_user": {
-      "id": 123,
-      "username": "jane_smith",
-      "full_name": "Jane Smith",
-      "avatar": "https://s3.amazonaws.com/avatars/jane.jpg",
-      "is_online": true
+    conversation_id: 1,
+    other_user: {
+      id: 123,
+      username: "jane_smith",
+      full_name: "Jane Smith",
+      avatar: "https://s3.amazonaws.com/avatars/jane.jpg",
+      is_online: true,
     },
-    "last_message": "Hey, how are you?",
-    "last_message_at": "2026-01-09T10:30:00Z",
-    "last_message_by_me": false,
-    "unread_count": 3,
-    "updated_at": "2026-01-09T10:30:00Z"
+    last_message: "Hey, how are you?",
+    last_message_at: "2026-01-09T10:30:00Z",
+    last_message_by_me: false,
+    unread_count: 3,
+    updated_at: "2026-01-09T10:30:00Z",
   },
   {
-    "conversation_id": 2,
-    "other_user": {
-      "id": 456,
-      "username": "bob_jones",
-      "full_name": "Bob Jones",
-      "avatar": null,
-      "is_online": false
+    conversation_id: 2,
+    other_user: {
+      id: 456,
+      username: "bob_jones",
+      full_name: "Bob Jones",
+      avatar: null,
+      is_online: false,
     },
-    "last_message": "See you tomorrow!",
-    "last_message_at": "2026-01-08T15:20:00Z",
-    "last_message_by_me": true,
-    "unread_count": 0,
-    "updated_at": "2026-01-08T15:20:00Z"
-  }
-]
+    last_message: "See you tomorrow!",
+    last_message_at: "2026-01-08T15:20:00Z",
+    last_message_by_me: true,
+    unread_count: 0,
+    updated_at: "2026-01-08T15:20:00Z",
+  },
+];
 ```
 
 **Implementation:**
 
 ```javascript
 // src/api/chatService.js
-import apiClient from './client';
+import apiClient from "./client";
 
 export const chatAPI = {
   // Get all conversations
   getConversations: async () => {
     try {
-      const response = await apiClient.get('/communication/chats/conversations/');
+      const response = await apiClient.get(
+        "/communication/chats/conversations/"
+      );
       return response.data;
     } catch (error) {
-      console.error('Failed to fetch conversations:', error);
+      console.error("Failed to fetch conversations:", error);
       throw error;
     }
   },
@@ -341,8 +352,8 @@ export const chatAPI = {
 
 ```javascript
 // src/components/ConversationsList.jsx
-import React, { useState, useEffect } from 'react';
-import { chatAPI } from '../api/chatService';
+import React, { useState, useEffect } from "react";
+import { chatAPI } from "../api/chatService";
 
 const ConversationsList = ({ onSelectConversation }) => {
   const [conversations, setConversations] = useState([]);
@@ -360,7 +371,7 @@ const ConversationsList = ({ onSelectConversation }) => {
       const data = await chatAPI.getConversations();
       setConversations(data);
     } catch (err) {
-      setError('Failed to load conversations');
+      setError("Failed to load conversations");
       console.error(err);
     } finally {
       setLoading(false);
@@ -372,21 +383,21 @@ const ConversationsList = ({ onSelectConversation }) => {
 
   return (
     <div className="conversations-list">
-      {conversations.map(conv => (
+      {conversations.map((conv) => (
         <div
           key={conv.conversation_id}
           className="conversation-item"
           onClick={() => onSelectConversation(conv.other_user)}
         >
           <img
-            src={conv.other_user.avatar || '/default-avatar.png'}
+            src={conv.other_user.avatar || "/default-avatar.png"}
             alt={conv.other_user.full_name}
             className="avatar"
           />
           <div className="conversation-info">
             <h4>{conv.other_user.full_name}</h4>
-            <p className={conv.unread_count > 0 ? 'unread' : ''}>
-              {conv.last_message_by_me ? 'You: ' : ''}
+            <p className={conv.unread_count > 0 ? "unread" : ""}>
+              {conv.last_message_by_me ? "You: " : ""}
               {conv.last_message}
             </p>
           </div>
@@ -412,14 +423,17 @@ export default ConversationsList;
 **Endpoint:** `GET /communication/chats/conversation/{user_id}/`
 
 **URL Parameters:**
+
 - `user_id` (required): ID of the other user in the conversation
 
 **Query Parameters:**
+
 - `limit` (optional, default: 50): Number of messages to return
 - `offset` (optional, default: 0): Pagination offset
 - `before_id` (optional): Get messages before this message ID (for infinite scroll)
 
 **Request Headers:**
+
 ```javascript
 {
   "Authorization": "Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b",
@@ -441,6 +455,7 @@ GET /communication/chats/conversation/123/?limit=50&before_id=999
 ```
 
 **Response (200 OK):**
+
 ```javascript
 {
   "conversation_id": 1,
@@ -517,7 +532,7 @@ export const chatAPI = {
     const params = {
       limit,
       offset,
-      ...(before_id && { before_id })
+      ...(before_id && { before_id }),
     };
 
     try {
@@ -527,7 +542,7 @@ export const chatAPI = {
       );
       return response.data;
     } catch (error) {
-      console.error('Failed to fetch messages:', error);
+      console.error("Failed to fetch messages:", error);
       throw error;
     }
   },
@@ -538,8 +553,8 @@ export const chatAPI = {
 
 ```javascript
 // src/components/ChatWindow.jsx
-import React, { useState, useEffect, useRef } from 'react';
-import { chatAPI } from '../api/chatService';
+import React, { useState, useEffect, useRef } from "react";
+import { chatAPI } from "../api/chatService";
 
 const ChatWindow = ({ otherUser, currentUser }) => {
   const [messages, setMessages] = useState([]);
@@ -558,7 +573,7 @@ const ChatWindow = ({ otherUser, currentUser }) => {
       setMessages(data.messages.reverse()); // Reverse for chronological order
       setHasMore(data.has_more);
     } catch (error) {
-      console.error('Failed to load messages:', error);
+      console.error("Failed to load messages:", error);
     } finally {
       setLoading(false);
     }
@@ -572,13 +587,13 @@ const ChatWindow = ({ otherUser, currentUser }) => {
       const oldestMessageId = messages[0]?.id;
       const data = await chatAPI.getMessages(otherUser.id, {
         limit: 50,
-        before_id: oldestMessageId
+        before_id: oldestMessageId,
       });
 
-      setMessages(prev => [...data.messages.reverse(), ...prev]);
+      setMessages((prev) => [...data.messages.reverse(), ...prev]);
       setHasMore(data.has_more);
     } catch (error) {
-      console.error('Failed to load more messages:', error);
+      console.error("Failed to load more messages:", error);
     } finally {
       setLoading(false);
     }
@@ -600,7 +615,7 @@ const ChatWindow = ({ otherUser, currentUser }) => {
         onScroll={handleScroll}
       >
         {loading && messages.length === 0 && <div>Loading...</div>}
-        {messages.map(msg => (
+        {messages.map((msg) => (
           <Message key={msg.id} message={msg} currentUser={currentUser} />
         ))}
       </div>
@@ -616,6 +631,7 @@ const ChatWindow = ({ otherUser, currentUser }) => {
 **Endpoint:** `POST /communication/chats/`
 
 **Request Headers:**
+
 ```javascript
 {
   "Authorization": "Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b",
@@ -626,6 +642,7 @@ const ChatWindow = ({ otherUser, currentUser }) => {
 **For text message:**
 
 **Request Payload:**
+
 ```javascript
 {
   "receiver_id": 123,
@@ -636,6 +653,7 @@ const ChatWindow = ({ otherUser, currentUser }) => {
 **For message with attachment:**
 
 **Request Headers:**
+
 ```javascript
 {
   "Authorization": "Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b",
@@ -644,6 +662,7 @@ const ChatWindow = ({ otherUser, currentUser }) => {
 ```
 
 **Request Payload (FormData):**
+
 ```javascript
 // FormData format
 receiver_id: 123
@@ -652,6 +671,7 @@ attachment: [File object]
 ```
 
 **Response (201 Created):**
+
 ```javascript
 {
   "id": 458,
@@ -681,6 +701,7 @@ attachment: [File object]
 **Error Responses:**
 
 **400 Bad Request:**
+
 ```javascript
 {
   "error": "receiver_id is required"
@@ -692,6 +713,7 @@ attachment: [File object]
 ```
 
 **404 Not Found:**
+
 ```javascript
 {
   "error": "Receiver not found"
@@ -713,18 +735,18 @@ export const chatAPI = {
       if (attachment) {
         // Send with attachment using FormData
         const formData = new FormData();
-        formData.append('receiver_id', receiverId);
-        formData.append('message', message);
-        formData.append('attachment', attachment);
+        formData.append("receiver_id", receiverId);
+        formData.append("message", message);
+        formData.append("attachment", attachment);
 
-        response = await apiClient.post('/communication/chats/', formData, {
+        response = await apiClient.post("/communication/chats/", formData, {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
         });
       } else {
         // Send text message
-        response = await apiClient.post('/communication/chats/', {
+        response = await apiClient.post("/communication/chats/", {
           receiver_id: receiverId,
           message: message,
         });
@@ -732,7 +754,7 @@ export const chatAPI = {
 
       return response.data;
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error("Failed to send message:", error);
       throw error;
     }
   },
@@ -743,11 +765,11 @@ export const chatAPI = {
 
 ```javascript
 // src/components/MessageInput.jsx
-import React, { useState } from 'react';
-import { chatAPI } from '../api/chatService';
+import React, { useState } from "react";
+import { chatAPI } from "../api/chatService";
 
 const MessageInput = ({ receiverId, onMessageSent }) => {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [attachment, setAttachment] = useState(null);
   const [sending, setSending] = useState(false);
 
@@ -764,11 +786,11 @@ const MessageInput = ({ receiverId, onMessageSent }) => {
         attachment
       );
 
-      setMessage('');
+      setMessage("");
       setAttachment(null);
       onMessageSent(sentMessage);
     } catch (error) {
-      alert('Failed to send message');
+      alert("Failed to send message");
     } finally {
       setSending(false);
     }
@@ -779,7 +801,7 @@ const MessageInput = ({ receiverId, onMessageSent }) => {
     if (file) {
       // Validate file size (e.g., max 10MB)
       if (file.size > 10 * 1024 * 1024) {
-        alert('File too large. Max 10MB.');
+        alert("File too large. Max 10MB.");
         return;
       }
       setAttachment(file);
@@ -799,12 +821,12 @@ const MessageInput = ({ receiverId, onMessageSent }) => {
         type="file"
         id="file-input"
         onChange={handleFileChange}
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
       />
 
       <button
         type="button"
-        onClick={() => document.getElementById('file-input').click()}
+        onClick={() => document.getElementById("file-input").click()}
       >
         📎
       </button>
@@ -818,7 +840,7 @@ const MessageInput = ({ receiverId, onMessageSent }) => {
       />
 
       <button type="submit" disabled={sending}>
-        {sending ? '...' : 'Send'}
+        {sending ? "..." : "Send"}
       </button>
     </form>
   );
@@ -834,6 +856,7 @@ export default MessageInput;
 **Endpoint:** `POST /communication/chats/mark-read/`
 
 **Request Headers:**
+
 ```javascript
 {
   "Authorization": "Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b",
@@ -844,6 +867,7 @@ export default MessageInput;
 **Option 1: Mark specific messages**
 
 **Request Payload:**
+
 ```javascript
 {
   "message_ids": [456, 457, 458]
@@ -853,6 +877,7 @@ export default MessageInput;
 **Option 2: Mark all messages in a conversation**
 
 **Request Payload:**
+
 ```javascript
 {
   "conversation_id": 1
@@ -862,6 +887,7 @@ export default MessageInput;
 **Option 3: Mark all messages from a sender**
 
 **Request Payload:**
+
 ```javascript
 {
   "sender_id": 123
@@ -869,6 +895,7 @@ export default MessageInput;
 ```
 
 **Response (200 OK):**
+
 ```javascript
 {
   "success": true,
@@ -878,6 +905,7 @@ export default MessageInput;
 ```
 
 **Error Response (400 Bad Request):**
+
 ```javascript
 {
   "error": "Provide message_ids, conversation_id, or sender_id"
@@ -895,12 +923,12 @@ export const chatAPI = {
   markAsRead: async (options) => {
     try {
       const response = await apiClient.post(
-        '/communication/chats/mark-read/',
+        "/communication/chats/mark-read/",
         options
       );
       return response.data;
     } catch (error) {
-      console.error('Failed to mark messages as read:', error);
+      console.error("Failed to mark messages as read:", error);
       throw error;
     }
   },
@@ -930,9 +958,9 @@ useEffect(() => {
 const handleMarkRead = async (messageIds) => {
   try {
     await chatAPI.markMessagesAsRead(messageIds);
-    console.log('Messages marked as read');
+    console.log("Messages marked as read");
   } catch (error) {
-    console.error('Failed to mark as read:', error);
+    console.error("Failed to mark as read:", error);
   }
 };
 ```
@@ -944,6 +972,7 @@ const handleMarkRead = async (messageIds) => {
 **Endpoint:** `POST /communication/chats/typing/`
 
 **Request Headers:**
+
 ```javascript
 {
   "Authorization": "Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b",
@@ -952,6 +981,7 @@ const handleMarkRead = async (messageIds) => {
 ```
 
 **Request Payload:**
+
 ```javascript
 {
   "receiver_id": 123,
@@ -960,6 +990,7 @@ const handleMarkRead = async (messageIds) => {
 ```
 
 **Response (200 OK):**
+
 ```javascript
 {
   "success": true
@@ -967,6 +998,7 @@ const handleMarkRead = async (messageIds) => {
 ```
 
 **Error Response (400 Bad Request):**
+
 ```javascript
 {
   "error": "receiver_id is required"
@@ -983,13 +1015,13 @@ export const chatAPI = {
   // Send typing indicator
   sendTyping: async (receiverId, isTyping) => {
     try {
-      const response = await apiClient.post('/communication/chats/typing/', {
+      const response = await apiClient.post("/communication/chats/typing/", {
         receiver_id: receiverId,
         is_typing: isTyping,
       });
       return response.data;
     } catch (error) {
-      console.error('Failed to send typing indicator:', error);
+      console.error("Failed to send typing indicator:", error);
       throw error;
     }
   },
@@ -1000,33 +1032,36 @@ export const chatAPI = {
 
 ```javascript
 // src/hooks/useTypingIndicator.js
-import { useRef, useCallback } from 'react';
-import { chatAPI } from '../api/chatService';
+import { useRef, useCallback } from "react";
+import { chatAPI } from "../api/chatService";
 
 export const useTypingIndicator = (receiverId) => {
   const typingTimeoutRef = useRef(null);
   const isTypingRef = useRef(false);
 
-  const sendTyping = useCallback((isTyping) => {
-    if (isTyping && !isTypingRef.current) {
-      // Start typing
-      chatAPI.sendTyping(receiverId, true);
-      isTypingRef.current = true;
-    }
-
-    // Clear existing timeout
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
-
-    // Stop typing after 3 seconds of inactivity
-    typingTimeoutRef.current = setTimeout(() => {
-      if (isTypingRef.current) {
-        chatAPI.sendTyping(receiverId, false);
-        isTypingRef.current = false;
+  const sendTyping = useCallback(
+    (isTyping) => {
+      if (isTyping && !isTypingRef.current) {
+        // Start typing
+        chatAPI.sendTyping(receiverId, true);
+        isTypingRef.current = true;
       }
-    }, 3000);
-  }, [receiverId]);
+
+      // Clear existing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      // Stop typing after 3 seconds of inactivity
+      typingTimeoutRef.current = setTimeout(() => {
+        if (isTypingRef.current) {
+          chatAPI.sendTyping(receiverId, false);
+          isTypingRef.current = false;
+        }
+      }, 3000);
+    },
+    [receiverId]
+  );
 
   const stopTyping = useCallback(() => {
     if (typingTimeoutRef.current) {
@@ -1046,10 +1081,10 @@ export const useTypingIndicator = (receiverId) => {
 
 ```javascript
 // In MessageInput component
-import { useTypingIndicator } from '../hooks/useTypingIndicator';
+import { useTypingIndicator } from "../hooks/useTypingIndicator";
 
 const MessageInput = ({ receiverId }) => {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const { sendTyping, stopTyping } = useTypingIndicator(receiverId);
 
   const handleChange = (e) => {
@@ -1068,13 +1103,7 @@ const MessageInput = ({ receiverId }) => {
     stopTyping();
   };
 
-  return (
-    <input
-      value={message}
-      onChange={handleChange}
-      onBlur={stopTyping}
-    />
-  );
+  return <input value={message} onChange={handleChange} onBlur={stopTyping} />;
 };
 ```
 
@@ -1085,6 +1114,7 @@ const MessageInput = ({ receiverId }) => {
 **Endpoint:** `GET /communication/chats/unread-count/`
 
 **Request Headers:**
+
 ```javascript
 {
   "Authorization": "Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b",
@@ -1095,6 +1125,7 @@ const MessageInput = ({ receiverId }) => {
 **Request Payload:** None (GET request)
 
 **Response (200 OK):**
+
 ```javascript
 {
   "total_unread": 42,
@@ -1125,10 +1156,12 @@ export const chatAPI = {
   // Get unread message count
   getUnreadCount: async () => {
     try {
-      const response = await apiClient.get('/communication/chats/unread-count/');
+      const response = await apiClient.get(
+        "/communication/chats/unread-count/"
+      );
       return response.data;
     } catch (error) {
-      console.error('Failed to fetch unread count:', error);
+      console.error("Failed to fetch unread count:", error);
       throw error;
     }
   },
@@ -1139,8 +1172,8 @@ export const chatAPI = {
 
 ```javascript
 // src/components/UnreadBadge.jsx
-import React, { useState, useEffect } from 'react';
-import { chatAPI } from '../api/chatService';
+import React, { useState, useEffect } from "react";
+import { chatAPI } from "../api/chatService";
 
 const UnreadBadge = () => {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -1158,7 +1191,7 @@ const UnreadBadge = () => {
       const data = await chatAPI.getUnreadCount();
       setUnreadCount(data.total_unread);
     } catch (error) {
-      console.error('Failed to load unread count:', error);
+      console.error("Failed to load unread count:", error);
     }
   };
 
@@ -1166,7 +1199,7 @@ const UnreadBadge = () => {
 
   return (
     <span className="unread-badge">
-      {unreadCount > 99 ? '99+' : unreadCount}
+      {unreadCount > 99 ? "99+" : unreadCount}
     </span>
   );
 };
@@ -1181,6 +1214,7 @@ export default UnreadBadge;
 **Endpoint:** `GET /communication/chats/online-users/`
 
 **Request Headers:**
+
 ```javascript
 {
   "Authorization": "Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b",
@@ -1191,6 +1225,7 @@ export default UnreadBadge;
 **Request Payload:** None (GET request)
 
 **Response (200 OK):**
+
 ```javascript
 {
   "online_users": [123, 456, 789]
@@ -1207,10 +1242,12 @@ export const chatAPI = {
   // Get online users
   getOnlineUsers: async () => {
     try {
-      const response = await apiClient.get('/communication/chats/online-users/');
+      const response = await apiClient.get(
+        "/communication/chats/online-users/"
+      );
       return response.data;
     } catch (error) {
-      console.error('Failed to fetch online users:', error);
+      console.error("Failed to fetch online users:", error);
       throw error;
     }
   },
@@ -1221,8 +1258,8 @@ export const chatAPI = {
 
 ```javascript
 // src/hooks/useOnlineStatus.js
-import { useState, useEffect } from 'react';
-import { chatAPI } from '../api/chatService';
+import { useState, useEffect } from "react";
+import { chatAPI } from "../api/chatService";
 
 export const useOnlineStatus = (userId) => {
   const [isOnline, setIsOnline] = useState(false);
@@ -1233,7 +1270,7 @@ export const useOnlineStatus = (userId) => {
         const data = await chatAPI.getOnlineUsers();
         setIsOnline(data.online_users.includes(userId));
       } catch (error) {
-        console.error('Failed to check online status:', error);
+        console.error("Failed to check online status:", error);
       }
     };
 
@@ -1258,11 +1295,13 @@ export const useOnlineStatus = (userId) => {
 **Authentication:** Token passed as query parameter
 
 **URL Format:**
+
 ```
 GET /communication/sse/events/?token=YOUR_AUTH_TOKEN
 ```
 
 **Example:**
+
 ```
 http://localhost:8000/api/v1/communication/sse/events/?token=9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b
 ```
@@ -1371,8 +1410,8 @@ Keep-alive ping (every 30 seconds).
 
 ```javascript
 // src/hooks/useSSE.js
-import { useEffect, useCallback, useRef, useState } from 'react';
-import { getAuthToken } from '../api/auth';
+import { useEffect, useCallback, useRef, useState } from "react";
+import { getAuthToken } from "../api/auth";
 
 const SSE_BASE_URL = process.env.REACT_APP_WS_BASE_URL;
 
@@ -1384,14 +1423,14 @@ export const useSSE = (onMessage, enabled = true) => {
 
   const connect = useCallback(() => {
     if (!enabled) {
-      console.log('SSE disabled');
+      console.log("SSE disabled");
       return;
     }
 
     const token = getAuthToken();
     if (!token) {
-      setError('No auth token');
-      console.error('Cannot connect to SSE: No auth token');
+      setError("No auth token");
+      console.error("Cannot connect to SSE: No auth token");
       return;
     }
 
@@ -1401,50 +1440,50 @@ export const useSSE = (onMessage, enabled = true) => {
     }
 
     const url = `${SSE_BASE_URL}/communication/sse/events/?token=${token}`;
-    console.log('Connecting to SSE:', url);
+    console.log("Connecting to SSE:", url);
 
     const eventSource = new EventSource(url);
 
     eventSource.onopen = () => {
-      console.log('✅ SSE Connected');
+      console.log("✅ SSE Connected");
       setIsConnected(true);
       setError(null);
     };
 
     eventSource.onerror = (err) => {
-      console.error('❌ SSE Error:', err);
+      console.error("❌ SSE Error:", err);
       setIsConnected(false);
-      setError('Connection error');
+      setError("Connection error");
 
       // Close the connection
       eventSource.close();
 
       // Auto-reconnect after 5 seconds
       reconnectTimeoutRef.current = setTimeout(() => {
-        console.log('🔄 Reconnecting to SSE...');
+        console.log("🔄 Reconnecting to SSE...");
         connect();
       }, 5000);
     };
 
     // Handle all event types
     const eventTypes = [
-      'connected',
-      'message',
-      'typing',
-      'read_receipt',
-      'notification',
-      'heartbeat',
-      'disconnected'
+      "connected",
+      "message",
+      "typing",
+      "read_receipt",
+      "notification",
+      "heartbeat",
+      "disconnected",
     ];
 
-    eventTypes.forEach(eventType => {
+    eventTypes.forEach((eventType) => {
       eventSource.addEventListener(eventType, (event) => {
         try {
           const data = JSON.parse(event.data);
           console.log(`📨 SSE Event [${eventType}]:`, data);
           onMessage({ event: eventType, data });
         } catch (err) {
-          console.error('Failed to parse SSE data:', err, event.data);
+          console.error("Failed to parse SSE data:", err, event.data);
         }
       });
     });
@@ -1468,7 +1507,7 @@ export const useSSE = (onMessage, enabled = true) => {
   return {
     isConnected,
     error,
-    reconnect: connect
+    reconnect: connect,
   };
 };
 ```
@@ -1477,9 +1516,9 @@ export const useSSE = (onMessage, enabled = true) => {
 
 ```javascript
 // src/components/Chat/ChatContainer.jsx
-import React, { useState, useCallback } from 'react';
-import { useSSE } from '../../hooks/useSSE';
-import { getCurrentUser } from '../../api/auth';
+import React, { useState, useCallback } from "react";
+import { useSSE } from "../../hooks/useSSE";
+import { getCurrentUser } from "../../api/auth";
 
 const ChatContainer = () => {
   const [messages, setMessages] = useState([]);
@@ -1487,67 +1526,80 @@ const ChatContainer = () => {
   const currentUser = getCurrentUser();
 
   // Handle SSE events
-  const handleSSEMessage = useCallback((event) => {
-    const { event: eventType, data } = event;
+  const handleSSEMessage = useCallback(
+    (event) => {
+      const { event: eventType, data } = event;
 
-    switch (eventType) {
-      case 'connected':
-        console.log('Connected to chat server');
-        break;
+      switch (eventType) {
+        case "connected":
+          console.log("Connected to chat server");
+          break;
 
-      case 'message':
-        // Add new message
-        setMessages(prev => [...prev, data]);
+        case "message":
+          // CRITICAL: Only add message if it belongs to the currently active conversation!
+          // Assuming you have a state or prop `activeConversationId`
+          if (data.conversation_id === activeConversationId) {
+            setMessages((prev) => [...prev, data]);
+            // Mark as read if we're the receiver and chat is open
+            if (data.receiver_id === currentUser.id) {
+              chatAPI.markMessagesAsRead([data.id]);
+            }
+          } else {
+            // If message is for another conversation, show notification or update conversation list badge
+            console.log(
+              "New message for another conversation:",
+              data.conversation_id
+            );
+            // updateUnreadCounts(data.conversation_id);
+          }
+          break;
 
-        // Mark as read if we're the receiver
-        if (data.receiver_id === currentUser.id) {
-          chatAPI.markMessagesAsRead([data.id]);
-        }
-        break;
-
-      case 'typing':
-        // Update typing indicators
-        setTypingUsers(prev => ({
-          ...prev,
-          [data.sender_id]: data.is_typing
-        }));
-
-        // Auto-clear after 5 seconds
-        if (data.is_typing) {
-          setTimeout(() => {
-            setTypingUsers(prev => ({
+        case "typing":
+          // Only show typing for current conversation
+          if (data.conversation_id === activeConversationId) {
+            setTypingUsers((prev) => ({
               ...prev,
-              [data.sender_id]: false
+              [data.sender_id]: data.is_typing,
             }));
-          }, 5000);
-        }
-        break;
 
-      case 'read_receipt':
-        // Update message read status
-        setMessages(prev =>
-          prev.map(msg =>
-            msg.id === data.message_id
-              ? { ...msg, is_read: true, read_at: data.read_at }
-              : msg
-          )
-        );
-        break;
+            if (data.is_typing) {
+              setTimeout(() => {
+                setTypingUsers((prev) => ({
+                  ...prev,
+                  [data.sender_id]: false,
+                }));
+              }, 5000);
+            }
+          }
+          break;
 
-      case 'notification':
-        // Show notification
-        showNotification(data.title, data.message);
-        break;
+        case "read_receipt":
+          // Update message read status
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === data.message_id
+                ? { ...msg, is_read: true, read_at: data.read_at }
+                : msg
+            )
+          );
+          break;
 
-      case 'heartbeat':
-        // Connection is alive
-        console.log('Heartbeat received');
-        break;
+        case "notification":
+          // Show notification
+          showNotification(data.title, data.message);
+          break;
 
-      default:
-        console.log('Unknown event:', eventType, data);
-    }
-  }, [currentUser.id]);
+        case "heartbeat":
+          // Connection is alive
+          console.log("Heartbeat received");
+          break;
+
+        default:
+          console.log("Unknown event:", eventType, data);
+      }
+    },
+    [currentUser.id, activeConversationId]
+  ); // Add activeConversationId to dependencies
 
   // Connect to SSE
   const { isConnected, error, reconnect } = useSSE(handleSSEMessage);
@@ -1607,12 +1659,12 @@ src/
 
 ```javascript
 // src/api/chatService.js - COMPLETE VERSION
-import apiClient from './client';
+import apiClient from "./client";
 
 export const chatAPI = {
   // Get all conversations
   getConversations: async () => {
-    const response = await apiClient.get('/communication/chats/conversations/');
+    const response = await apiClient.get("/communication/chats/conversations/");
     return response.data;
   },
 
@@ -1632,14 +1684,14 @@ export const chatAPI = {
     let response;
     if (attachment) {
       const formData = new FormData();
-      formData.append('receiver_id', receiverId);
-      formData.append('message', message);
-      formData.append('attachment', attachment);
-      response = await apiClient.post('/communication/chats/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      formData.append("receiver_id", receiverId);
+      formData.append("message", message);
+      formData.append("attachment", attachment);
+      response = await apiClient.post("/communication/chats/", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
     } else {
-      response = await apiClient.post('/communication/chats/', {
+      response = await apiClient.post("/communication/chats/", {
         receiver_id: receiverId,
         message: message,
       });
@@ -1650,7 +1702,7 @@ export const chatAPI = {
   // Mark messages as read
   markAsRead: async (options) => {
     const response = await apiClient.post(
-      '/communication/chats/mark-read/',
+      "/communication/chats/mark-read/",
       options
     );
     return response.data;
@@ -1668,7 +1720,7 @@ export const chatAPI = {
 
   // Send typing indicator
   sendTyping: async (receiverId, isTyping) => {
-    const response = await apiClient.post('/communication/chats/typing/', {
+    const response = await apiClient.post("/communication/chats/typing/", {
       receiver_id: receiverId,
       is_typing: isTyping,
     });
@@ -1677,13 +1729,13 @@ export const chatAPI = {
 
   // Get unread count
   getUnreadCount: async () => {
-    const response = await apiClient.get('/communication/chats/unread-count/');
+    const response = await apiClient.get("/communication/chats/unread-count/");
     return response.data;
   },
 
   // Get online users
   getOnlineUsers: async () => {
-    const response = await apiClient.get('/communication/chats/online-users/');
+    const response = await apiClient.get("/communication/chats/online-users/");
     return response.data;
   },
 };
@@ -1693,12 +1745,12 @@ export const chatAPI = {
 
 ```javascript
 // src/components/Chat/ChatWindow.jsx - COMPLETE VERSION
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { chatAPI } from '../../api/chatService';
-import { useSSE } from '../../hooks/useSSE';
-import { useTypingIndicator } from '../../hooks/useTypingIndicator';
-import MessageList from './MessageList';
-import MessageInput from './MessageInput';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { chatAPI } from "../../api/chatService";
+import { useSSE } from "../../hooks/useSSE";
+import { useTypingIndicator } from "../../hooks/useTypingIndicator";
+import MessageList from "./MessageList";
+import MessageInput from "./MessageInput";
 
 const ChatWindow = ({ otherUser, currentUser }) => {
   const [messages, setMessages] = useState([]);
@@ -1724,67 +1776,72 @@ const ChatWindow = ({ otherUser, currentUser }) => {
         await chatAPI.markConversationAsRead(data.conversation_id);
       }
     } catch (error) {
-      console.error('Failed to load messages:', error);
+      console.error("Failed to load messages:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   // Handle SSE events
-  const handleSSEMessage = useCallback((event) => {
-    const { event: eventType, data } = event;
+  const handleSSEMessage = useCallback(
+    (event) => {
+      const { event: eventType, data } = event;
 
-    switch (eventType) {
-      case 'message':
-        // Only add if relevant to this conversation
-        if (
-          (data.sender_id === otherUser.id && data.receiver_id === currentUser.id) ||
-          (data.sender_id === currentUser.id && data.receiver_id === otherUser.id)
-        ) {
-          setMessages(prev => [...prev, data]);
+      switch (eventType) {
+        case "message":
+          // Only add if relevant to this conversation
+          if (
+            (data.sender_id === otherUser.id &&
+              data.receiver_id === currentUser.id) ||
+            (data.sender_id === currentUser.id &&
+              data.receiver_id === otherUser.id)
+          ) {
+            setMessages((prev) => [...prev, data]);
 
-          // Auto mark as read if we're the receiver
-          if (data.receiver_id === currentUser.id) {
-            chatAPI.markMessagesAsRead([data.id]);
+            // Auto mark as read if we're the receiver
+            if (data.receiver_id === currentUser.id) {
+              chatAPI.markMessagesAsRead([data.id]);
+            }
           }
-        }
-        break;
+          break;
 
-      case 'typing':
-        if (data.sender_id === otherUser.id) {
-          setIsOtherUserTyping(data.is_typing);
-          if (data.is_typing) {
-            setTimeout(() => setIsOtherUserTyping(false), 5000);
+        case "typing":
+          if (data.sender_id === otherUser.id) {
+            setIsOtherUserTyping(data.is_typing);
+            if (data.is_typing) {
+              setTimeout(() => setIsOtherUserTyping(false), 5000);
+            }
           }
-        }
-        break;
+          break;
 
-      case 'read_receipt':
-        setMessages(prev =>
-          prev.map(msg =>
-            msg.id === data.message_id
-              ? { ...msg, is_read: true, read_at: data.read_at }
-              : msg
-          )
-        );
-        break;
+        case "read_receipt":
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === data.message_id
+                ? { ...msg, is_read: true, read_at: data.read_at }
+                : msg
+            )
+          );
+          break;
 
-      default:
-        break;
-    }
-  }, [otherUser.id, currentUser.id]);
+        default:
+          break;
+      }
+    },
+    [otherUser.id, currentUser.id]
+  );
 
   // Connect to SSE
   const { isConnected } = useSSE(handleSSEMessage);
 
   // Scroll to bottom on new message
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleMessageSent = (sentMessage) => {
     // Message will be added via SSE, but add optimistically
-    setMessages(prev => [...prev, sentMessage]);
+    setMessages((prev) => [...prev, sentMessage]);
   };
 
   return (
@@ -1792,20 +1849,20 @@ const ChatWindow = ({ otherUser, currentUser }) => {
       <div className="chat-header">
         <div className="user-info">
           <img
-            src={otherUser.avatar || '/default-avatar.png'}
+            src={otherUser.avatar || "/default-avatar.png"}
             alt={otherUser.full_name}
             className="avatar"
           />
           <div>
             <h3>{otherUser.full_name}</h3>
-            <span className={`status ${otherUser.is_online ? 'online' : 'offline'}`}>
-              {otherUser.is_online ? 'Online' : 'Offline'}
+            <span
+              className={`status ${otherUser.is_online ? "online" : "offline"}`}
+            >
+              {otherUser.is_online ? "Online" : "Offline"}
             </span>
           </div>
         </div>
-        <div className="connection-indicator">
-          {isConnected ? '🟢' : '🔴'}
-        </div>
+        <div className="connection-indicator">{isConnected ? "🟢" : "🔴"}</div>
       </div>
 
       <MessageList
@@ -1835,6 +1892,7 @@ export default ChatWindow;
 ### Common Error Responses
 
 #### 401 Unauthorized
+
 ```javascript
 {
   "detail": "Authentication credentials were not provided."
@@ -1846,14 +1904,15 @@ export default ChatWindow;
 ```
 
 **Handling:**
+
 ```javascript
 // In axios interceptor
 apiClient.interceptors.response.use(
-  response => response,
-  error => {
+  (response) => response,
+  (error) => {
     if (error.response?.status === 401) {
       localStorage.clear();
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
@@ -1861,6 +1920,7 @@ apiClient.interceptors.response.use(
 ```
 
 #### 400 Bad Request
+
 ```javascript
 {
   "error": "receiver_id is required"
@@ -1868,6 +1928,7 @@ apiClient.interceptors.response.use(
 ```
 
 **Handling:**
+
 ```javascript
 try {
   await chatAPI.sendMessage(receiverId, message);
@@ -1879,6 +1940,7 @@ try {
 ```
 
 #### 404 Not Found
+
 ```javascript
 {
   "error": "Receiver not found"
@@ -1886,6 +1948,7 @@ try {
 ```
 
 #### 500 Internal Server Error
+
 ```javascript
 {
   "detail": "Internal server error"
@@ -1896,7 +1959,7 @@ try {
 
 ```javascript
 // src/components/ErrorBoundary.jsx
-import React from 'react';
+import React from "react";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -1909,7 +1972,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
+    console.error("Error caught by boundary:", error, errorInfo);
   }
 
   render() {
@@ -1918,9 +1981,7 @@ class ErrorBoundary extends React.Component {
         <div className="error-boundary">
           <h2>Something went wrong</h2>
           <p>{this.state.error?.message}</p>
-          <button onClick={() => window.location.reload()}>
-            Reload Page
-          </button>
+          <button onClick={() => window.location.reload()}>Reload Page</button>
         </div>
       );
     }
@@ -1944,23 +2005,23 @@ export const testSSEConnection = (token) => {
   const url = `http://localhost:8000/api/v1/communication/sse/test/`;
   const eventSource = new EventSource(url);
 
-  eventSource.addEventListener('test', (event) => {
-    console.log('Test event:', JSON.parse(event.data));
+  eventSource.addEventListener("test", (event) => {
+    console.log("Test event:", JSON.parse(event.data));
   });
 
-  eventSource.addEventListener('complete', (event) => {
-    console.log('Test complete:', JSON.parse(event.data));
+  eventSource.addEventListener("complete", (event) => {
+    console.log("Test complete:", JSON.parse(event.data));
     eventSource.close();
   });
 
   eventSource.onerror = (error) => {
-    console.error('SSE test error:', error);
+    console.error("SSE test error:", error);
     eventSource.close();
   };
 
   // Auto-close after 10 seconds
   setTimeout(() => {
-    console.log('Closing test connection');
+    console.log("Closing test connection");
     eventSource.close();
   }, 10000);
 };
@@ -1974,38 +2035,38 @@ export const testSSEConnection = (token) => {
 
 ```javascript
 // src/utils/testAPI.js
-import { chatAPI } from '../api/chatService';
+import { chatAPI } from "../api/chatService";
 
 export const testChatAPI = async () => {
-  console.log('Testing Chat API...');
+  console.log("Testing Chat API...");
 
   try {
     // Test 1: Get conversations
-    console.log('1. Getting conversations...');
+    console.log("1. Getting conversations...");
     const conversations = await chatAPI.getConversations();
-    console.log('✅ Conversations:', conversations);
+    console.log("✅ Conversations:", conversations);
 
     // Test 2: Get messages (if conversations exist)
     if (conversations.length > 0) {
       const firstConv = conversations[0];
-      console.log('2. Getting messages...');
+      console.log("2. Getting messages...");
       const messages = await chatAPI.getMessages(firstConv.other_user.id);
-      console.log('✅ Messages:', messages);
+      console.log("✅ Messages:", messages);
     }
 
     // Test 3: Get unread count
-    console.log('3. Getting unread count...');
+    console.log("3. Getting unread count...");
     const unreadCount = await chatAPI.getUnreadCount();
-    console.log('✅ Unread count:', unreadCount);
+    console.log("✅ Unread count:", unreadCount);
 
     // Test 4: Get online users
-    console.log('4. Getting online users...');
+    console.log("4. Getting online users...");
     const onlineUsers = await chatAPI.getOnlineUsers();
-    console.log('✅ Online users:', onlineUsers);
+    console.log("✅ Online users:", onlineUsers);
 
-    console.log('✅ All tests passed!');
+    console.log("✅ All tests passed!");
   } catch (error) {
-    console.error('❌ Test failed:', error);
+    console.error("❌ Test failed:", error);
   }
 };
 
@@ -2034,22 +2095,24 @@ const sendMessage = async (message) => {
   };
 
   // Add to UI immediately
-  setMessages(prev => [...prev, optimisticMessage]);
+  setMessages((prev) => [...prev, optimisticMessage]);
 
   try {
     // Send to server
     const sentMessage = await chatAPI.sendMessage(otherUser.id, message);
 
     // Replace optimistic with real message
-    setMessages(prev =>
-      prev.map(msg =>
-        msg.id === optimisticMessage.id ? { ...sentMessage, sending: false } : msg
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === optimisticMessage.id
+          ? { ...sentMessage, sending: false }
+          : msg
       )
     );
   } catch (error) {
     // Mark as failed
-    setMessages(prev =>
-      prev.map(msg =>
+    setMessages((prev) =>
+      prev.map((msg) =>
         msg.id === optimisticMessage.id ? { ...msg, failed: true } : msg
       )
     );
@@ -2076,13 +2139,15 @@ const MessagesContainer = ({ messages }) => {
   // Auto-scroll on new message if at bottom
   useEffect(() => {
     if (autoScroll) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, autoScroll]);
 
   return (
     <div ref={containerRef} onScroll={handleScroll}>
-      {messages.map(msg => <Message key={msg.id} message={msg} />)}
+      {messages.map((msg) => (
+        <Message key={msg.id} message={msg} />
+      ))}
       <div ref={messagesEndRef} />
     </div>
   );
@@ -2093,12 +2158,12 @@ const MessagesContainer = ({ messages }) => {
 
 ```javascript
 // Search conversations
-const [searchTerm, setSearchTerm] = useState('');
+const [searchTerm, setSearchTerm] = useState("");
 const [filteredConversations, setFilteredConversations] = useState([]);
 
 useEffect(() => {
   const timer = setTimeout(() => {
-    const filtered = conversations.filter(conv =>
+    const filtered = conversations.filter((conv) =>
       conv.other_user.full_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredConversations(filtered);
@@ -2115,10 +2180,12 @@ useEffect(() => {
 ### Issue 1: SSE Not Connecting
 
 **Symptoms:**
+
 - `isConnected` stays false
 - Console shows connection errors
 
 **Checklist:**
+
 1. ✅ Check auth token exists: `localStorage.getItem('authToken')`
 2. ✅ Check URL is correct: `http://localhost:8000/api/v1/communication/sse/events/`
 3. ✅ Check CORS settings on backend
@@ -2126,14 +2193,16 @@ useEffect(() => {
 5. ✅ Test with SSE test endpoint: `/communication/sse/test/`
 
 **Debug:**
+
 ```javascript
-console.log('Token:', localStorage.getItem('authToken'));
-console.log('SSE URL:', `${SSE_BASE_URL}/communication/sse/events/`);
+console.log("Token:", localStorage.getItem("authToken"));
+console.log("SSE URL:", `${SSE_BASE_URL}/communication/sse/events/`);
 ```
 
 ### Issue 2: Messages Not Appearing
 
 **Checklist:**
+
 1. ✅ SSE connected: `isConnected === true`
 2. ✅ Event handler registered correctly
 3. ✅ User IDs match in event handler
@@ -2141,9 +2210,10 @@ console.log('SSE URL:', `${SSE_BASE_URL}/communication/sse/events/`);
 5. ✅ Check Network tab → EventStream
 
 **Debug:**
+
 ```javascript
 const handleSSEMessage = (event) => {
-  console.log('SSE Event:', event); // Add this
+  console.log("SSE Event:", event); // Add this
   // ... rest of handler
 };
 ```
@@ -2151,6 +2221,7 @@ const handleSSEMessage = (event) => {
 ### Issue 3: CORS Errors
 
 **Error:**
+
 ```
 Access to XMLHttpRequest at 'http://localhost:8000/api/...' from origin 'http://localhost:3000'
 has been blocked by CORS policy
@@ -2170,6 +2241,7 @@ CORS_ALLOWED_ORIGINS = [
 ### Issue 4: Token Expired
 
 **Symptoms:**
+
 - 401 errors
 - Automatic logout
 
@@ -2181,11 +2253,11 @@ Implement token refresh or re-login:
 useEffect(() => {
   const checkAuth = async () => {
     try {
-      await apiClient.get('/auth/user/');
+      await apiClient.get("/auth/user/");
     } catch (error) {
       if (error.response?.status === 401) {
         logout();
-        navigate('/login');
+        navigate("/login");
       }
     }
   };
@@ -2204,12 +2276,12 @@ useEffect(() => {
 
 ```javascript
 // src/App.jsx
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { isAuthenticated } from './api/auth';
-import Login from './components/Login';
-import ChatContainer from './components/Chat/ChatContainer';
-import ErrorBoundary from './components/ErrorBoundary';
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { isAuthenticated } from "./api/auth";
+import Login from "./components/Login";
+import ChatContainer from "./components/Chat/ChatContainer";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const ProtectedRoute = ({ children }) => {
   return isAuthenticated() ? children : <Navigate to="/login" />;
@@ -2244,6 +2316,7 @@ export default App;
 ## Summary Checklist
 
 ### Setup ✅
+
 - [ ] Install axios
 - [ ] Create `.env` with API URLs
 - [ ] Set up authentication (login, token storage)
@@ -2251,12 +2324,14 @@ export default App;
 - [ ] Create chatService.js with all API methods
 
 ### SSE Integration ✅
+
 - [ ] Create useSSE hook
 - [ ] Handle all event types
 - [ ] Implement auto-reconnection
 - [ ] Add connection status indicator
 
 ### Components ✅
+
 - [ ] ConversationsList - show all chats
 - [ ] ChatWindow - main chat interface
 - [ ] MessageList - display messages
@@ -2264,6 +2339,7 @@ export default App;
 - [ ] UnreadBadge - notification badge
 
 ### Features ✅
+
 - [ ] Real-time messaging
 - [ ] Typing indicators
 - [ ] Read receipts
@@ -2280,6 +2356,7 @@ export default App;
 This guide contains everything you need to integrate the chat API into your React frontend. All request/response formats are documented, headers are specified, and complete working examples are provided.
 
 **Next Steps:**
+
 1. Copy the code examples
 2. Test with your backend
 3. Customize UI/styling
