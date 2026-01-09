@@ -1,0 +1,1 @@
+wsl -d Ubuntu -u root service redis-server start; python manage.py check_redis; python manage.py migrate; python manage.py runserver
