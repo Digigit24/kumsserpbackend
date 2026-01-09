@@ -530,12 +530,12 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
     ordering = ['-indent_date']
 
     def _with_issue_flags(self, qs):
-        issues = MaterialIssueNote.objects.filter(indent_id=OuterRef('pk'))
-        return qs.annotate(
-            has_prepared=Exists(issues.filter(status='prepared')),
-            has_dispatched=Exists(issues.filter(status='dispatched')),
-            has_in_transit=Exists(issues.filter(status='in_transit')),
-            has_received=Exists(issues.filter(status='received')),
+        from django.db.models import Q, Count, Case, When, IntegerField
+        return qs.prefetch_related('material_issues').annotate(
+            has_prepared=Count('material_issues', filter=Q(material_issues__status='prepared')),
+            has_dispatched=Count('material_issues', filter=Q(material_issues__status='dispatched')),
+            has_in_transit=Count('material_issues', filter=Q(material_issues__status='in_transit')),
+            has_received=Count('material_issues', filter=Q(material_issues__status='received')),
         )
 
     def get_queryset(self):
@@ -545,6 +545,10 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         elif self.action == 'retrieve':
             qs = qs.prefetch_related('items__central_store_item__category')
         return qs
+
+    @method_decorator(cache_page(60 * 2))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
     def get_serializer_class(self):
