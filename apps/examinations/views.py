@@ -1,4 +1,5 @@
 from rest_framework import filters, viewsets
+from apps.core.cache_mixins import CachedReadOnlyMixin
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -33,7 +34,7 @@ from .serializers import (
 )
 
 
-class MarksGradeViewSet(CollegeScopedModelViewSet):
+class MarksGradeViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     queryset = MarksGrade.objects.all_colleges()
     serializer_class = MarksGradeSerializer
     permission_classes = [IsAuthenticated]
@@ -44,7 +45,7 @@ class MarksGradeViewSet(CollegeScopedModelViewSet):
     ordering = ['grade']
 
 
-class ExamTypeViewSet(CollegeScopedModelViewSet):
+class ExamTypeViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     queryset = ExamType.objects.all_colleges()
     serializer_class = ExamTypeSerializer
     permission_classes = [IsAuthenticated]
@@ -55,7 +56,7 @@ class ExamTypeViewSet(CollegeScopedModelViewSet):
     ordering = ['name']
 
 
-class ExamViewSet(CollegeScopedModelViewSet):
+class ExamViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     queryset = Exam.objects.all_colleges()
     serializer_class = ExamSerializer
     permission_classes = [IsAuthenticated]
@@ -66,7 +67,7 @@ class ExamViewSet(CollegeScopedModelViewSet):
     ordering = ['-start_date']
 
 
-class ExamScheduleViewSet(viewsets.ModelViewSet):
+class ExamScheduleViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     queryset = ExamSchedule.objects.all()
     serializer_class = ExamScheduleSerializer
     permission_classes = [IsAuthenticated]
@@ -76,7 +77,7 @@ class ExamScheduleViewSet(viewsets.ModelViewSet):
     ordering = ['date']
 
 
-class ExamAttendanceViewSet(viewsets.ModelViewSet):
+class ExamAttendanceViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     queryset = ExamAttendance.objects.all()
     serializer_class = ExamAttendanceSerializer
     permission_classes = [IsAuthenticated]
@@ -86,7 +87,7 @@ class ExamAttendanceViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class AdmitCardViewSet(viewsets.ModelViewSet):
+class AdmitCardViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     queryset = AdmitCard.objects.all()
     serializer_class = AdmitCardSerializer
     permission_classes = [IsAuthenticated]
@@ -97,7 +98,7 @@ class AdmitCardViewSet(viewsets.ModelViewSet):
     ordering = ['-issue_date']
 
 
-class MarksRegisterViewSet(viewsets.ModelViewSet):
+class MarksRegisterViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     queryset = MarksRegister.objects.all()
     serializer_class = MarksRegisterSerializer
     permission_classes = [IsAuthenticated]
@@ -107,7 +108,7 @@ class MarksRegisterViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class StudentMarksViewSet(viewsets.ModelViewSet):
+class StudentMarksViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     queryset = StudentMarks.objects.all()
     serializer_class = StudentMarksSerializer
     permission_classes = [IsAuthenticated]
@@ -117,7 +118,7 @@ class StudentMarksViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class ExamResultViewSet(viewsets.ModelViewSet):
+class ExamResultViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     queryset = ExamResult.objects.all()
     serializer_class = ExamResultSerializer
     permission_classes = [IsAuthenticated]
@@ -127,7 +128,7 @@ class ExamResultViewSet(viewsets.ModelViewSet):
     ordering = ['-percentage']
 
 
-class ProgressCardViewSet(viewsets.ModelViewSet):
+class ProgressCardViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     queryset = ProgressCard.objects.all()
     serializer_class = ProgressCardSerializer
     permission_classes = [IsAuthenticated]
@@ -137,7 +138,7 @@ class ProgressCardViewSet(viewsets.ModelViewSet):
     ordering = ['-issue_date']
 
 
-class MarkSheetViewSet(viewsets.ModelViewSet):
+class MarkSheetViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     queryset = MarkSheet.objects.all()
     serializer_class = MarkSheetSerializer
     permission_classes = [IsAuthenticated]
@@ -148,7 +149,7 @@ class MarkSheetViewSet(viewsets.ModelViewSet):
     ordering = ['-issue_date']
 
 
-class TabulationSheetViewSet(viewsets.ModelViewSet):
+class TabulationSheetViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     queryset = TabulationSheet.objects.all()
     serializer_class = TabulationSheetSerializer
     permission_classes = [IsAuthenticated]

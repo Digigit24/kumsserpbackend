@@ -1,4 +1,5 @@
 """
+from apps.core.cache_mixins import CachedReadOnlyMixin
 DRF ViewSets for Attendance app with comprehensive API documentation.
 """
 from rest_framework import status, filters
@@ -77,7 +78,7 @@ from apps.core.mixins import CollegeScopedModelViewSet, RelatedCollegeScopedMode
         tags=['Attendance - Students']
     ),
 )
-class StudentAttendanceViewSet(CollegeScopedModelViewSet):
+class StudentAttendanceViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     """ViewSet for managing student attendance."""
     queryset = StudentAttendance.objects.all_colleges()
     serializer_class = StudentAttendanceSerializer
@@ -322,7 +323,7 @@ class SubjectAttendanceViewSet(RelatedCollegeScopedModelViewSet):
         tags=['Attendance - Staff']
     ),
 )
-class StaffAttendanceViewSet(CollegeScopedModelViewSet):
+class StaffAttendanceViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     """ViewSet for managing staff attendance."""
     queryset = StaffAttendance.objects.all_colleges()
     serializer_class = StaffAttendanceSerializer
@@ -386,7 +387,7 @@ class StaffAttendanceViewSet(CollegeScopedModelViewSet):
         tags=['Attendance - Notifications']
     ),
 )
-class AttendanceNotificationViewSet(CollegeScopedModelViewSet):
+class AttendanceNotificationViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     """ViewSet for managing attendance notifications."""
     queryset = AttendanceNotification.objects.all_colleges()
     serializer_class = AttendanceNotificationSerializer
