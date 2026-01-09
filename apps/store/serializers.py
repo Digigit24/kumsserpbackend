@@ -617,6 +617,7 @@ class MaterialIssueNoteCreateSerializer(serializers.ModelSerializer):
 class CentralStoreInventoryListSerializer(serializers.ModelSerializer):
     """For GET - returns item ID and name"""
     item_display = serializers.CharField(source='item.name', read_only=True)
+    central_store_name = serializers.CharField(source='central_store.name', read_only=True)
 
     class Meta:
         model = CentralStoreInventory
