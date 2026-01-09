@@ -266,6 +266,86 @@ class NotificationRule(CollegeScopedModel):
         return f"{self.name} ({self.event_type})"
 
 
+class Conversation(AuditModel):
+    """
+    Represents a conversation between two users.
+    Stores metadata about the conversation for quick access.
+    """
+    user1 = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='conversations_as_user1',
+        help_text="First user in conversation"
+    )
+    user2 = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='conversations_as_user2',
+        help_text="Second user in conversation"
+    )
+    last_message = models.TextField(null=True, blank=True, help_text="Last message preview")
+    last_message_at = models.DateTimeField(null=True, blank=True, help_text="Last message timestamp")
+    last_message_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='last_messages',
+        help_text="User who sent last message"
+    )
+    unread_count_user1 = models.IntegerField(default=0, help_text="Unread count for user1")
+    unread_count_user2 = models.IntegerField(default=0, help_text="Unread count for user2")
+
+    class Meta:
+        db_table = 'conversation'
+        unique_together = ['user1', 'user2']
+        indexes = [
+            models.Index(fields=['user1', 'user2']),
+            models.Index(fields=['last_message_at']),
+        ]
+
+    def __str__(self):
+        return f"Conversation: {self.user1.username} <-> {self.user2.username}"
+
+    @classmethod
+    def get_or_create_conversation(cls, user1, user2):
+        """Get or create a conversation between two users, ensuring consistent ordering."""
+        if user1.id > user2.id:
+            user1, user2 = user2, user1
+
+        conversation, created = cls.objects.get_or_create(
+            user1=user1,
+            user2=user2
+        )
+        return conversation
+
+    def get_other_user(self, user):
+        """Get the other user in the conversation."""
+        return self.user2 if user.id == self.user1.id else self.user1
+
+    def get_unread_count(self, user):
+        """Get unread count for a specific user."""
+        if user.id == self.user1.id:
+            return self.unread_count_user1
+        return self.unread_count_user2
+
+    def increment_unread(self, for_user):
+        """Increment unread count for a specific user."""
+        if for_user.id == self.user1.id:
+            self.unread_count_user1 += 1
+        else:
+            self.unread_count_user2 += 1
+        self.save(update_fields=['unread_count_user1' if for_user.id == self.user1.id else 'unread_count_user2', 'updated_at'])
+
+    def reset_unread(self, for_user):
+        """Reset unread count for a specific user."""
+        if for_user.id == self.user1.id:
+            self.unread_count_user1 = 0
+        else:
+            self.unread_count_user2 = 0
+        self.save(update_fields=['unread_count_user1' if for_user.id == self.user1.id else 'unread_count_user2', 'updated_at'])
+
+
 class ChatMessage(AuditModel):
     sender = models.ForeignKey(
         User,
@@ -279,16 +359,27 @@ class ChatMessage(AuditModel):
         related_name='received_messages',
         help_text="Receiver"
     )
-    message = models.TextField(help_text="Message content")
+    conversation = models.ForeignKey(
+        Conversation,
+        on_delete=models.CASCADE,
+        related_name='messages',
+        null=True,
+        blank=True,
+        help_text="Related conversation"
+    )
+    message = models.TextField(help_text="Message content", blank=True, default="")
     attachment = models.FileField(upload_to='chat_attachments/', null=True, blank=True, help_text="Attachment")
+    attachment_type = models.CharField(max_length=20, null=True, blank=True, help_text="Attachment type (image/video/document)")
     is_read = models.BooleanField(default=False, help_text="Read flag")
     read_at = models.DateTimeField(null=True, blank=True, help_text="Read time")
+    delivered_at = models.DateTimeField(null=True, blank=True, help_text="Delivered time")
     timestamp = models.DateTimeField(auto_now_add=True, help_text="Timestamp")
 
     class Meta:
         db_table = 'chat_message'
         indexes = [
             models.Index(fields=['sender', 'receiver', 'timestamp', 'is_read']),
+            models.Index(fields=['conversation', '-timestamp']),
         ]
 
     def __str__(self):
@@ -299,3 +390,39 @@ class ChatMessage(AuditModel):
             self.is_read = True
             self.read_at = datetime.now()
             self.save(update_fields=['is_read', 'read_at', 'updated_at'])
+
+    def mark_delivered(self):
+        if not self.delivered_at:
+            self.delivered_at = datetime.now()
+            self.save(update_fields=['delivered_at', 'updated_at'])
+
+
+class TypingIndicator(models.Model):
+    """
+    Stores typing indicators for real-time display.
+    Uses TTL (time to live) - records older than 5 seconds are considered stale.
+    """
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='typing_indicators',
+        help_text="User who is typing"
+    )
+    conversation_partner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='typing_to',
+        help_text="User being typed to"
+    )
+    is_typing = models.BooleanField(default=True, help_text="Currently typing")
+    timestamp = models.DateTimeField(auto_now=True, help_text="Last update timestamp")
+
+    class Meta:
+        db_table = 'typing_indicator'
+        unique_together = ['user', 'conversation_partner']
+        indexes = [
+            models.Index(fields=['conversation_partner', 'timestamp']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} typing to {self.conversation_partner.username}"
