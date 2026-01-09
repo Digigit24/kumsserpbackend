@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import models
+from django.db.models import Exists, OuterRef
 from django.core.exceptions import ValidationError
 
 from apps.core.mixins import (
@@ -461,13 +462,29 @@ class InspectionNoteViewSet(viewsets.ModelViewSet):
 
 
 class StoreIndentViewSet(CollegeScopedModelViewSet):
-    queryset = StoreIndent.objects.all_colleges().select_related('college', 'central_store')
+    queryset = StoreIndent.objects.all_colleges().select_related('college', 'central_store', 'requesting_store_manager', 'approved_by')
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'college', 'priority', 'indent_date']
     search_fields = ['indent_number']
     ordering_fields = ['indent_date', 'created_at']
     ordering = ['-indent_date']
+
+    def _with_issue_flags(self, qs):
+        issues = MaterialIssueNote.objects.filter(indent_id=OuterRef('pk'))
+        return qs.annotate(
+            has_prepared=Exists(issues.filter(status='prepared')),
+            has_dispatched=Exists(issues.filter(status='dispatched')),
+            has_in_transit=Exists(issues.filter(status='in_transit')),
+            has_received=Exists(issues.filter(status='received')),
+        )
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.action == 'list':
+            qs = self._with_issue_flags(qs)
+        return qs
+
 
     def get_serializer_class(self):
         if self.action == 'list':
