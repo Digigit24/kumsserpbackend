@@ -15,7 +15,7 @@ from .views import (
     NotificationRuleViewSet,
     ChatMessageViewSet,
 )
-from .long_polling_views import long_poll_events, poll_test, disconnect
+from .long_polling_views import long_poll_events, poll_test, disconnect, sse_migration_notice
 
 router = DefaultRouter()
 router.register(r'notices', NoticeViewSet, basename='notice')
@@ -33,6 +33,10 @@ urlpatterns = [
     path('poll/events/', long_poll_events, name='long-poll-events'),
     path('poll/test/', poll_test, name='poll-test'),
     path('poll/disconnect/', disconnect, name='poll-disconnect'),
+
+    # Migration notice for old SSE endpoints (returns 410 Gone with helpful message)
+    path('sse/events/', sse_migration_notice, name='sse-migration-notice'),
+    path('sse/test/', sse_migration_notice, name='sse-test-migration-notice'),
 
     # REST API endpoints
     path('', include(router.urls)),

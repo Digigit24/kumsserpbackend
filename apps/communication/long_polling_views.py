@@ -181,3 +181,32 @@ def disconnect(request):
         'status': 'disconnected',
         'user_id': user.id
     })
+
+
+@require_http_methods(["GET"])
+def sse_migration_notice(request):
+    """
+    Migration notice for old SSE endpoint.
+    Returns helpful error message directing to new polling endpoint.
+
+    Old URL: /api/v1/communication/sse/events/
+    New URL: /api/v1/communication/poll/events/
+    """
+    return JsonResponse({
+        'error': 'SSE endpoint has been replaced',
+        'message': 'Server-Sent Events have been replaced with Long Polling using RabbitMQ',
+        'migration': {
+            'old_endpoint': '/api/v1/communication/sse/events/',
+            'new_endpoint': '/api/v1/communication/poll/events/',
+            'method': 'GET',
+            'authentication': 'Token in query parameter (?token=XXX) or Authorization header'
+        },
+        'breaking_changes': [
+            'Replace EventSource with fetch() in a loop',
+            'Use new endpoint: /api/v1/communication/poll/events/',
+            'Events now returned as JSON array in "events" field',
+            'Client must immediately poll again after receiving response'
+        ],
+        'documentation': '/apps/communication/LONG_POLLING_GUIDE.md',
+        'test_endpoint': '/api/v1/communication/poll/test/'
+    }, status=410)  # 410 Gone - resource permanently removed
