@@ -26,7 +26,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
     'grappelli',
 
     'django.contrib.admin',

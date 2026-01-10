@@ -34,14 +34,21 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = OrganizationNode.objects.filter(is_active=True)
         college_id = self.request.headers.get('X-College-Id')
-        if college_id:
-            queryset = queryset.filter(college_id=college_id)
+
+        # Handle 'all' or invalid college_id
+        if college_id and college_id.lower() != 'all':
+            try:
+                queryset = queryset.filter(college_id=int(college_id))
+            except (ValueError, TypeError):
+                pass  # Invalid college_id, return all nodes
+
         return queryset
 
     @action(detail=False, methods=['get'])
     def tree(self, request):
         """Return full tree structure."""
-        cache_key = f'org_tree_{request.headers.get("X-College-Id", "all")}'
+        college_id = request.headers.get('X-College-Id')
+        cache_key = f'org_tree_{college_id or "all"}'
         cached_data = cache.get(cache_key)
 
         if cached_data:
@@ -70,8 +77,13 @@ class DynamicRoleViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = DynamicRole.objects.filter(is_active=True)
         college_id = self.request.headers.get('X-College-Id')
-        if college_id:
-            queryset = queryset.filter(college_id=college_id) | queryset.filter(is_global=True)
+
+        if college_id and college_id.lower() != 'all':
+            try:
+                queryset = queryset.filter(college_id=int(college_id)) | queryset.filter(is_global=True)
+            except (ValueError, TypeError):
+                queryset = queryset.filter(is_global=True)
+
         return queryset
 
     @action(detail=True, methods=['patch'])
@@ -178,8 +190,13 @@ class TeamViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Team.objects.filter(is_active=True)
         college_id = self.request.headers.get('X-College-Id')
-        if college_id:
-            queryset = queryset.filter(college_id=college_id)
+
+        if college_id and college_id.lower() != 'all':
+            try:
+                queryset = queryset.filter(college_id=int(college_id))
+            except (ValueError, TypeError):
+                pass
+
         return queryset
 
     @action(detail=True, methods=['get'])
