@@ -8,3 +8,4 @@
 - Virtual tree now pulls college-scoped roles from apps.accounts.models.Role (parent-based) when available, so teachers/students display per college.
 - Tree now hides empty positions and includes members_count per role using UserRole/HierarchyUserRole allocations.
 - Tree now falls back to showing role nodes even when allocations are missing, using user_type counts if available.
+- Added user_type-based fallback nodes (with counts) when no roles exist, including global user_type nodes.

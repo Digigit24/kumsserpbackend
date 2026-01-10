@@ -82,6 +82,26 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
 
         ceo_role = role_by_code.get('ceo')
 
+        user_type_labels = {
+            'college_admin': 'Principal',
+            'admin': 'Admin',
+            'teacher': 'Teacher',
+            'student': 'Student',
+            'parent': 'Parent',
+            'staff': 'Staff',
+            'store_manager': 'Store Manager',
+            'central_manager': 'Central Manager',
+            'hod': 'HOD',
+            'accountant': 'Accountant',
+            'librarian': 'Librarian'
+        }
+
+        global_user_types = [
+            (user_type, count)
+            for (college_id, user_type), count in user_type_counts.items()
+            if college_id is None and count > 0
+        ]
+
         root = {
             'id': 'virtual-ceo',
             'name': 'CEO',
@@ -93,6 +113,27 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
             'is_active': True,
             'order': 0
         }
+
+        def build_user_type_node(college_id, user_type_code, count):
+            node_type = user_type_code if user_type_code in node_type_codes else 'staff'
+            return {
+                'id': f'virtual-user-type-{college_id}-{user_type_code}',
+                'name': user_type_labels.get(user_type_code, user_type_code.replace('_', ' ').title()),
+                'node_type': node_type,
+                'description': '',
+                'role': {
+                    'code': user_type_code,
+                    'name': user_type_labels.get(user_type_code, user_type_code.replace('_', ' ').title())
+                },
+                'user': None,
+                'children': [],
+                'members_count': count,
+                'is_active': True,
+                'order': 0
+            }
+
+        for user_type, count in global_user_types:
+            root['children'].append(build_user_type_node('global', user_type, count))
 
         def serialize_account_role(role):
             return {
@@ -211,6 +252,28 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                 if role.college_id == college.id or (role.college_id is None and role.is_global)
             ]
             dynamic_allow_empty = not any(get_dynamic_members_count(role, college.id) > 0 for role in dynamic_roles_college)
+
+            if not dynamic_roles_college:
+                user_type_items = [
+                    (user_type, count)
+                    for (college_id, user_type), count in user_type_counts.items()
+                    if college_id == college.id and count > 0
+                ]
+                if user_type_items:
+                    principal_item = next((item for item in user_type_items if item[0] == 'college_admin'), None)
+                    other_items = [item for item in user_type_items if item[0] != 'college_admin']
+                    if principal_item:
+                        principal_node = build_user_type_node(college.id, principal_item[0], principal_item[1])
+                        principal_node['id'] = f'virtual-principal-{college.id}'
+                        college_node['children'].append(principal_node)
+                        parent_node = principal_node
+                    else:
+                        parent_node = college_node
+                    for user_type, count in other_items:
+                        parent_node['children'].append(build_user_type_node(college.id, user_type, count))
+                    if college_node['children']:
+                        root['children'].append(college_node)
+                    continue
 
             principal_role = None
             for candidate in dynamic_roles_college:
