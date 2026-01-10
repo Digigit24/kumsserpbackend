@@ -213,14 +213,6 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                 else:
                     parent_node['children'].append(node)
 
-        # Get all actual user types from database per college
-        actual_user_types = {}
-        for row in User.objects.filter(is_active=True).exclude(user_type='super_admin').values('college_id', 'user_type').annotate(total=Count('id')):
-            college_id = row['college_id']
-            if college_id not in actual_user_types:
-                actual_user_types[college_id] = {}
-            actual_user_types[college_id][row['user_type']] = row['total']
-
         # Role display names and levels for common user types
         user_type_labels = {
             'student': ('Student', 10),
@@ -235,6 +227,27 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
             'clerk': ('Clerk', 8),
             'college_admin': ('College Admin', 3),
         }
+
+        def build_user_type_node(college_id, user_type, count):
+            """Build a virtual node from user_type data."""
+            label, level = user_type_labels.get(user_type, (user_type.replace('_', ' ').title(), 9))
+            return {
+                'id': f'virtual-role-{college_id}-{user_type}',
+                'name': label,
+                'node_type': user_type,
+                'description': f'{count} {label.lower()}(s)',
+                'role': {
+                    'id': f'virtual-{user_type}',
+                    'name': label,
+                    'code': user_type,
+                    'level': level
+                },
+                'user': None,
+                'children': [],
+                'members_count': count,
+                'is_active': True,
+                'order': level
+            }
 
         for college in colleges:
             college_node = {
@@ -312,31 +325,30 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                     attach_roles_by_level(college_node, filtered_roles, college.id)
 
             # If no roles defined, create virtual roles from actual users
-            if not college_node['children'] and college.id in actual_user_types:
-                user_roles = []
-                for user_type, count in actual_user_types[college.id].items():
-                    if count > 0:
-                        label, level = user_type_labels.get(user_type, (user_type.replace('_', ' ').title(), 9))
-                        user_roles.append({
-                            'id': f'virtual-role-{college.id}-{user_type}',
-                            'name': label,
-                            'node_type': user_type,
-                            'description': f'{count} {label.lower()}(s)',
-                            'role': {
-                                'id': f'virtual-{user_type}',
-                                'name': label,
-                                'code': user_type,
-                                'level': level
-                            },
-                            'user': None,
-                            'children': [],
-                            'members_count': count,
-                            'is_active': True,
-                            'order': level
-                        })
+            if not college_node['children']:
+                user_type_items = [
+                    (user_type, count)
+                    for (college_id, user_type), count in user_type_counts.items()
+                    if college_id == college.id and count > 0
+                ]
 
-                # Sort by level and add to college node
-                college_node['children'] = sorted(user_roles, key=lambda x: (x['order'], x['name']))
+                if user_type_items:
+                    # Check for principal/college_admin user type
+                    principal_item = next((item for item in user_type_items if item[0] in ['college_admin', 'principal']), None)
+                    other_items = [item for item in user_type_items if item[0] not in ['college_admin', 'principal']]
+
+                    if principal_item:
+                        # Create principal node as parent
+                        principal_node = build_user_type_node(college.id, principal_item[0], principal_item[1])
+                        principal_node['id'] = f'virtual-principal-{college.id}'
+                        college_node['children'].append(principal_node)
+                        parent_node = principal_node
+                    else:
+                        parent_node = college_node
+
+                    # Add other user type nodes
+                    for user_type, count in sorted(other_items, key=lambda x: user_type_labels.get(x[0], (x[0], 9))[1]):
+                        parent_node['children'].append(build_user_type_node(college.id, user_type, count))
 
             if college_node['children']:
                 root['children'].append(college_node)
