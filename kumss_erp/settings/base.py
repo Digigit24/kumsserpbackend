@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'drf_spectacular',  # API documentation
     'django_filters',
     'storages',  # AWS S3 storage
+    'mptt',  # Django MPTT for tree structures
 
     'django_extensions',
 

@@ -37,6 +37,7 @@ django-extensions==4.1
 django-filter==25.1
 django-grappelli==4.0.3
 django-import-export==4.3.14
+django-mptt==0.16.0
 django-storages==1.14.6
 djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
