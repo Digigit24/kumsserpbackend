@@ -5,7 +5,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from apps.core.permissions.drf_permissions import IsSuperAdmin
 from django.core.cache import cache
+from django.db.models import Count
 from apps.core.permissions.registry import PERMISSION_REGISTRY
+from apps.accounts.models import Role as AccountRole, UserRole as AccountUserRole
 from .models import (
     OrganizationNode,
     DynamicRole,
@@ -50,9 +52,23 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
 
     def _build_virtual_tree(self):
         colleges = College.objects.filter(is_active=True).order_by('name')
-        roles = DynamicRole.objects.filter(is_active=True)
+        dynamic_roles = DynamicRole.objects.filter(is_active=True)
+        account_roles = AccountRole.objects.filter(is_active=True)
 
-        role_by_code = {role.code.lower(): role for role in roles if role.code}
+        account_role_counts = {
+            row['role_id']: row['total']
+            for row in AccountUserRole.objects.filter(is_active=True)
+            .values('role_id')
+            .annotate(total=Count('id'))
+        }
+        dynamic_role_counts = {
+            row['role_id']: row['total']
+            for row in HierarchyUserRole.objects.filter(is_active=True)
+            .values('role_id')
+            .annotate(total=Count('id'))
+        }
+
+        role_by_code = {role.code.lower(): role for role in dynamic_roles if role.code}
         node_type_codes = {code for code, _label in OrganizationNode.NODE_TYPES}
 
         ceo_role = role_by_code.get('ceo')
@@ -69,7 +85,17 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
             'order': 0
         }
 
-        def role_to_node(role):
+        def serialize_account_role(role):
+            return {
+                'id': role.id,
+                'name': role.name,
+                'code': role.code,
+                'description': role.description or '',
+                'level': role.level,
+                'college': role.college_id
+            }
+
+        def role_to_node(role, role_payload, members_count):
             role_code = (role.code or '').lower()
             node_type = role_code if role_code in node_type_codes else 'staff'
             return {
@@ -77,18 +103,28 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                 'name': role.name,
                 'node_type': node_type,
                 'description': role.description or '',
-                'role': DynamicRoleSerializer(role).data,
+                'role': role_payload,
                 'user': None,
                 'children': [],
+                'members_count': members_count,
                 'is_active': True,
                 'order': role.level
             }
 
-        def attach_roles(parent_node, role_list):
+        def prune_empty_positions(node):
+            kept_children = []
+            for child in node.get('children', []):
+                if prune_empty_positions(child):
+                    kept_children.append(child)
+            node['children'] = kept_children
+            return node.get('members_count', 0) > 0 or len(kept_children) > 0
+
+        def attach_roles_by_level(parent_node, role_list):
             sorted_roles = sorted(role_list, key=lambda r: (r.level, r.name.lower()))
             stack = []
             for role in sorted_roles:
-                node = role_to_node(role)
+                count = dynamic_role_counts.get(role.id, 0)
+                node = role_to_node(role, DynamicRoleSerializer(role).data, count)
                 while stack and role.level <= stack[-1][0]:
                     stack.pop()
                 if stack:
@@ -97,18 +133,25 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                     parent_node['children'].append(node)
                 stack.append((role.level, node))
 
+        def attach_roles_by_parent(parent_node, role_list):
+            nodes = {}
+            for role in role_list:
+                count = account_role_counts.get(role.id, 0)
+                role_payload = serialize_account_role(role)
+                nodes[role.id] = role_to_node(role, role_payload, count)
+
+            for role in role_list:
+                node = nodes[role.id]
+                if role.parent_id and role.parent_id in nodes:
+                    nodes[role.parent_id]['children'].append(node)
+                else:
+                    parent_node['children'].append(node)
+
+            for child in list(parent_node['children']):
+                if not prune_empty_positions(child):
+                    parent_node['children'].remove(child)
+
         for college in colleges:
-            college_roles = [
-                role for role in roles
-                if role.college_id == college.id or (role.college_id is None and role.is_global)
-            ]
-
-            principal_role = None
-            for candidate in college_roles:
-                if candidate.code and candidate.code.lower() in ['college_admin', 'principal']:
-                    principal_role = candidate
-                    break
-
             college_node = {
                 'id': f'virtual-college-{college.id}',
                 'name': college.name,
@@ -121,27 +164,43 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                 'order': 0
             }
 
-            if principal_role:
-                principal_node = {
-                    'id': f'virtual-principal-{college.id}',
-                    'name': principal_role.name,
-                    'node_type': 'principal',
-                    'description': principal_role.description or 'College Admin',
-                    'role': DynamicRoleSerializer(principal_role).data,
-                    'user': None,
-                    'children': [],
-                    'is_active': True,
-                    'order': principal_role.level
-                }
+            account_roles_college = [role for role in account_roles if role.college_id == college.id]
+            if account_roles_college:
+                attach_roles_by_parent(college_node, account_roles_college)
+                if college_node['children']:
+                    root['children'].append(college_node)
+                continue
+
+            dynamic_roles_college = [
+                role for role in dynamic_roles
+                if role.college_id == college.id or (role.college_id is None and role.is_global)
+            ]
+
+            principal_role = None
+            for candidate in dynamic_roles_college:
+                if candidate.code and candidate.code.lower() in ['college_admin', 'principal']:
+                    principal_role = candidate
+                    break
+
+            filtered_roles = [
+                r for r in dynamic_roles_college
+                if r != principal_role and r != ceo_role and dynamic_role_counts.get(r.id, 0) > 0
+            ]
+
+            if principal_role and (dynamic_role_counts.get(principal_role.id, 0) > 0 or filtered_roles):
+                principal_node = role_to_node(
+                    principal_role,
+                    DynamicRoleSerializer(principal_role).data,
+                    dynamic_role_counts.get(principal_role.id, 0)
+                )
+                principal_node['id'] = f'virtual-principal-{college.id}'
                 college_node['children'].append(principal_node)
-                parent_node = principal_node
+                attach_roles_by_level(principal_node, filtered_roles)
             else:
-                parent_node = college_node
+                attach_roles_by_level(college_node, filtered_roles)
 
-            filtered_roles = [r for r in college_roles if r != principal_role and r != ceo_role]
-            attach_roles(parent_node, filtered_roles)
-
-            root['children'].append(college_node)
+            if college_node['children']:
+                root['children'].append(college_node)
 
         return [root]
 

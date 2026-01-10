@@ -5,3 +5,5 @@
 - Allowed hierarchy roles (including custom codes) to drive permission lookups.
 - Expanded superadmin check to include user_type super_admin.
 - Built a virtual CEO -> College -> Role tree from existing College/DynamicRole data when no org nodes exist.
+- Virtual tree now pulls college-scoped roles from apps.accounts.models.Role (parent-based) when available, so teachers/students display per college.
+- Tree now hides empty positions and includes members_count per role using UserRole/HierarchyUserRole allocations.
