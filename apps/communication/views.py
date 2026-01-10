@@ -7,6 +7,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q, Count, Max, F, Case, When, IntegerField
 from django.utils import timezone
 from datetime import timedelta
+import logging
+
+logger = logging.getLogger(__name__)
 
 from apps.core.mixins import CollegeScopedMixin, CollegeScopedModelViewSet
 from .models import (
@@ -199,11 +202,11 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Get or create receiver
+        # Get receiver (only fetch needed fields for speed)
         from django.contrib.auth import get_user_model
         User = get_user_model()
         try:
-            receiver = User.objects.get(id=receiver_id)
+            receiver = User.objects.only('id', 'username', 'first_name', 'last_name').get(id=receiver_id)
         except User.DoesNotExist:
             return Response(
                 {'error': 'Receiver not found'},
@@ -222,14 +225,7 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
             attachment=attachment
         )
 
-        # Update conversation metadata
-        conversation.last_message = message_content[:100] if message_content else "[Attachment]"
-        conversation.last_message_at = message.timestamp
-        conversation.last_message_by = request.user
-        conversation.increment_unread(receiver)
-        conversation.save()
-
-        # Publish real-time event via Redis
+        # Prepare response data FIRST (before any async operations)
         attachment_url = None
         if message.attachment:
             try:
@@ -250,18 +246,29 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
             'conversation_id': conversation.id,
         }
 
-        # Serialize and return FIRST (don't wait for queue operation)
+        # Serialize response FIRST (don't wait for any background operations)
         serializer = self.get_serializer(message)
+        response_data = serializer.data
 
-        # Publish real-time event via RabbitMQ (after response is ready)
-        # This happens quickly but we've already prepared the response
+        # NOW do background operations (conversation update + event publishing)
+        # These happen after response is prepared but before returning
+        try:
+            # Update conversation metadata
+            conversation.last_message = message_content[:100] if message_content else "[Attachment]"
+            conversation.last_message_at = message.timestamp
+            conversation.last_message_by = request.user
+            conversation.increment_unread(receiver)
+            conversation.save()
+        except Exception as e:
+            logger.error(f"Failed to update conversation metadata: {e}")
+
+        # Publish real-time event via RabbitMQ
         try:
             publish_message_event(receiver.id, message_data)
         except Exception as e:
-            # Log error but don't fail the request
             logger.error(f"Failed to publish message event: {e}")
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['get'], url_path='conversations')
     def conversations(self, request):
