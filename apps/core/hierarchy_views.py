@@ -140,21 +140,12 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                 'order': role.level
             }
 
-        def prune_empty_positions(node):
-            kept_children = []
-            for child in node.get('children', []):
-                if prune_empty_positions(child):
-                    kept_children.append(child)
-            node['children'] = kept_children
-            return node.get('members_count', 0) > 0 or len(kept_children) > 0
-
-        def attach_roles_by_level(parent_node, role_list, college_id, allow_empty):
+        def attach_roles_by_level(parent_node, role_list, college_id):
             sorted_roles = sorted(role_list, key=lambda r: (r.level, r.name.lower()))
             stack = []
             for role in sorted_roles:
                 count = get_dynamic_members_count(role, college_id)
-                if count == 0 and not allow_empty:
-                    continue
+                # Always show all roles with their counts (even if 0)
                 node = role_to_node(role, DynamicRoleSerializer(role).data, count)
                 while stack and role.level <= stack[-1][0]:
                     stack.pop()
@@ -164,12 +155,11 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                     parent_node['children'].append(node)
                 stack.append((role.level, node))
 
-        def attach_roles_by_parent(parent_node, role_list, college_id, allow_empty):
+        def attach_roles_by_parent(parent_node, role_list, college_id):
             nodes = {}
             for role in role_list:
                 count = get_account_members_count(role, college_id)
-                if count == 0 and not allow_empty:
-                    continue
+                # Always show all roles with their counts (even if 0)
                 role_payload = serialize_account_role(role)
                 nodes[role.id] = role_to_node(role, role_payload, count)
 
@@ -181,11 +171,6 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                     nodes[role.parent_id]['children'].append(node)
                 else:
                     parent_node['children'].append(node)
-
-            if not allow_empty:
-                for child in list(parent_node['children']):
-                    if not prune_empty_positions(child):
-                        parent_node['children'].remove(child)
 
         for college in colleges:
             college_node = {
@@ -201,9 +186,8 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
             }
 
             account_roles_college = [role for role in account_roles if role.college_id == college.id]
-            account_allow_empty = not any(get_account_members_count(role, college.id) > 0 for role in account_roles_college)
             if account_roles_college:
-                attach_roles_by_parent(college_node, account_roles_college, college.id, account_allow_empty)
+                attach_roles_by_parent(college_node, account_roles_college, college.id)
                 if college_node['children']:
                     root['children'].append(college_node)
                     continue
@@ -213,7 +197,6 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                 role for role in dynamic_roles
                 if role.college_id == college.id or (role.college_id is None and role.is_global)
             ]
-            dynamic_allow_empty = not any(get_dynamic_members_count(role, college.id) > 0 for role in dynamic_roles_college)
 
             principal_role = None
             for candidate in dynamic_roles_college:
@@ -226,18 +209,20 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                 if r != principal_role and r != ceo_role
             ]
 
-            principal_count = get_dynamic_members_count(principal_role, college.id) if principal_role else 0
-            if principal_role and (principal_count > 0 or filtered_roles or dynamic_allow_empty):
-                principal_node = role_to_node(
-                    principal_role,
-                    DynamicRoleSerializer(principal_role).data,
-                    principal_count
-                )
-                principal_node['id'] = f'virtual-principal-{college.id}'
-                college_node['children'].append(principal_node)
-                attach_roles_by_level(principal_node, filtered_roles, college.id, dynamic_allow_empty)
-            else:
-                attach_roles_by_level(college_node, filtered_roles, college.id, dynamic_allow_empty)
+            # Always show all roles, including those with 0 count
+            if principal_role or filtered_roles:
+                if principal_role:
+                    principal_count = get_dynamic_members_count(principal_role, college.id)
+                    principal_node = role_to_node(
+                        principal_role,
+                        DynamicRoleSerializer(principal_role).data,
+                        principal_count
+                    )
+                    principal_node['id'] = f'virtual-principal-{college.id}'
+                    college_node['children'].append(principal_node)
+                    attach_roles_by_level(principal_node, filtered_roles, college.id)
+                else:
+                    attach_roles_by_level(college_node, filtered_roles, college.id)
 
             if college_node['children']:
                 root['children'].append(college_node)
@@ -368,10 +353,12 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         cache.delete_pattern('org_tree_*')
+        cache.delete_pattern('roles_summary_*')
         serializer.save()
 
     def perform_update(self, serializer):
         cache.delete_pattern('org_tree_*')
+        cache.delete_pattern('roles_summary_*')
         serializer.save()
 
 
