@@ -1,14 +1,19 @@
 """
-Redis Pub/Sub utilities for real-time messaging.
-Replaces WebSocket with Server-Sent Events (SSE) + Redis.
+Redis utilities for real-time messaging.
+Now uses Redis Lists (queues) for long polling instead of Pub/Sub.
 """
 import json
 import logging
 import redis
 from django.conf import settings
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 logger = logging.getLogger(__name__)
+
+# Maximum events to keep in queue per user (prevent memory issues)
+MAX_QUEUE_SIZE = 100
+# Queue expiration time in seconds (30 minutes)
+QUEUE_EXPIRATION = 1800
 
 
 class RedisClient:
@@ -64,34 +69,62 @@ def get_redis():
     return RedisClient().get_client()
 
 
-def publish_event(channel: str, event_type: str, data: Dict[str, Any]) -> bool:
+def queue_event(queue_key: str, event_type: str, data: Dict[str, Any]) -> bool:
     """
-    Publish an event to a Redis channel.
+    Add an event to a Redis queue (list) for long polling.
 
     Args:
-        channel: Redis channel name (e.g., 'user:123', 'conversation:456')
+        queue_key: Redis queue key (e.g., 'event_queue:user:123')
         event_type: Type of event (e.g., 'message', 'typing', 'read', 'notification')
-        data: Event data to publish
+        data: Event data to queue
 
     Returns:
-        bool: True if published successfully, False otherwise
+        bool: True if queued successfully, False otherwise
     """
     redis_client = get_redis()
     if not redis_client:
-        logger.warning(f"Redis not available, cannot publish to {channel}")
+        logger.warning(f"Redis not available, cannot queue event to {queue_key}")
         return False
 
     try:
         message = {
             'event': event_type,
-            'data': data
+            'data': data,
+            'timestamp': data.get('timestamp') or None
         }
-        redis_client.publish(channel, json.dumps(message))
-        logger.debug(f"Published {event_type} to {channel}")
+
+        # Add event to queue (right push to end of list)
+        redis_client.rpush(queue_key, json.dumps(message))
+
+        # Trim queue to maximum size (keep only last MAX_QUEUE_SIZE events)
+        redis_client.ltrim(queue_key, -MAX_QUEUE_SIZE, -1)
+
+        # Set expiration on queue to prevent stale data
+        redis_client.expire(queue_key, QUEUE_EXPIRATION)
+
+        logger.debug(f"Queued {event_type} to {queue_key}")
         return True
     except Exception as e:
-        logger.error(f"Failed to publish to {channel}: {e}")
+        logger.error(f"Failed to queue event to {queue_key}: {e}")
         return False
+
+
+def publish_event(channel: str, event_type: str, data: Dict[str, Any]) -> bool:
+    """
+    Legacy function - now uses queue_event for long polling.
+    Converts channel name to queue key format.
+
+    Args:
+        channel: Redis channel name (e.g., 'user:123', 'college:456')
+        event_type: Type of event (e.g., 'message', 'typing', 'read', 'notification')
+        data: Event data to publish
+
+    Returns:
+        bool: True if queued successfully, False otherwise
+    """
+    # Convert channel to queue key
+    queue_key = f"event_queue:{channel}"
+    return queue_event(queue_key, event_type, data)
 
 
 def publish_message_event(receiver_id: int, message_data: Dict[str, Any]) -> bool:
@@ -184,87 +217,115 @@ def publish_college_notification(college_id: int, notification_data: Dict[str, A
     return publish_event(channel, 'notification', notification_data)
 
 
-def subscribe_to_user_events(user_id: int):
+def get_user_event_queue_key(user_id: int) -> str:
+    """Get Redis queue key for a user's events."""
+    return f"event_queue:user:{user_id}"
+
+
+def get_college_event_queue_key(college_id: int) -> str:
+    """Get Redis queue key for a college's events."""
+    return f"event_queue:college:{college_id}"
+
+
+def get_queued_events(user_id: int, college_id: Optional[int] = None) -> List[Dict[str, Any]]:
     """
-    Subscribe to events for a specific user.
-    Returns a pubsub object that can be used to listen for events.
+    Get all queued events for a user (non-blocking).
 
     Args:
-        user_id: ID of the user to subscribe to
+        user_id: ID of the user
+        college_id: Optional college ID for college-wide events
 
     Returns:
-        redis.client.PubSub: PubSub object for listening to events
+        List of event dictionaries
     """
     redis_client = get_redis()
     if not redis_client:
-        return None
+        return []
+
+    events = []
+
+    # Get user-specific events
+    user_queue_key = get_user_event_queue_key(user_id)
+    while True:
+        event_data = redis_client.lpop(user_queue_key)
+        if not event_data:
+            break
+        try:
+            event = json.loads(event_data)
+            events.append(event)
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to decode event: {e}")
+            continue
+
+    # Get college-wide events if college_id is provided
+    if college_id:
+        college_queue_key = get_college_event_queue_key(college_id)
+        while True:
+            event_data = redis_client.lpop(college_queue_key)
+            if not event_data:
+                break
+            try:
+                event = json.loads(event_data)
+                events.append(event)
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to decode college event: {e}")
+                continue
+
+    return events
+
+
+def clear_user_event_queue(user_id: int) -> bool:
+    """
+    Clear all events from a user's queue.
+
+    Args:
+        user_id: ID of the user
+
+    Returns:
+        bool: True if successful
+    """
+    redis_client = get_redis()
+    if not redis_client:
+        return False
 
     try:
-        pubsub = redis_client.pubsub()
-        channel = f"user:{user_id}"
-        pubsub.subscribe(channel)
-        logger.info(f"Subscribed to {channel}")
-        return pubsub
+        queue_key = get_user_event_queue_key(user_id)
+        redis_client.delete(queue_key)
+        return True
     except Exception as e:
-        logger.error(f"Failed to subscribe to user:{user_id}: {e}")
-        return None
+        logger.error(f"Failed to clear queue for user {user_id}: {e}")
+        return False
+
+
+# Legacy Pub/Sub functions - kept for backward compatibility but not used with long polling
+# These are commented out as they're replaced by queue-based approach
+
+def subscribe_to_user_events(user_id: int):
+    """
+    DEPRECATED: Legacy function for SSE pub/sub approach.
+    Not used with long polling. Kept for backward compatibility.
+    """
+    logger.warning("subscribe_to_user_events is deprecated with long polling")
+    return None
 
 
 def subscribe_to_college_events(college_id: int):
     """
-    Subscribe to events for a specific college.
-
-    Args:
-        college_id: ID of the college to subscribe to
-
-    Returns:
-        redis.client.PubSub: PubSub object for listening to events
+    DEPRECATED: Legacy function for SSE pub/sub approach.
+    Not used with long polling. Kept for backward compatibility.
     """
-    redis_client = get_redis()
-    if not redis_client:
-        return None
-
-    try:
-        pubsub = redis_client.pubsub()
-        channel = f"college:{college_id}"
-        pubsub.subscribe(channel)
-        logger.info(f"Subscribed to {channel}")
-        return pubsub
-    except Exception as e:
-        logger.error(f"Failed to subscribe to college:{college_id}: {e}")
-        return None
+    logger.warning("subscribe_to_college_events is deprecated with long polling")
+    return None
 
 
 def listen_for_events(pubsub, timeout: Optional[int] = None):
     """
-    Generator that yields events from a pubsub subscription.
-
-    Args:
-        pubsub: Redis pubsub object
-        timeout: Timeout in seconds (None for blocking)
-
-    Yields:
-        dict: Event data
+    DEPRECATED: Legacy function for SSE pub/sub approach.
+    Not used with long polling. Kept for backward compatibility.
     """
-    if not pubsub:
-        return
-
-    try:
-        for message in pubsub.listen():
-            if message['type'] == 'message':
-                try:
-                    data = json.loads(message['data'])
-                    yield data
-                except json.JSONDecodeError as e:
-                    logger.error(f"Failed to decode message: {e}")
-                    continue
-    except Exception as e:
-        logger.error(f"Error listening for events: {e}")
-    finally:
-        try:
-            pubsub.close()
-        except:
-            pass
+    logger.warning("listen_for_events is deprecated with long polling")
+    return
+    yield  # Make it a generator to avoid breaking existing code
 
 
 def get_online_users() -> set:

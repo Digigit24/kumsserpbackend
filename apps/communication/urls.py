@@ -15,7 +15,7 @@ from .views import (
     NotificationRuleViewSet,
     ChatMessageViewSet,
 )
-from .sse_views import sse_events, sse_test
+from .long_polling_views import long_poll_events, poll_test, disconnect
 
 router = DefaultRouter()
 router.register(r'notices', NoticeViewSet, basename='notice')
@@ -29,9 +29,10 @@ router.register(r'notification-rules', NotificationRuleViewSet, basename='notifi
 router.register(r'chats', ChatMessageViewSet, basename='chatmessage')
 
 urlpatterns = [
-    # SSE (Server-Sent Events) endpoints for real-time communication
-    path('sse/events/', sse_events, name='sse-events'),
-    path('sse/test/', sse_test, name='sse-test'),
+    # Long Polling endpoints for real-time communication
+    path('poll/events/', long_poll_events, name='long-poll-events'),
+    path('poll/test/', poll_test, name='poll-test'),
+    path('poll/disconnect/', disconnect, name='poll-disconnect'),
 
     # REST API endpoints
     path('', include(router.urls)),
