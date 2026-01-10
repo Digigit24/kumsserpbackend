@@ -24,7 +24,7 @@ def get_user_role(user):
     Determine the user's role.
     Now integrates with organizational hierarchy system.
     """
-    if hasattr(user, 'is_superuser') and user.is_superuser:
+    if (hasattr(user, 'is_superuser') and user.is_superuser) or getattr(user, 'is_superadmin', False):
         return 'superadmin'
 
     # Check hierarchy roles first (new system)
@@ -36,11 +36,7 @@ def get_user_role(user):
         ).select_related('role').order_by('-role__level').first()
 
         if hierarchy_role:
-            # Map hierarchy role code to permission role
-            role_code = hierarchy_role.role.code
-            # If the role code matches existing permission roles, use it
-            if role_code in ['admin', 'teacher', 'student', 'principal', 'hod', 'accountant', 'librarian']:
-                return role_code
+            return hierarchy_role.role.code
     except Exception:
         pass  # Hierarchy system not set up yet
 

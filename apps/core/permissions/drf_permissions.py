@@ -11,7 +11,16 @@ class IsSuperAdmin(BasePermission):
     Permission class for superadmin-only endpoints.
     """
     def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and getattr(request.user, 'is_superadmin', False)
+        if not request.user or not request.user.is_authenticated:
+            return False
+
+        if getattr(request.user, 'is_superuser', False):
+            return True
+
+        if getattr(request.user, 'is_superadmin', False):
+            return True
+
+        return getattr(request.user, 'user_type', None) == 'super_admin'
 
 
 class ResourcePermission(BasePermission):

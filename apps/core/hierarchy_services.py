@@ -7,7 +7,7 @@ from .models import (
     HierarchyTeamMember,
     OrganizationNode
 )
-from .permissions_utils import check_permission as existing_check_permission
+from apps.core.permissions.manager import check_permission as existing_check_permission
 
 
 class PermissionChecker:
@@ -26,11 +26,11 @@ class PermissionChecker:
         Check if user has permission using EXISTING permission system.
         Format: module='students', action='create'
         """
-        if self.user.is_superuser:
+        if getattr(self.user, 'is_superadmin', False) or getattr(self.user, 'is_superuser', False):
             return True
 
-        # Use the existing check_permission function from permissions_utils.py
-        return existing_check_permission(self.user, module, action)
+        has_perm, _scope = existing_check_permission(self.user, module, action)
+        return has_perm
 
     def get_hierarchy_roles(self):
         """Get all hierarchy roles assigned to the user."""
@@ -98,7 +98,7 @@ class PermissionChecker:
         Check hierarchy-specific permissions (for org management features).
         Format: permission_code='system.manage_roles'
         """
-        if self.user.is_superuser:
+        if getattr(self.user, 'is_superadmin', False) or getattr(self.user, 'is_superuser', False):
             return True
 
         cache_key = f'user_hierarchy_perms_{self.user.id}'

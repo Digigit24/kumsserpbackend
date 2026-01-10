@@ -39,11 +39,7 @@ class PermissionUpdateSerializer(serializers.Serializer):
     Frontend sends only the TRUE permissions for each module.
     """
 
-    role = serializers.ChoiceField(
-        choices=[
-            'student', 'teacher', 'admin', 'hod',
-            'accountant', 'librarian', 'staff'
-        ],
+    role = serializers.CharField(
         required=True,
         help_text="User role to update permissions for"
     )
@@ -118,6 +114,12 @@ class PermissionUpdateSerializer(serializers.Serializer):
         default=dict,
         help_text="Reports module permissions"
     )
+
+    def validate_role(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError("Role is required")
+        return value
 
     def validate(self, data):
         """Validate that at least one module permission is provided."""
