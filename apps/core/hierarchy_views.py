@@ -208,6 +208,31 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                 'order': level
             }
 
+        # Handle global users (users without college_id or college_id=None)
+        global_user_items = [
+            (user_type, count)
+            for (college_id, user_type), count in user_type_counts.items()
+            if college_id is None and count > 0 and user_type not in ['ceo', 'super_admin']
+        ]
+
+        for user_type, count in sorted(global_user_items, key=lambda x: user_type_labels.get(x[0], (x[0], 9))[1]):
+            global_node = {
+                'id': f'virtual-user-type-global-{user_type}',
+                'name': user_type_labels.get(user_type, (user_type.replace('_', ' ').title(), 9))[0],
+                'node_type': 'staff',
+                'description': '',
+                'role': {
+                    'code': user_type,
+                    'name': user_type_labels.get(user_type, (user_type.replace('_', ' ').title(), 9))[0]
+                },
+                'user': None,
+                'children': [],
+                'members_count': count,
+                'is_active': True,
+                'order': 0
+            }
+            root['children'].append(global_node)
+
         for college in colleges:
             college_node = {
                 'id': f'virtual-college-{college.id}',
@@ -221,72 +246,30 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                 'order': 0
             }
 
-            # First try account roles if they exist
-            account_roles_college = [role for role in account_roles if role.college_id == college.id]
-            if account_roles_college:
-                attach_roles_by_parent(college_node, account_roles_college, college.id)
-                if college_node['children']:
-                    root['children'].append(college_node)
-                    continue
-                college_node['children'] = []
-
-            # Try dynamic roles if they exist
-            dynamic_roles_college = [
-                role for role in dynamic_roles
-                if role.college_id == college.id or (role.college_id is None and role.is_global)
+            # ALWAYS create roles from actual users based on college_id
+            user_type_items = [
+                (user_type, count)
+                for (college_id, user_type), count in user_type_counts.items()
+                if college_id == college.id and count > 0
             ]
 
-            if dynamic_roles_college:
-                principal_role = None
-                for candidate in dynamic_roles_college:
-                    if candidate.code and candidate.code.lower() in ['college_admin', 'principal']:
-                        principal_role = candidate
-                        break
+            if user_type_items:
+                # Check for principal/college_admin user type
+                principal_item = next((item for item in user_type_items if item[0] in ['college_admin', 'principal']), None)
+                other_items = [item for item in user_type_items if item[0] not in ['college_admin', 'principal']]
 
-                filtered_roles = [
-                    r for r in dynamic_roles_college
-                    if r != principal_role and r != ceo_role
-                ]
+                if principal_item:
+                    # Create principal node as parent
+                    principal_node = build_user_type_node(college.id, principal_item[0], principal_item[1])
+                    principal_node['id'] = f'virtual-principal-{college.id}'
+                    college_node['children'].append(principal_node)
+                    parent_node = principal_node
+                else:
+                    parent_node = college_node
 
-                if principal_role or filtered_roles:
-                    if principal_role:
-                        principal_count = get_dynamic_members_count(principal_role, college.id)
-                        principal_node = role_to_node(
-                            principal_role,
-                            DynamicRoleSerializer(principal_role).data,
-                            principal_count
-                        )
-                        principal_node['id'] = f'virtual-principal-{college.id}'
-                        college_node['children'].append(principal_node)
-                        attach_roles_by_level(principal_node, filtered_roles, college.id)
-                    else:
-                        attach_roles_by_level(college_node, filtered_roles, college.id)
-
-            # If no roles defined, create virtual roles from actual users
-            if not college_node['children']:
-                user_type_items = [
-                    (user_type, count)
-                    for (college_id, user_type), count in user_type_counts.items()
-                    if college_id == college.id and count > 0
-                ]
-
-                if user_type_items:
-                    # Check for principal/college_admin user type
-                    principal_item = next((item for item in user_type_items if item[0] in ['college_admin', 'principal']), None)
-                    other_items = [item for item in user_type_items if item[0] not in ['college_admin', 'principal']]
-
-                    if principal_item:
-                        # Create principal node as parent
-                        principal_node = build_user_type_node(college.id, principal_item[0], principal_item[1])
-                        principal_node['id'] = f'virtual-principal-{college.id}'
-                        college_node['children'].append(principal_node)
-                        parent_node = principal_node
-                    else:
-                        parent_node = college_node
-
-                    # Add other user type nodes
-                    for user_type, count in sorted(other_items, key=lambda x: user_type_labels.get(x[0], (x[0], 9))[1]):
-                        parent_node['children'].append(build_user_type_node(college.id, user_type, count))
+                # Add other user type nodes sorted by hierarchy level
+                for user_type, count in sorted(other_items, key=lambda x: user_type_labels.get(x[0], (x[0], 9))[1]):
+                    parent_node['children'].append(build_user_type_node(college.id, user_type, count))
 
             if college_node['children']:
                 root['children'].append(college_node)
