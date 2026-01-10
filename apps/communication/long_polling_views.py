@@ -91,7 +91,22 @@ def long_poll_events(request):
     if not rabbitmq_client.is_connected():
         return JsonResponse({
             'error': 'RabbitMQ not available',
-            'events': []
+            'message': 'RabbitMQ is not running or not accessible',
+            'events': [],
+            'setup_instructions': {
+                'quick_start': 'See RABBITMQ_SETUP.md for installation guide',
+                'docker': 'docker run -d -p 5672:5672 -p 15672:15672 rabbitmq:management',
+                'windows': 'Download from https://www.rabbitmq.com/install-windows.html',
+                'linux': 'sudo apt-get install rabbitmq-server && sudo systemctl start rabbitmq-server',
+                'test': 'python manage.py check_rabbitmq',
+                'troubleshooting': 'Check if RabbitMQ service is running'
+            },
+            'common_issues': [
+                'RabbitMQ not installed - Install from rabbitmq.com',
+                'RabbitMQ service not running - Start the service',
+                'Port 5672 blocked - Check firewall settings',
+                'Missing pika package - Run: pip install pika==1.3.2'
+            ]
         }, status=503)
 
     # Mark user as online
