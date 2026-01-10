@@ -346,13 +346,13 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                     ).count()
                     count = max(count, user_type_count)
 
-                if count > 0:
-                    role_counts[role.name] = {
-                        'role_name': role.name,
-                        'role_code': role.code,
-                        'count': count,
-                        'level': role.level
-                    }
+                # Show all roles, even with 0 count
+                role_counts[role.name] = {
+                    'role_name': role.name,
+                    'role_code': role.code,
+                    'count': count,
+                    'level': role.level
+                }
 
             # Account roles
             account_roles = AccountRole.objects.filter(
@@ -375,13 +375,13 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                     ).count()
                     count = max(count, user_type_count)
 
-                if count > 0:
-                    role_counts[role.name] = {
-                        'role_name': role.name,
-                        'role_code': role.code,
-                        'count': count,
-                        'level': role.level
-                    }
+                # Show all roles, even with 0 count
+                role_counts[role.name] = {
+                    'role_name': role.name,
+                    'role_code': role.code,
+                    'count': count,
+                    'level': role.level
+                }
 
             college_summary['roles'] = sorted(
                 role_counts.values(),
