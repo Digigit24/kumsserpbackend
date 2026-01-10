@@ -27,6 +27,7 @@ class RabbitMQClient:
     _instance = None
     _connection = None
     _channel = None
+    _declared_queues = set()  # Cache of already declared queues
 
     def __new__(cls):
         if cls._instance is None:
@@ -102,12 +103,19 @@ def get_rabbitmq():
 def ensure_queue_exists(channel, queue_name: str, ttl: int = MESSAGE_TTL):
     """
     Ensure a queue exists with proper configuration.
+    Uses caching to avoid repeated declarations for performance.
 
     Args:
         channel: RabbitMQ channel
         queue_name: Name of the queue
         ttl: Message TTL in milliseconds
     """
+    client = get_rabbitmq()
+
+    # Skip if already declared in this session (performance optimization)
+    if queue_name in client._declared_queues:
+        return
+
     try:
         # Declare queue with message TTL and max length
         channel.queue_declare(
@@ -119,6 +127,8 @@ def ensure_queue_exists(channel, queue_name: str, ttl: int = MESSAGE_TTL):
                 'x-overflow': 'drop-head',  # Drop oldest messages when full
             }
         )
+        # Cache the declaration
+        client._declared_queues.add(queue_name)
     except Exception as e:
         logger.error(f"Failed to declare queue {queue_name}: {e}")
 

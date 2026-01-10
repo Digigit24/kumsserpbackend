@@ -249,10 +249,18 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
             'is_read': message.is_read,
             'conversation_id': conversation.id,
         }
-        publish_message_event(receiver.id, message_data)
 
-        # Serialize and return
+        # Serialize and return FIRST (don't wait for queue operation)
         serializer = self.get_serializer(message)
+
+        # Publish real-time event via RabbitMQ (after response is ready)
+        # This happens quickly but we've already prepared the response
+        try:
+            publish_message_event(receiver.id, message_data)
+        except Exception as e:
+            # Log error but don't fail the request
+            logger.error(f"Failed to publish message event: {e}")
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['get'], url_path='conversations')
