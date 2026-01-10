@@ -16,7 +16,7 @@ from .models import (
     DynamicRole,
     HierarchyPermission,
     RolePermission,
-    UserRole,
+    HierarchyUserRole,
     Team,
     HierarchyTeamMember
 )
