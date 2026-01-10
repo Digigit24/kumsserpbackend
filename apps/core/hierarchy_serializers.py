@@ -39,7 +39,7 @@ class DynamicRoleSerializer(serializers.ModelSerializer):
 
 class OrganizationNodeSerializer(serializers.ModelSerializer):
     role_detail = DynamicRoleSerializer(source='role', read_only=True)
-    user_detail = serializers.SerializerMethodField()
+    user_count = serializers.SerializerMethodField()
     college_detail = serializers.SerializerMethodField()
     children_count = serializers.SerializerMethodField()
     team_members_count = serializers.SerializerMethodField()
@@ -48,14 +48,9 @@ class OrganizationNodeSerializer(serializers.ModelSerializer):
         model = OrganizationNode
         fields = '__all__'
 
-    def get_user_detail(self, obj):
-        if obj.user:
-            return {
-                'id': obj.user.id,
-                'name': obj.user.get_full_name(),
-                'email': obj.user.email
-            }
-        return None
+    def get_user_count(self, obj):
+        """Return count instead of user details."""
+        return 1 if obj.user else 0
 
     def get_college_detail(self, obj):
         if obj.college:
@@ -78,21 +73,16 @@ class OrganizationNodeSerializer(serializers.ModelSerializer):
 class OrganizationNodeTreeSerializer(serializers.ModelSerializer):
     """Recursive serializer for tree structure."""
     role = DynamicRoleSerializer(read_only=True)
-    user = serializers.SerializerMethodField()
+    user_count = serializers.SerializerMethodField()
     children = serializers.SerializerMethodField()
 
     class Meta:
         model = OrganizationNode
-        fields = ['id', 'name', 'node_type', 'description', 'role', 'user', 'children', 'is_active', 'order']
+        fields = ['id', 'name', 'node_type', 'description', 'role', 'user_count', 'children', 'is_active', 'order']
 
-    def get_user(self, obj):
-        if obj.user:
-            return {
-                'id': obj.user.id,
-                'name': obj.user.get_full_name(),
-                'email': obj.user.email
-            }
-        return None
+    def get_user_count(self, obj):
+        """Return count of users instead of user details."""
+        return 1 if obj.user else 0
 
     def get_children(self, obj):
         children = obj.get_children().filter(is_active=True)
@@ -101,49 +91,27 @@ class OrganizationNodeTreeSerializer(serializers.ModelSerializer):
 
 class HierarchyUserRoleSerializer(serializers.ModelSerializer):
     role_detail = DynamicRoleSerializer(source='role', read_only=True)
-    user_detail = serializers.SerializerMethodField()
 
     class Meta:
         model = HierarchyUserRole
         fields = '__all__'
 
-    def get_user_detail(self, obj):
-        return {
-            'id': obj.user.id,
-            'name': obj.user.get_full_name(),
-            'email': obj.user.email
-        }
-
 
 class HierarchyTeamMemberSerializer(serializers.ModelSerializer):
-    user_detail = serializers.SerializerMethodField()
 
     class Meta:
         model = HierarchyTeamMember
         fields = '__all__'
 
-    def get_user_detail(self, obj):
-        return {
-            'id': obj.user.id,
-            'name': obj.user.get_full_name(),
-            'email': obj.user.email
-        }
-
 
 class TeamSerializer(serializers.ModelSerializer):
-    members = HierarchyTeamMemberSerializer(source='team_members', many=True, read_only=True)
+    members_count = serializers.SerializerMethodField()
     node_detail = OrganizationNodeSerializer(source='node', read_only=True)
-    lead_detail = serializers.SerializerMethodField()
 
     class Meta:
         model = Team
         fields = '__all__'
 
-    def get_lead_detail(self, obj):
-        if obj.lead_user:
-            return {
-                'id': obj.lead_user.id,
-                'name': obj.lead_user.get_full_name(),
-                'email': obj.lead_user.email
-            }
-        return None
+    def get_members_count(self, obj):
+        """Return count of team members instead of member details."""
+        return obj.team_members.filter(is_active=True).count()
