@@ -5,7 +5,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from apps.core.permissions.drf_permissions import IsSuperAdmin
 from django.core.cache import cache
-from django.db.models import Count
+from django.db import models
+from django.db.models import Count, Q
 from django.contrib.auth import get_user_model
 from apps.core.permissions.registry import PERMISSION_REGISTRY
 from apps.accounts.models import Role as AccountRole, UserRole as AccountUserRole
@@ -52,23 +53,25 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
         return queryset
 
     def _build_virtual_tree(self):
+        """Build optimized virtual tree with role counts only."""
         colleges = College.objects.filter(is_active=True).order_by('name')
-        dynamic_roles = DynamicRole.objects.filter(is_active=True)
-        account_roles = AccountRole.objects.filter(is_active=True)
+        dynamic_roles = DynamicRole.objects.filter(is_active=True).select_related('college')
+        account_roles = AccountRole.objects.filter(is_active=True).select_related('college', 'parent')
         User = get_user_model()
 
-        account_role_counts = {
-            row['role_id']: row['total']
-            for row in AccountUserRole.objects.filter(is_active=True)
-            .values('role_id')
+        # Fetch all role counts efficiently
+        account_role_counts = dict(
+            AccountUserRole.objects.filter(is_active=True)
+            .values('role_id', 'college_id')
             .annotate(total=Count('id'))
-        }
-        dynamic_role_counts = {
-            row['role_id']: row['total']
-            for row in HierarchyUserRole.objects.filter(is_active=True)
-            .values('role_id')
+            .values_list('role_id', 'total')
+        )
+        dynamic_role_counts = dict(
+            HierarchyUserRole.objects.filter(is_active=True)
+            .values('role_id', 'college_id')
             .annotate(total=Count('id'))
-        }
+            .values_list('role_id', 'total')
+        )
         user_type_counts = {
             (row['college_id'], row['user_type']): row['total']
             for row in User.objects.filter(is_active=True)
@@ -240,6 +243,108 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                 root['children'].append(college_node)
 
         return [root]
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def roles_summary(self, request):
+        """Get summary of all roles and their counts per college."""
+        college_id = request.headers.get('X-College-Id')
+        cache_key = f'roles_summary_{college_id or "all"}'
+        cached_data = cache.get(cache_key)
+
+        if cached_data:
+            return Response(cached_data)
+
+        User = get_user_model()
+        summary = {}
+
+        # Get colleges to query
+        if college_id and college_id.lower() != 'all':
+            try:
+                colleges = College.objects.filter(id=int(college_id), is_active=True)
+            except (ValueError, TypeError):
+                colleges = College.objects.filter(is_active=True)
+        else:
+            colleges = College.objects.filter(is_active=True)
+
+        for college in colleges:
+            college_summary = {
+                'college_id': college.id,
+                'college_name': college.name,
+                'roles': []
+            }
+
+            # Get all role types with counts
+            role_counts = {}
+
+            # Dynamic roles
+            dynamic_roles = DynamicRole.objects.filter(
+                Q(college_id=college.id) | Q(is_global=True),
+                is_active=True
+            )
+
+            for role in dynamic_roles:
+                count = HierarchyUserRole.objects.filter(
+                    role=role,
+                    college_id=college.id,
+                    is_active=True
+                ).count()
+
+                # Also check user_type counts
+                if role.code:
+                    user_type_count = User.objects.filter(
+                        college_id=college.id,
+                        user_type=role.code.lower(),
+                        is_active=True
+                    ).count()
+                    count = max(count, user_type_count)
+
+                if count > 0:
+                    role_counts[role.name] = {
+                        'role_name': role.name,
+                        'role_code': role.code,
+                        'count': count,
+                        'level': role.level
+                    }
+
+            # Account roles
+            account_roles = AccountRole.objects.filter(
+                college_id=college.id,
+                is_active=True
+            )
+
+            for role in account_roles:
+                count = AccountUserRole.objects.filter(
+                    role=role,
+                    is_active=True
+                ).count()
+
+                # Also check user_type counts
+                if role.code:
+                    user_type_count = User.objects.filter(
+                        college_id=college.id,
+                        user_type=role.code.lower(),
+                        is_active=True
+                    ).count()
+                    count = max(count, user_type_count)
+
+                if count > 0:
+                    role_counts[role.name] = {
+                        'role_name': role.name,
+                        'role_code': role.code,
+                        'count': count,
+                        'level': role.level
+                    }
+
+            college_summary['roles'] = sorted(
+                role_counts.values(),
+                key=lambda x: (x['level'], x['role_name'])
+            )
+            college_summary['total_roles'] = len(college_summary['roles'])
+
+            summary[college.name] = college_summary
+
+        cache.set(cache_key, summary, timeout=300)
+        return Response(summary)
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated, IsSuperAdmin])
     def tree(self, request):
