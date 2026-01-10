@@ -76,8 +76,11 @@ INSTALLED_APPS = [
 
 ASGI_APPLICATION = 'kumss_erp.asgi.application'
 
-# Redis configuration for real-time messaging (SSE + Pub/Sub)
+# Redis configuration for caching
 REDIS_URL = config('REDIS_URL', default='redis://127.0.0.1:6379')
+
+# RabbitMQ configuration for real-time messaging (Long Polling)
+RABBITMQ_URL = config('RABBITMQ_URL', default='amqp://guest:guest@localhost:5672/')
 
 # Django Cache Configuration using Redis
 CACHES = {
@@ -89,7 +92,7 @@ CACHES = {
     }
 }
 
-# Channel Layers - Disabled (Using SSE instead of WebSocket)
+# Channel Layers - Disabled (Using Long Polling with RabbitMQ instead of WebSocket)
 # CHANNEL_LAYERS = {
 #     'default': {
 #         'BACKEND': 'channels_redis.core.RedisChannelLayer',

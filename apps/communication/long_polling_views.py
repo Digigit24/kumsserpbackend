@@ -1,6 +1,6 @@
 """
 Long polling views for real-time communication.
-Replaces SSE with long polling approach.
+Replaces SSE with long polling approach using RabbitMQ.
 """
 import json
 import logging
@@ -10,10 +10,11 @@ from django.views.decorators.http import require_http_methods
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 
-from .redis_pubsub import (
-    get_redis,
+from .rabbitmq_queue import (
+    get_rabbitmq,
     set_user_online,
     set_user_offline,
+    get_queued_events,
 )
 
 logger = logging.getLogger(__name__)
@@ -57,60 +58,7 @@ def get_user_from_token(request):
         return None
 
 
-def get_user_event_queue_key(user_id):
-    """Get Redis key for user's event queue."""
-    return f"event_queue:user:{user_id}"
-
-
-def get_college_event_queue_key(college_id):
-    """Get Redis key for college's event queue."""
-    return f"event_queue:college:{college_id}"
-
-
-def get_pending_events(redis_client, user_id, college_id=None):
-    """
-    Get all pending events for a user from Redis queues.
-
-    Args:
-        redis_client: Redis client instance
-        user_id: ID of the user
-        college_id: Optional college ID for college-wide events
-
-    Returns:
-        list: List of events
-    """
-    events = []
-
-    # Get user-specific events
-    user_queue_key = get_user_event_queue_key(user_id)
-
-    # Get all events from the queue (non-blocking)
-    while True:
-        event_data = redis_client.lpop(user_queue_key)
-        if not event_data:
-            break
-        try:
-            event = json.loads(event_data)
-            events.append(event)
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to decode event: {e}")
-            continue
-
-    # Get college-wide events if college_id is provided
-    if college_id:
-        college_queue_key = get_college_event_queue_key(college_id)
-        while True:
-            event_data = redis_client.lpop(college_queue_key)
-            if not event_data:
-                break
-            try:
-                event = json.loads(event_data)
-                events.append(event)
-            except json.JSONDecodeError as e:
-                logger.error(f"Failed to decode college event: {e}")
-                continue
-
-    return events
+# Helper functions removed - now using rabbitmq_queue.get_queued_events()
 
 
 @require_http_methods(["GET"])
@@ -139,10 +87,10 @@ def long_poll_events(request):
             'events': []
         }, status=401)
 
-    redis_client = get_redis()
-    if not redis_client:
+    rabbitmq_client = get_rabbitmq()
+    if not rabbitmq_client.is_connected():
         return JsonResponse({
-            'error': 'Redis not available',
+            'error': 'RabbitMQ not available',
             'events': []
         }, status=503)
 
@@ -158,7 +106,7 @@ def long_poll_events(request):
     # Long polling loop
     while True:
         # Check for pending events
-        events = get_pending_events(redis_client, user.id, college_id)
+        events = get_queued_events(user.id, college_id)
 
         # If we have events, return them immediately
         if events:

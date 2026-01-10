@@ -1,8 +1,8 @@
-# Long Polling Implementation Guide
+# Long Polling with RabbitMQ Implementation Guide
 
 ## Overview
 
-This application now uses **Long Polling** for real-time communication instead of WebSockets or Server-Sent Events (SSE). Long polling provides near real-time updates with better compatibility and simpler deployment.
+This application now uses **Long Polling with RabbitMQ** for real-time communication instead of WebSockets or Server-Sent Events (SSE). Long polling provides near real-time updates with better compatibility and simpler deployment. RabbitMQ provides reliable message queuing that works seamlessly on both Windows and Linux.
 
 ## How Long Polling Works
 
@@ -13,6 +13,74 @@ This application now uses **Long Polling** for real-time communication instead o
 5. **Client immediately makes a new request** to continue polling
 
 This creates a near real-time connection without keeping persistent connections like WebSockets.
+
+## RabbitMQ Setup
+
+### Windows
+
+1. **Download RabbitMQ:**
+   - Download from: https://www.rabbitmq.com/install-windows.html
+   - Install Erlang first (required dependency)
+   - Install RabbitMQ Server
+
+2. **Start RabbitMQ:**
+   ```bash
+   # Start as Windows service
+   rabbitmq-server.bat
+
+   # Or use the RabbitMQ Service - Start Windows Service
+   ```
+
+3. **Enable Management Plugin (Optional):**
+   ```bash
+   rabbitmq-plugins enable rabbitmq_management
+   # Access UI at http://localhost:15672
+   # Default login: guest/guest
+   ```
+
+### Linux
+
+1. **Install RabbitMQ:**
+   ```bash
+   # Ubuntu/Debian
+   sudo apt-get update
+   sudo apt-get install rabbitmq-server
+
+   # CentOS/RHEL
+   sudo yum install rabbitmq-server
+   ```
+
+2. **Start RabbitMQ:**
+   ```bash
+   sudo systemctl start rabbitmq-server
+   sudo systemctl enable rabbitmq-server  # Auto-start on boot
+   ```
+
+3. **Enable Management Plugin (Optional):**
+   ```bash
+   sudo rabbitmq-plugins enable rabbitmq_management
+   # Access UI at http://localhost:15672
+   ```
+
+### Docker (Cross-platform)
+
+```bash
+# Run RabbitMQ with management plugin
+docker run -d --name rabbitmq \
+  -p 5672:5672 \
+  -p 15672:15672 \
+  rabbitmq:management
+
+# Access UI at http://localhost:15672
+# Default login: guest/guest
+```
+
+### Test Connection
+
+```bash
+# Django management command
+python manage.py check_rabbitmq
+```
 
 ## API Endpoints
 
@@ -374,12 +442,18 @@ function ChatComponent() {
 - **Queue Expiration:** 30 minutes (1800 seconds)
 - **Online Status TTL:** 5 minutes (300 seconds)
 
-### Redis Queue Structure
+### RabbitMQ Queue Structure
 
 - User events: `event_queue:user:{user_id}`
 - College events: `event_queue:college:{college_id}`
-- Online users: `online_users` (SET)
-- Individual online status: `online:user:{user_id}` (with TTL)
+- Online status: `online_status:user:{user_id}` (queue with TTL)
+
+**Queue Properties:**
+- Durable: Yes (survives broker restart)
+- Auto-delete: No for event queues, Yes for online status
+- Max length: 100 messages per queue
+- Message TTL: 30 minutes (1,800,000 ms)
+- Overflow behavior: Drop oldest messages
 
 ### Performance Considerations
 
@@ -462,10 +536,14 @@ client.start();
 ## Troubleshooting
 
 ### No events received
-- Check Redis is running: `redis-cli ping`
+- Check RabbitMQ is running:
+  - Windows: Check RabbitMQ service in Services
+  - Linux: `sudo systemctl status rabbitmq-server`
+  - Command: `python manage.py check_rabbitmq`
 - Verify token is valid
 - Check server logs for errors
 - Test with `/api/v1/communication/poll/test/`
+- Check RabbitMQ management UI at http://localhost:15672
 
 ### High latency
 - Normal worst-case latency is 5-6 seconds (timeout)
@@ -481,10 +559,14 @@ client.start();
 - Queues are limited to 100 events per user
 - Queues expire after 30 minutes of inactivity
 - Users marked offline after 5 minutes of no polling
+- Monitor RabbitMQ memory usage in management UI
 
 ## Support
 
 For issues or questions, please check:
 - Server logs: `/var/log/django/`
-- Redis logs: `/var/log/redis/`
+- RabbitMQ logs:
+  - Windows: `C:\Users\<user>\AppData\Roaming\RabbitMQ\log\`
+  - Linux: `/var/log/rabbitmq/`
+- RabbitMQ Management UI: http://localhost:15672
 - Browser console for client-side errors

@@ -33,7 +33,7 @@ from .serializers import (
     NotificationRuleSerializer,
     ChatMessageSerializer,
 )
-from .redis_pubsub import (
+from .rabbitmq_queue import (
     publish_message_event,
     publish_typing_event,
     publish_read_receipt,
