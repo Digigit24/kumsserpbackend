@@ -7,35 +7,69 @@ from .models import (
     HierarchyTeamMember,
     OrganizationNode
 )
+from .permissions_utils import check_permission as existing_check_permission
 
 
 class PermissionChecker:
-    """Real-time permission checking."""
+    """
+    Real-time permission checking - integrates with existing Permission system.
+    The hierarchy determines user's role, existing system checks permissions.
+    """
 
     def __init__(self, user):
         self.user = user
         self._permission_cache = None
+        self._hierarchy_role_cache = None
 
-    def has_permission(self, permission_code, college=None):
+    def has_permission(self, module, action):
         """
-        Check if user has permission.
-        Format: "students.create", "fees.approve_invoice"
+        Check if user has permission using EXISTING permission system.
+        Format: module='students', action='create'
         """
         if self.user.is_superuser:
             return True
 
-        # Check cache first
-        cache_key = f'user_perms_{self.user.id}'
-        permissions = cache.get(cache_key)
+        # Use the existing check_permission function from permissions_utils.py
+        return existing_check_permission(self.user, module, action)
 
-        if permissions is None:
-            permissions = self.get_user_permissions()
-            cache.set(cache_key, permissions, timeout=3600)  # 1 hour
+    def get_hierarchy_roles(self):
+        """Get all hierarchy roles assigned to the user."""
+        if self._hierarchy_role_cache is not None:
+            return self._hierarchy_role_cache
 
-        return permission_code in permissions
+        roles = HierarchyUserRole.objects.filter(
+            user=self.user,
+            is_active=True
+        ).select_related('role')
 
-    def get_user_permissions(self):
-        """Get all permissions for user - CACHED."""
+        self._hierarchy_role_cache = [ur.role for ur in roles]
+        return self._hierarchy_role_cache
+
+    def get_primary_hierarchy_role(self):
+        """Get the user's primary (highest level) hierarchy role."""
+        cache_key = f'user_primary_role_{self.user.id}'
+        cached_role = cache.get(cache_key)
+
+        if cached_role:
+            return cached_role
+
+        # Get the role with the highest level
+        user_role = HierarchyUserRole.objects.filter(
+            user=self.user,
+            is_active=True
+        ).select_related('role').order_by('-role__level').first()
+
+        if user_role:
+            cache.set(cache_key, user_role.role, timeout=3600)  # 1 hour
+            return user_role.role
+
+        return None
+
+    def get_user_permissions_from_hierarchy(self):
+        """
+        Get granular permissions from hierarchy roles (for hierarchy-specific features).
+        This is SEPARATE from the main permission system.
+        """
         if self._permission_cache is not None:
             return self._permission_cache
 
@@ -59,10 +93,29 @@ class PermissionChecker:
         self._permission_cache = list(permissions)
         return self._permission_cache
 
+    def has_hierarchy_permission(self, permission_code):
+        """
+        Check hierarchy-specific permissions (for org management features).
+        Format: permission_code='system.manage_roles'
+        """
+        if self.user.is_superuser:
+            return True
+
+        cache_key = f'user_hierarchy_perms_{self.user.id}'
+        permissions = cache.get(cache_key)
+
+        if permissions is None:
+            permissions = self.get_user_permissions_from_hierarchy()
+            cache.set(cache_key, permissions, timeout=3600)  # 1 hour
+
+        return permission_code in permissions
+
     @classmethod
     def clear_user_cache(cls, user_id):
         """Clear permission cache for specific user."""
         cache.delete(f'user_perms_{user_id}')
+        cache.delete(f'user_primary_role_{user_id}')
+        cache.delete(f'user_hierarchy_perms_{user_id}')
 
 
 class TeamAutoAssignmentService:
@@ -185,14 +238,17 @@ class RoleManagementService:
         """
         Assign role to user with validation.
         Only allow if:
-        1. Assigner has permission
+        1. Assigner has permission (using existing permission system)
         2. Assigner's role level >= target role level
         """
         from django.core.exceptions import PermissionDenied
 
         checker = PermissionChecker(assigner)
 
-        if not checker.has_permission('users.assign_role'):
+        # Check using existing permission system (hr.update or system.manage_users)
+        if not (checker.has_permission('hr', 'update') or
+                checker.has_permission('system', 'update') or
+                checker.has_hierarchy_permission('system.manage_users')):
             raise PermissionDenied("No permission to assign roles")
 
         # Get assigner's max role level
@@ -218,4 +274,38 @@ class RoleManagementService:
         # Clear permission cache
         PermissionChecker.clear_user_cache(target_user.id)
 
+        # Sync with existing permission system
+        RoleManagementService.sync_hierarchy_role_to_permissions(target_user, role, college)
+
         return user_role, created
+
+    @staticmethod
+    def sync_hierarchy_role_to_permissions(user, hierarchy_role, college):
+        """
+        Sync hierarchy role to the existing Permission system.
+        Creates/updates Permission record for the user's college and role.
+        """
+        from .models import Permission
+        from .permissions_utils import _get_default_permissions_dict
+
+        if not college:
+            return
+
+        # Map hierarchy role code to permission role
+        role_code = hierarchy_role.code
+        if role_code not in ['admin', 'teacher', 'student', 'principal', 'hod', 'accountant', 'librarian']:
+            # For custom roles, map to 'admin' by default
+            role_code = 'admin'
+
+        # Get or create Permission record for this college and role
+        permission, created = Permission.objects.get_or_create(
+            college=college,
+            role=role_code,
+            defaults={
+                'permissions_json': _get_default_permissions_dict(role_code),
+                'is_active': True
+            }
+        )
+
+        # Clear cache
+        PermissionChecker.clear_user_cache(user.id)

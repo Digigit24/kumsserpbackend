@@ -20,15 +20,38 @@ def get_user_college(user):
 
 
 def get_user_role(user):
-    """Determine the user's role."""
+    """
+    Determine the user's role.
+    Now integrates with organizational hierarchy system.
+    """
     if hasattr(user, 'is_superuser') and user.is_superuser:
         return 'superadmin'
-    elif hasattr(user, 'student_profile') and user.student_profile:
+
+    # Check hierarchy roles first (new system)
+    try:
+        from .models import HierarchyUserRole
+        hierarchy_role = HierarchyUserRole.objects.filter(
+            user=user,
+            is_active=True
+        ).select_related('role').order_by('-role__level').first()
+
+        if hierarchy_role:
+            # Map hierarchy role code to permission role
+            role_code = hierarchy_role.role.code
+            # If the role code matches existing permission roles, use it
+            if role_code in ['admin', 'teacher', 'student', 'principal', 'hod', 'accountant', 'librarian']:
+                return role_code
+    except Exception:
+        pass  # Hierarchy system not set up yet
+
+    # Fallback to legacy role detection
+    if hasattr(user, 'student_profile') and user.student_profile:
         return 'student'
     elif hasattr(user, 'teacher_profile') and user.teacher_profile:
         return 'teacher'
     elif hasattr(user, 'role'):
         return user.role
+
     return 'student'  # Default
 
 
