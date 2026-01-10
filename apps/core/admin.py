@@ -358,7 +358,8 @@ class UserRoleAdmin(admin.ModelAdmin):
     list_display = ['user', 'role', 'college', 'assigned_by', 'assigned_at', 'is_active']
     list_filter = ['is_active', 'college', 'role']
     search_fields = ['user__email', 'user__first_name', 'user__last_name', 'role__name']
-    autocomplete_fields = ['user', 'role', 'college', 'assigned_by', 'department']
+    autocomplete_fields = ['user', 'role', 'college', 'assigned_by']
+    raw_id_fields = ['department']
     date_hierarchy = 'assigned_at'
 
 
