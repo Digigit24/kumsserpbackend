@@ -2,7 +2,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.cache import cache
-from .models import OrganizationNode, RolePermission, UserRole
+from .models import OrganizationNode, RolePermission, HierarchyUserRole
 from .hierarchy_services import TeamAutoAssignmentService, PermissionChecker
 
 
@@ -21,7 +21,7 @@ def sync_role_permissions(sender, instance, created, **kwargs):
     2. Log change for audit
     """
     # Clear cache for all users with this role
-    user_ids = UserRole.objects.filter(
+    user_ids = HierarchyUserRole.objects.filter(
         role=instance.role,
         is_active=True
     ).values_list('user_id', flat=True)
@@ -30,7 +30,7 @@ def sync_role_permissions(sender, instance, created, **kwargs):
         PermissionChecker.clear_user_cache(user_id)
 
 
-@receiver(post_save, sender=UserRole)
+@receiver(post_save, sender=HierarchyUserRole)
 def clear_user_permission_cache_on_role_change(sender, instance, **kwargs):
     """Clear permission cache when user role changes."""
     PermissionChecker.clear_user_cache(instance.user_id)

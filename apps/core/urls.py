@@ -25,7 +25,7 @@ from .hierarchy_views import (
     OrganizationNodeViewSet,
     DynamicRoleViewSet,
     HierarchyPermissionViewSet,
-    UserRoleViewSet,
+    HierarchyUserRoleViewSet,
     TeamViewSet,
 )
 
@@ -48,7 +48,7 @@ router.register(r'team-memberships', TeamMembershipViewSet, basename='team-membe
 router.register(r'organization/nodes', OrganizationNodeViewSet, basename='org-node')
 router.register(r'organization/roles', DynamicRoleViewSet, basename='dynamic-role')
 router.register(r'organization/hierarchy-permissions', HierarchyPermissionViewSet, basename='hierarchy-permission')
-router.register(r'organization/user-roles', UserRoleViewSet, basename='user-role')
+router.register(r'organization/user-roles', HierarchyUserRoleViewSet, basename='hierarchy-user-role')
 router.register(r'organization/teams', TeamViewSet, basename='hierarchy-team')
 
 urlpatterns = [

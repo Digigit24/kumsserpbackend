@@ -1,7 +1,7 @@
 """Services for organizational hierarchy and permission management."""
 from django.core.cache import cache
 from .models import (
-    UserRole,
+    HierarchyUserRole,
     RolePermission,
     Team,
     HierarchyTeamMember,
@@ -42,7 +42,7 @@ class PermissionChecker:
         permissions = set()
 
         # Get all active user roles
-        user_roles = UserRole.objects.filter(
+        user_roles = HierarchyUserRole.objects.filter(
             user=self.user,
             is_active=True
         ).select_related('role')
@@ -196,7 +196,7 @@ class RoleManagementService:
             raise PermissionDenied("No permission to assign roles")
 
         # Get assigner's max role level
-        assigner_max_level = UserRole.objects.filter(
+        assigner_max_level = HierarchyUserRole.objects.filter(
             user=assigner,
             is_active=True
         ).select_related('role').order_by('-role__level').first()
@@ -205,7 +205,7 @@ class RoleManagementService:
             raise PermissionDenied("Cannot assign role with higher level")
 
         # Create user role
-        user_role, created = UserRole.objects.get_or_create(
+        user_role, created = HierarchyUserRole.objects.get_or_create(
             user=target_user,
             role=role,
             college=college,

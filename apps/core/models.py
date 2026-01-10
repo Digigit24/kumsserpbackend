@@ -1013,29 +1013,23 @@ class RolePermission(models.Model):
         return f"{self.role.name} - {self.permission.code}"
 
 
-class UserRole(models.Model):
-    """Users can have multiple roles."""
+class HierarchyUserRole(models.Model):
+    """Users can have multiple hierarchy roles - part of organizational hierarchy system."""
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='dynamic_user_roles'
+        related_name='hierarchy_roles'
     )
     role = models.ForeignKey(
         DynamicRole,
         on_delete=models.CASCADE,
-        related_name='user_assignments'
+        related_name='hierarchy_user_assignments'
     )
 
     college = models.ForeignKey(
         College,
         on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
-    department = models.ForeignKey(
-        'academic.Department',
-        on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
@@ -1047,15 +1041,15 @@ class UserRole(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='role_assignments_made'
+        related_name='hierarchy_role_assignments_made'
     )
     assigned_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True, db_index=True)
 
     class Meta:
-        verbose_name = 'User Role'
-        verbose_name_plural = 'User Roles'
-        db_table = 'core_user_role'
+        verbose_name = 'Hierarchy User Role'
+        verbose_name_plural = 'Hierarchy User Roles'
+        db_table = 'core_hierarchy_user_role'
         app_label = 'core'
         unique_together = [['user', 'role', 'college']]
         indexes = [

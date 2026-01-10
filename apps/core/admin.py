@@ -352,14 +352,13 @@ class RolePermissionAdmin(admin.ModelAdmin):
     autocomplete_fields = ['role', 'permission']
 
 
-@admin.register(UserRole)
-class UserRoleAdmin(admin.ModelAdmin):
-    """Admin for User Role assignments."""
+@admin.register(HierarchyUserRole)
+class HierarchyUserRoleAdmin(admin.ModelAdmin):
+    """Admin for Hierarchy User Role assignments."""
     list_display = ['user', 'role', 'college', 'assigned_by', 'assigned_at', 'is_active']
     list_filter = ['is_active', 'college', 'role']
     search_fields = ['user__email', 'user__first_name', 'user__last_name', 'role__name']
     autocomplete_fields = ['user', 'role', 'college', 'assigned_by']
-    raw_id_fields = ['department']
     date_hierarchy = 'assigned_at'
 
 

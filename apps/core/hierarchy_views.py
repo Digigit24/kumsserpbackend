@@ -9,7 +9,7 @@ from .models import (
     DynamicRole,
     HierarchyPermission,
     RolePermission,
-    UserRole,
+    HierarchyUserRole,
     Team,
     HierarchyTeamMember
 )
@@ -19,7 +19,7 @@ from .hierarchy_serializers import (
     DynamicRoleSerializer,
     HierarchyPermissionSerializer,
     RolePermissionSerializer,
-    UserRoleSerializer,
+    HierarchyUserRoleSerializer,
     TeamSerializer,
     HierarchyTeamMemberSerializer
 )
@@ -102,7 +102,7 @@ class DynamicRoleViewSet(viewsets.ModelViewSet):
 
     def _clear_user_permission_cache(self, role):
         """Clear permission cache for all users with this role."""
-        user_ids = UserRole.objects.filter(role=role, is_active=True).values_list('user_id', flat=True)
+        user_ids = HierarchyUserRole.objects.filter(role=role, is_active=True).values_list('user_id', flat=True)
         for user_id in user_ids:
             cache.delete(f'user_perms_{user_id}')
 
@@ -125,14 +125,14 @@ class HierarchyPermissionViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(categories)
 
 
-class UserRoleViewSet(viewsets.ModelViewSet):
-    """Assign/revoke roles to users."""
-    queryset = UserRole.objects.all()
-    serializer_class = UserRoleSerializer
+class HierarchyUserRoleViewSet(viewsets.ModelViewSet):
+    """Assign/revoke hierarchy roles to users."""
+    queryset = HierarchyUserRole.objects.all()
+    serializer_class = HierarchyUserRoleSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return UserRole.objects.filter(is_active=True)
+        return HierarchyUserRole.objects.filter(is_active=True)
 
     @action(detail=False, methods=['post'])
     def assign(self, request):
@@ -141,7 +141,7 @@ class UserRoleViewSet(viewsets.ModelViewSet):
         role_id = request.data.get('role_id')
         college_id = request.data.get('college_id')
 
-        user_role, created = UserRole.objects.get_or_create(
+        user_role, created = HierarchyUserRole.objects.get_or_create(
             user_id=user_id,
             role_id=role_id,
             college_id=college_id,
@@ -152,7 +152,7 @@ class UserRoleViewSet(viewsets.ModelViewSet):
         )
 
         cache.delete(f'user_perms_{user_id}')
-        return Response(UserRoleSerializer(user_role).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        return Response(HierarchyUserRoleSerializer(user_role).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'])
     def revoke(self, request):
@@ -160,7 +160,7 @@ class UserRoleViewSet(viewsets.ModelViewSet):
         user_id = request.data.get('user_id')
         role_id = request.data.get('role_id')
 
-        UserRole.objects.filter(
+        HierarchyUserRole.objects.filter(
             user_id=user_id,
             role_id=role_id
         ).update(is_active=False)

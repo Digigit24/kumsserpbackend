@@ -5,7 +5,7 @@ from .models import (
     DynamicRole,
     HierarchyPermission,
     RolePermission,
-    UserRole,
+    HierarchyUserRole,
     Team,
     HierarchyTeamMember
 )
@@ -99,12 +99,12 @@ class OrganizationNodeTreeSerializer(serializers.ModelSerializer):
         return OrganizationNodeTreeSerializer(children, many=True).data
 
 
-class UserRoleSerializer(serializers.ModelSerializer):
+class HierarchyUserRoleSerializer(serializers.ModelSerializer):
     role_detail = DynamicRoleSerializer(source='role', read_only=True)
     user_detail = serializers.SerializerMethodField()
 
     class Meta:
-        model = UserRole
+        model = HierarchyUserRole
         fields = '__all__'
 
     def get_user_detail(self, obj):
