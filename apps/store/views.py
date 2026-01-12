@@ -573,7 +573,9 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         try:
             indent = self.get_object()
             indent.submit()
-            return Response({'status': indent.status, 'message': 'Submitted to super admin for approval'})
+            indent.refresh_from_db()  # Ensure status is fresh
+            serializer = self.get_serializer(indent)
+            return Response(serializer.data)
         except ValidationError as exc:
             detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
             return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
@@ -592,10 +594,12 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
         try:
             indent.college_admin_approve(user=request.user)
+            indent.refresh_from_db()
+            serializer = self.get_serializer(indent)
+            return Response(serializer.data)
         except ValidationError as exc:
             detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
             return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'status': indent.status, 'message': 'Forwarded to super admin for approval'})
 
     @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])
     def college_admin_reject(self, request, pk=None):
@@ -605,10 +609,12 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
         try:
             indent.college_admin_reject(user=request.user, reason=request.data.get('reason'))
+            indent.refresh_from_db()
+            serializer = self.get_serializer(indent)
+            return Response(serializer.data)
         except ValidationError as exc:
             detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
             return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'status': indent.status, 'message': 'Rejected by college admin'})
 
     @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
     def super_admin_approve(self, request, pk=None):
@@ -616,10 +622,12 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         indent = self.get_object()
         try:
             indent.super_admin_approve(user=request.user)
+            indent.refresh_from_db()
+            serializer = self.get_serializer(indent)
+            return Response(serializer.data)
         except ValidationError as exc:
             detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
             return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'status': indent.status, 'message': 'Approved by super admin'})
 
     @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
     def super_admin_reject(self, request, pk=None):
@@ -627,10 +635,12 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         indent = self.get_object()
         try:
             indent.super_admin_reject(user=request.user, reason=request.data.get('reason'))
+            indent.refresh_from_db()
+            serializer = self.get_serializer(indent)
+            return Response(serializer.data)
         except ValidationError as exc:
             detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
             return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'status': indent.status, 'message': 'Rejected by super admin'})
 
     @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])
     def approve(self, request, pk=None):
@@ -638,7 +648,9 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         try:
             indent = self.get_object()
             indent.approve(user=request.user)
-            return Response({'status': indent.status})
+            indent.refresh_from_db()
+            serializer = self.get_serializer(indent)
+            return Response(serializer.data)
         except ValidationError as exc:
             detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
             return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
@@ -654,7 +666,9 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         try:
             indent = self.get_object()
             indent.reject(user=request.user, reason=request.data.get('reason'))
-            return Response({'status': indent.status})
+            indent.refresh_from_db()
+            serializer = self.get_serializer(indent)
+            return Response(serializer.data)
         except ValidationError as exc:
             detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
             return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)

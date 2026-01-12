@@ -954,6 +954,16 @@ class StoreIndent(CollegeScopedModel):
 
     def submit(self):
         """College store submits request to super admin"""
+        # Allow submission from draft or submitted states
+        valid_states = ['draft', 'submitted']
+        if self.status not in valid_states:
+            # If already in a later stage, just log and return
+            if self.status in ['pending_super_admin', 'pending_college_approval', 'approved']:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f'Indent {self.indent_number} already in {self.status} status')
+                return
+            raise ValidationError(f'Cannot submit indent in {self.status} status. Must be in draft or submitted state.')
         self.status = 'pending_super_admin'
         self.save(update_fields=['status', 'updated_at'])
 
