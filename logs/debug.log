@@ -170,3 +170,783 @@ DEBUG 2026-01-07 16:02:07,795 http_protocol 16136 8232 HTTP close for ['127.0.0.
 DEBUG 2026-01-07 16:02:07,795 http_protocol 16136 8232 HTTP response complete for ['127.0.0.1', 63164]
 INFO 2026-01-07 16:02:07,796 runserver 16136 8232 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.46, 127.0.0.1:63164][0m
 INFO 2026-01-07 16:02:07,796 runserver 16136 8232 [mHTTP GET /api/v1/approvals/notifications/unread_count/ 200 [2.46, 127.0.0.1:63164][0m
+DEBUG 2026-01-07 20:54:11,799 selector_events 8112 23888 Using selector: SelectSelector
+DEBUG 2026-01-07 20:54:22,834 selector_events 12200 22692 Using selector: SelectSelector
+INFO 2026-01-07 20:54:24,036 autoreload 12200 22692 Watching for file changes with StatReloader
+INFO 2026-01-07 20:54:24,036 autoreload 12200 22692 Watching for file changes with StatReloader
+INFO 2026-01-07 20:55:13,656 server 12200 21204 HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+INFO 2026-01-07 20:55:13,656 server 12200 21204 Configuring endpoint tcp:port=8000:interface=127.0.0.1
+INFO 2026-01-07 20:55:13,656 server 12200 21204 Listening on TCP address 127.0.0.1:8000
+DEBUG 2026-01-07 21:02:19,393 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:02:39,982 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 65505]
+DEBUG 2026-01-07 21:03:26,792 http_protocol 12200 21204 HTTP 302 response started for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:03:26,793 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:03:26,794 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59025]
+INFO 2026-01-07 21:03:26,794 runserver 12200 21204 [32mHTTP GET / 302 [67.40, 127.0.0.1:59025][0m
+INFO 2026-01-07 21:03:26,794 runserver 12200 21204 [32mHTTP GET / 302 [67.40, 127.0.0.1:59025][0m
+DEBUG 2026-01-07 21:03:26,802 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59025]
+INFO 2026-01-07 21:03:34,071 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:53514]
+INFO 2026-01-07 21:03:34,071 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:53514]
+DEBUG 2026-01-07 21:03:34,075 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 53514] to WebSocket
+DEBUG 2026-01-07 21:03:34,084 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 53514] rejected by application
+INFO 2026-01-07 21:03:34,139 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:53514]
+INFO 2026-01-07 21:03:34,139 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:53514]
+DEBUG 2026-01-07 21:03:34,232 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 53514]
+INFO 2026-01-07 21:03:34,234 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:53514]
+INFO 2026-01-07 21:03:34,234 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:53514]
+INFO 2026-01-07 21:03:34,354 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:54690]
+INFO 2026-01-07 21:03:34,354 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:54690]
+DEBUG 2026-01-07 21:03:34,365 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 54690] to WebSocket
+DEBUG 2026-01-07 21:03:34,394 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 54690] rejected by application
+INFO 2026-01-07 21:03:34,436 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:54690]
+INFO 2026-01-07 21:03:34,436 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:54690]
+DEBUG 2026-01-07 21:03:34,466 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 54690]
+INFO 2026-01-07 21:03:34,510 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:54690]
+INFO 2026-01-07 21:03:34,510 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:54690]
+INFO 2026-01-07 21:03:35,484 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:49314]
+INFO 2026-01-07 21:03:35,484 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:49314]
+DEBUG 2026-01-07 21:03:35,500 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 49314] to WebSocket
+DEBUG 2026-01-07 21:03:35,530 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 49314] rejected by application
+INFO 2026-01-07 21:03:35,537 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:49314]
+INFO 2026-01-07 21:03:35,537 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:49314]
+DEBUG 2026-01-07 21:03:35,571 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 49314]
+INFO 2026-01-07 21:03:35,575 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:49314]
+INFO 2026-01-07 21:03:35,575 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:49314]
+INFO 2026-01-07 21:03:37,087 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:64326]
+INFO 2026-01-07 21:03:37,087 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:64326]
+DEBUG 2026-01-07 21:03:37,088 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 64326] to WebSocket
+DEBUG 2026-01-07 21:03:37,090 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 64326] rejected by application
+INFO 2026-01-07 21:03:37,091 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:64326]
+INFO 2026-01-07 21:03:37,091 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:64326]
+DEBUG 2026-01-07 21:03:37,092 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 64326]
+INFO 2026-01-07 21:03:37,093 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:64326]
+INFO 2026-01-07 21:03:37,093 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:64326]
+INFO 2026-01-07 21:03:39,358 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:64751]
+INFO 2026-01-07 21:03:39,358 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:64751]
+DEBUG 2026-01-07 21:03:39,360 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 64751] to WebSocket
+DEBUG 2026-01-07 21:03:39,363 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 64751] rejected by application
+INFO 2026-01-07 21:03:39,363 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:64751]
+INFO 2026-01-07 21:03:39,363 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:64751]
+DEBUG 2026-01-07 21:03:39,366 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 64751]
+INFO 2026-01-07 21:03:39,368 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:64751]
+INFO 2026-01-07 21:03:39,368 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:64751]
+INFO 2026-01-07 21:03:42,749 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:52309]
+INFO 2026-01-07 21:03:42,749 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:52309]
+DEBUG 2026-01-07 21:03:42,750 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 52309] to WebSocket
+DEBUG 2026-01-07 21:03:42,752 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 52309] rejected by application
+INFO 2026-01-07 21:03:42,752 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:52309]
+INFO 2026-01-07 21:03:42,752 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:52309]
+DEBUG 2026-01-07 21:03:42,753 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 52309]
+INFO 2026-01-07 21:03:42,754 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:52309]
+INFO 2026-01-07 21:03:42,754 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:52309]
+DEBUG 2026-01-07 21:03:45,445 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 65505]
+DEBUG 2026-01-07 21:03:45,446 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 65505]
+DEBUG 2026-01-07 21:03:45,447 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 65505]
+INFO 2026-01-07 21:03:45,447 runserver 12200 21204 [mHTTP GET /api/docs/ 200 [65.47, 127.0.0.1:65505][0m
+INFO 2026-01-07 21:03:45,447 runserver 12200 21204 [mHTTP GET /api/docs/ 200 [65.47, 127.0.0.1:65505][0m
+DEBUG 2026-01-07 21:03:45,641 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 65505]
+DEBUG 2026-01-07 21:03:45,651 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 49289]
+DEBUG 2026-01-07 21:03:45,709 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 65505]
+DEBUG 2026-01-07 21:03:45,710 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 65505]
+DEBUG 2026-01-07 21:03:45,710 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 65505]
+INFO 2026-01-07 21:03:45,711 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/css/toolbar.css 304 [0.07, 127.0.0.1:65505][0m
+INFO 2026-01-07 21:03:45,711 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/css/toolbar.css 304 [0.07, 127.0.0.1:65505][0m
+DEBUG 2026-01-07 21:03:45,715 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 49289]
+DEBUG 2026-01-07 21:03:45,716 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 49289]
+DEBUG 2026-01-07 21:03:45,722 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 49289]
+INFO 2026-01-07 21:03:45,722 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/js/toolbar.js 304 [0.07, 127.0.0.1:49289][0m
+INFO 2026-01-07 21:03:45,722 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/js/toolbar.js 304 [0.07, 127.0.0.1:49289][0m
+DEBUG 2026-01-07 21:03:46,013 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 49289]
+DEBUG 2026-01-07 21:03:46,028 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 65505]
+DEBUG 2026-01-07 21:03:46,051 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 63205]
+DEBUG 2026-01-07 21:03:46,060 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 65505]
+DEBUG 2026-01-07 21:03:46,060 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 65505]
+DEBUG 2026-01-07 21:03:46,061 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 65505]
+INFO 2026-01-07 21:03:46,066 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/css/print.css 304 [0.04, 127.0.0.1:65505][0m
+INFO 2026-01-07 21:03:46,066 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/css/print.css 304 [0.04, 127.0.0.1:65505][0m
+DEBUG 2026-01-07 21:03:46,168 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 63205]
+DEBUG 2026-01-07 21:03:46,183 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 63205]
+DEBUG 2026-01-07 21:03:46,196 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 63205]
+INFO 2026-01-07 21:03:46,212 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/js/utils.js 304 [0.16, 127.0.0.1:63205][0m
+INFO 2026-01-07 21:03:46,212 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/js/utils.js 304 [0.16, 127.0.0.1:63205][0m
+INFO 2026-01-07 21:03:47,830 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:50764]
+INFO 2026-01-07 21:03:47,830 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:50764]
+DEBUG 2026-01-07 21:03:47,830 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 50764] to WebSocket
+DEBUG 2026-01-07 21:03:47,832 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 50764] rejected by application
+INFO 2026-01-07 21:03:47,832 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:50764]
+INFO 2026-01-07 21:03:47,832 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:50764]
+DEBUG 2026-01-07 21:03:47,834 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 50764]
+INFO 2026-01-07 21:03:47,835 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:50764]
+INFO 2026-01-07 21:03:47,835 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:50764]
+INFO 2026-01-07 21:03:55,433 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:54518]
+INFO 2026-01-07 21:03:55,433 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:54518]
+DEBUG 2026-01-07 21:03:55,434 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 54518] to WebSocket
+DEBUG 2026-01-07 21:03:55,435 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 54518] rejected by application
+INFO 2026-01-07 21:03:55,437 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:54518]
+INFO 2026-01-07 21:03:55,437 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:54518]
+DEBUG 2026-01-07 21:03:55,439 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 54518]
+INFO 2026-01-07 21:03:55,439 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:54518]
+INFO 2026-01-07 21:03:55,439 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:54518]
+INFO 2026-01-07 21:04:06,850 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:63390]
+INFO 2026-01-07 21:04:06,850 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:63390]
+DEBUG 2026-01-07 21:04:06,852 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 63390] to WebSocket
+DEBUG 2026-01-07 21:04:06,854 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 63390] rejected by application
+INFO 2026-01-07 21:04:06,855 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:63390]
+INFO 2026-01-07 21:04:06,855 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:63390]
+DEBUG 2026-01-07 21:04:06,857 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 63390]
+INFO 2026-01-07 21:04:06,858 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:63390]
+INFO 2026-01-07 21:04:06,858 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:63390]
+INFO 2026-01-07 21:04:23,950 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:65182]
+INFO 2026-01-07 21:04:23,950 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:65182]
+DEBUG 2026-01-07 21:04:23,951 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 65182] to WebSocket
+DEBUG 2026-01-07 21:04:23,952 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 65182] rejected by application
+INFO 2026-01-07 21:04:23,954 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:65182]
+INFO 2026-01-07 21:04:23,954 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:65182]
+DEBUG 2026-01-07 21:04:23,955 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 65182]
+INFO 2026-01-07 21:04:23,955 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:65182]
+INFO 2026-01-07 21:04:23,955 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:65182]
+DEBUG 2026-01-07 21:04:34,852 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:34,853 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:34,853 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59025]
+INFO 2026-01-07 21:04:34,854 runserver 12200 21204 [mHTTP GET /admin/ 200 [68.05, 127.0.0.1:59025][0m
+INFO 2026-01-07 21:04:34,854 runserver 12200 21204 [mHTTP GET /admin/ 200 [68.05, 127.0.0.1:59025][0m
+DEBUG 2026-01-07 21:04:34,906 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:34,912 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:34,914 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:34,925 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:34,925 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:34,926 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59025]
+INFO 2026-01-07 21:04:34,927 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/ui/jquery-ui.min.css 304 [0.02, 127.0.0.1:59025][0m
+INFO 2026-01-07 21:04:34,927 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/ui/jquery-ui.min.css 304 [0.02, 127.0.0.1:59025][0m
+DEBUG 2026-01-07 21:04:34,932 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:34,935 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:34,938 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57505]
+INFO 2026-01-07 21:04:34,942 runserver 12200 21204 [36mHTTP GET /static/grappelli/stylesheets/screen.css 304 [0.03, 127.0.0.1:57505][0m
+INFO 2026-01-07 21:04:34,942 runserver 12200 21204 [36mHTTP GET /static/grappelli/stylesheets/screen.css 304 [0.03, 127.0.0.1:57505][0m
+DEBUG 2026-01-07 21:04:34,944 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:34,945 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:34,945 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 56872]
+INFO 2026-01-07 21:04:34,946 runserver 12200 21204 [36mHTTP GET /static/grappelli/stylesheets/mueller/grid/output.css 304 [0.03, 127.0.0.1:56872][0m
+INFO 2026-01-07 21:04:34,946 runserver 12200 21204 [36mHTTP GET /static/grappelli/stylesheets/mueller/grid/output.css 304 [0.03, 127.0.0.1:56872][0m
+DEBUG 2026-01-07 21:04:35,026 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,029 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:35,032 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,044 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:35,044 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:35,045 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57505]
+INFO 2026-01-07 21:04:35,045 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/jquery.min.js 304 [0.02, 127.0.0.1:57505][0m
+INFO 2026-01-07 21:04:35,045 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/jquery.min.js 304 [0.02, 127.0.0.1:57505][0m
+DEBUG 2026-01-07 21:04:35,047 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,048 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,048 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 56872]
+INFO 2026-01-07 21:04:35,048 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/css/toolbar.css 304 [0.02, 127.0.0.1:56872][0m
+INFO 2026-01-07 21:04:35,048 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/css/toolbar.css 304 [0.02, 127.0.0.1:56872][0m
+DEBUG 2026-01-07 21:04:35,050 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,051 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,052 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59025]
+INFO 2026-01-07 21:04:35,052 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/jquery-migrate-3.0.1.min.js 304 [0.02, 127.0.0.1:59025][0m
+INFO 2026-01-07 21:04:35,052 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/jquery-migrate-3.0.1.min.js 304 [0.02, 127.0.0.1:59025][0m
+DEBUG 2026-01-07 21:04:35,067 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,078 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,082 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:35,098 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:35,099 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:35,107 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57505]
+INFO 2026-01-07 21:04:35,109 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_collapsible.js 304 [0.03, 127.0.0.1:57505][0m
+INFO 2026-01-07 21:04:35,109 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_collapsible.js 304 [0.03, 127.0.0.1:57505][0m
+DEBUG 2026-01-07 21:04:35,112 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,113 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,114 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59025]
+INFO 2026-01-07 21:04:35,114 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/ui/jquery-ui.min.js 304 [0.05, 127.0.0.1:59025][0m
+INFO 2026-01-07 21:04:35,114 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/ui/jquery-ui.min.js 304 [0.05, 127.0.0.1:59025][0m
+DEBUG 2026-01-07 21:04:35,118 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,122 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,122 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 56872]
+INFO 2026-01-07 21:04:35,125 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/grappelli.js 304 [0.05, 127.0.0.1:56872][0m
+INFO 2026-01-07 21:04:35,125 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/grappelli.js 304 [0.05, 127.0.0.1:56872][0m
+DEBUG 2026-01-07 21:04:35,135 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,141 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,148 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:35,159 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,160 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,161 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59025]
+INFO 2026-01-07 21:04:35,162 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_timepicker.js 304 [0.02, 127.0.0.1:59025][0m
+INFO 2026-01-07 21:04:35,162 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_timepicker.js 304 [0.02, 127.0.0.1:59025][0m
+DEBUG 2026-01-07 21:04:35,163 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,164 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,164 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 56872]
+INFO 2026-01-07 21:04:35,165 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_collapsible_group.js 304 [0.03, 127.0.0.1:56872][0m
+INFO 2026-01-07 21:04:35,165 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_collapsible_group.js 304 [0.03, 127.0.0.1:56872][0m
+DEBUG 2026-01-07 21:04:35,180 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:35,190 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:35,199 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57505]
+INFO 2026-01-07 21:04:35,200 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_fk.js 304 [0.05, 127.0.0.1:57505][0m
+INFO 2026-01-07 21:04:35,200 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_fk.js 304 [0.05, 127.0.0.1:57505][0m
+DEBUG 2026-01-07 21:04:35,205 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,212 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,219 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:35,233 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,235 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,240 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 56872]
+INFO 2026-01-07 21:04:35,241 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_m2m.js 304 [0.03, 127.0.0.1:56872][0m
+INFO 2026-01-07 21:04:35,241 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_m2m.js 304 [0.03, 127.0.0.1:56872][0m
+DEBUG 2026-01-07 21:04:35,245 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,246 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,247 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59025]
+INFO 2026-01-07 21:04:35,247 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_generic.js 304 [0.04, 127.0.0.1:59025][0m
+INFO 2026-01-07 21:04:35,247 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_generic.js 304 [0.04, 127.0.0.1:59025][0m
+DEBUG 2026-01-07 21:04:35,252 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:35,263 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:35,264 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57505]
+INFO 2026-01-07 21:04:35,265 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_fk.js 304 [0.05, 127.0.0.1:57505][0m
+INFO 2026-01-07 21:04:35,265 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_fk.js 304 [0.05, 127.0.0.1:57505][0m
+DEBUG 2026-01-07 21:04:35,266 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,268 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,289 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:35,299 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,307 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,308 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59025]
+INFO 2026-01-07 21:04:35,311 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_generic.js 304 [0.04, 127.0.0.1:59025][0m
+INFO 2026-01-07 21:04:35,311 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_generic.js 304 [0.04, 127.0.0.1:59025][0m
+DEBUG 2026-01-07 21:04:35,314 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:35,314 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57505]
+DEBUG 2026-01-07 21:04:35,315 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57505]
+INFO 2026-01-07 21:04:35,317 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_inline.js 304 [0.03, 127.0.0.1:57505][0m
+INFO 2026-01-07 21:04:35,317 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_inline.js 304 [0.03, 127.0.0.1:57505][0m
+DEBUG 2026-01-07 21:04:35,319 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,320 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,321 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 56872]
+INFO 2026-01-07 21:04:35,323 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_m2m.js 304 [0.05, 127.0.0.1:56872][0m
+INFO 2026-01-07 21:04:35,323 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_m2m.js 304 [0.05, 127.0.0.1:56872][0m
+DEBUG 2026-01-07 21:04:35,327 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,349 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,350 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,353 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59025]
+INFO 2026-01-07 21:04:35,356 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/js/toolbar.js 304 [0.03, 127.0.0.1:59025][0m
+INFO 2026-01-07 21:04:35,356 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/js/toolbar.js 304 [0.03, 127.0.0.1:59025][0m
+DEBUG 2026-01-07 21:04:35,359 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,377 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,386 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,387 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 56872]
+DEBUG 2026-01-07 21:04:35,388 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 56872]
+INFO 2026-01-07 21:04:35,390 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/css/print.css 304 [0.03, 127.0.0.1:56872][0m
+INFO 2026-01-07 21:04:35,390 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/css/print.css 304 [0.03, 127.0.0.1:56872][0m
+DEBUG 2026-01-07 21:04:35,393 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,393 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,394 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59025]
+INFO 2026-01-07 21:04:35,395 runserver 12200 21204 [36mHTTP GET /static/grappelli/images/spritesheet-1694777276.png 304 [0.02, 127.0.0.1:59025][0m
+INFO 2026-01-07 21:04:35,395 runserver 12200 21204 [36mHTTP GET /static/grappelli/images/spritesheet-1694777276.png 304 [0.02, 127.0.0.1:59025][0m
+DEBUG 2026-01-07 21:04:35,452 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,460 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,460 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:04:35,461 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59025]
+INFO 2026-01-07 21:04:35,461 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/js/utils.js 304 [0.01, 127.0.0.1:59025][0m
+INFO 2026-01-07 21:04:35,461 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/js/utils.js 304 [0.01, 127.0.0.1:59025][0m
+DEBUG 2026-01-07 21:04:35,620 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59025]
+INFO 2026-01-07 21:04:50,314 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:61231]
+INFO 2026-01-07 21:04:50,314 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:61231]
+DEBUG 2026-01-07 21:04:50,315 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 61231] to WebSocket
+DEBUG 2026-01-07 21:04:50,317 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 61231] rejected by application
+INFO 2026-01-07 21:04:50,317 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:61231]
+INFO 2026-01-07 21:04:50,317 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:61231]
+DEBUG 2026-01-07 21:04:50,319 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 61231]
+INFO 2026-01-07 21:04:50,319 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:61231]
+INFO 2026-01-07 21:04:50,319 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:61231]
+DEBUG 2026-01-07 21:04:56,072 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59992]
+DEBUG 2026-01-07 21:05:01,124 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 49289]
+DEBUG 2026-01-07 21:05:01,124 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 49289]
+DEBUG 2026-01-07 21:05:01,126 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 49289]
+DEBUG 2026-01-07 21:05:01,126 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 49289]
+INFO 2026-01-07 21:05:01,127 runserver 12200 21204 [mHTTP GET /api/schema/ 200 [75.11, 127.0.0.1:49289][0m
+INFO 2026-01-07 21:05:01,127 runserver 12200 21204 [mHTTP GET /api/schema/ 200 [75.11, 127.0.0.1:49289][0m
+INFO 2026-01-07 21:05:21,295 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:60538]
+INFO 2026-01-07 21:05:21,295 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:60538]
+DEBUG 2026-01-07 21:05:21,296 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 60538] to WebSocket
+DEBUG 2026-01-07 21:05:21,301 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 60538] rejected by application
+INFO 2026-01-07 21:05:21,302 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:60538]
+INFO 2026-01-07 21:05:21,302 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:60538]
+DEBUG 2026-01-07 21:05:21,304 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 60538]
+INFO 2026-01-07 21:05:21,305 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:60538]
+INFO 2026-01-07 21:05:21,305 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:60538]
+DEBUG 2026-01-07 21:05:31,112 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 60482]
+WARNING 2026-01-07 21:05:40,955 log 12200 10064 Not Found: /favicon.ico
+DEBUG 2026-01-07 21:05:40,956 http_protocol 12200 21204 HTTP 404 response started for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:05:40,957 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59025]
+DEBUG 2026-01-07 21:05:40,957 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59025]
+WARNING 2026-01-07 21:05:40,958 runserver 12200 21204 [33mHTTP GET /favicon.ico 404 [65.34, 127.0.0.1:59025][0m
+WARNING 2026-01-07 21:05:40,958 runserver 12200 21204 [33mHTTP GET /favicon.ico 404 [65.34, 127.0.0.1:59025][0m
+INFO 2026-01-07 21:05:52,316 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:51978]
+INFO 2026-01-07 21:05:52,316 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:51978]
+DEBUG 2026-01-07 21:05:52,317 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 51978] to WebSocket
+DEBUG 2026-01-07 21:05:52,323 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 51978] rejected by application
+INFO 2026-01-07 21:05:52,324 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:51978]
+INFO 2026-01-07 21:05:52,324 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:51978]
+DEBUG 2026-01-07 21:05:52,326 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 51978]
+INFO 2026-01-07 21:05:52,326 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:51978]
+INFO 2026-01-07 21:05:52,326 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:51978]
+DEBUG 2026-01-07 21:06:01,692 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 59992]
+DEBUG 2026-01-07 21:06:01,692 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59992]
+DEBUG 2026-01-07 21:06:01,692 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59992]
+INFO 2026-01-07 21:06:01,694 runserver 12200 21204 [mHTTP GET /__debug__/render_panel/?request_id=4761c71dd4864dc4b602dd69319f16b3&panel_id=HistoryPanel 200 [65.62, 127.0.0.1:59992][0m
+INFO 2026-01-07 21:06:01,694 runserver 12200 21204 [mHTTP GET /__debug__/render_panel/?request_id=4761c71dd4864dc4b602dd69319f16b3&panel_id=HistoryPanel 200 [65.62, 127.0.0.1:59992][0m
+DEBUG 2026-01-07 21:06:01,709 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59992]
+DEBUG 2026-01-07 21:06:01,725 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 59992]
+DEBUG 2026-01-07 21:06:01,729 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 59992]
+DEBUG 2026-01-07 21:06:01,730 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59992]
+DEBUG 2026-01-07 21:06:01,731 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59992]
+INFO 2026-01-07 21:06:01,735 runserver 12200 21204 [mHTTP GET /static/debug_toolbar/js/history.js 200 [0.03, 127.0.0.1:59992][0m
+INFO 2026-01-07 21:06:01,735 runserver 12200 21204 [mHTTP GET /static/debug_toolbar/js/history.js 200 [0.03, 127.0.0.1:59992][0m
+INFO 2026-01-07 21:06:22,348 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:52438]
+INFO 2026-01-07 21:06:22,348 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:52438]
+DEBUG 2026-01-07 21:06:22,351 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 52438] to WebSocket
+DEBUG 2026-01-07 21:06:22,353 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 52438] rejected by application
+INFO 2026-01-07 21:06:22,354 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:52438]
+INFO 2026-01-07 21:06:22,354 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:52438]
+DEBUG 2026-01-07 21:06:22,355 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 52438]
+INFO 2026-01-07 21:06:22,355 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:52438]
+INFO 2026-01-07 21:06:22,355 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:52438]
+DEBUG 2026-01-07 21:06:39,520 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,520 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,521 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 60482]
+INFO 2026-01-07 21:06:39,521 runserver 12200 21204 [mHTTP GET /admin/academic/classteacher/ 200 [68.41, 127.0.0.1:60482][0m
+INFO 2026-01-07 21:06:39,521 runserver 12200 21204 [mHTTP GET /admin/academic/classteacher/ 200 [68.41, 127.0.0.1:60482][0m
+DEBUG 2026-01-07 21:06:39,569 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,586 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,588 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,597 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,601 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,605 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 60482]
+INFO 2026-01-07 21:06:39,608 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/ui/jquery-ui.min.css 304 [0.04, 127.0.0.1:60482][0m
+INFO 2026-01-07 21:06:39,608 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/ui/jquery-ui.min.css 304 [0.04, 127.0.0.1:60482][0m
+DEBUG 2026-01-07 21:06:39,609 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,610 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,611 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 63118]
+INFO 2026-01-07 21:06:39,611 runserver 12200 21204 [36mHTTP GET /static/grappelli/stylesheets/mueller/grid/output.css 304 [0.02, 127.0.0.1:63118][0m
+INFO 2026-01-07 21:06:39,611 runserver 12200 21204 [36mHTTP GET /static/grappelli/stylesheets/mueller/grid/output.css 304 [0.02, 127.0.0.1:63118][0m
+DEBUG 2026-01-07 21:06:39,614 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,615 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,623 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57891]
+INFO 2026-01-07 21:06:39,624 runserver 12200 21204 [36mHTTP GET /static/grappelli/stylesheets/screen.css 304 [0.04, 127.0.0.1:57891][0m
+INFO 2026-01-07 21:06:39,624 runserver 12200 21204 [36mHTTP GET /static/grappelli/stylesheets/screen.css 304 [0.04, 127.0.0.1:57891][0m
+DEBUG 2026-01-07 21:06:39,628 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,643 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,644 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,661 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,662 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,662 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 60482]
+INFO 2026-01-07 21:06:39,664 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/jquery.min.js 304 [0.04, 127.0.0.1:60482][0m
+INFO 2026-01-07 21:06:39,664 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/jquery.min.js 304 [0.04, 127.0.0.1:60482][0m
+DEBUG 2026-01-07 21:06:39,668 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,674 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,674 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57891]
+INFO 2026-01-07 21:06:39,675 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/jquery-migrate-3.0.1.min.js 304 [0.03, 127.0.0.1:57891][0m
+INFO 2026-01-07 21:06:39,675 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/jquery-migrate-3.0.1.min.js 304 [0.03, 127.0.0.1:57891][0m
+DEBUG 2026-01-07 21:06:39,676 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,676 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,677 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 63118]
+INFO 2026-01-07 21:06:39,678 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/ui/jquery-ui.min.js 304 [0.04, 127.0.0.1:63118][0m
+INFO 2026-01-07 21:06:39,678 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/ui/jquery-ui.min.js 304 [0.04, 127.0.0.1:63118][0m
+DEBUG 2026-01-07 21:06:39,682 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,698 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,704 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,712 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 60482]
+INFO 2026-01-07 21:06:39,713 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/grappelli.js 304 [0.03, 127.0.0.1:60482][0m
+INFO 2026-01-07 21:06:39,713 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/grappelli.js 304 [0.03, 127.0.0.1:60482][0m
+DEBUG 2026-01-07 21:06:39,720 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,725 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,737 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,738 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,740 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 63118]
+INFO 2026-01-07 21:06:39,740 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_collapsible.js 304 [0.02, 127.0.0.1:63118][0m
+INFO 2026-01-07 21:06:39,740 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_collapsible.js 304 [0.02, 127.0.0.1:63118][0m
+DEBUG 2026-01-07 21:06:39,742 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,743 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,743 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57891]
+INFO 2026-01-07 21:06:39,744 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_collapsible_group.js 304 [0.02, 127.0.0.1:57891][0m
+INFO 2026-01-07 21:06:39,744 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_collapsible_group.js 304 [0.02, 127.0.0.1:57891][0m
+DEBUG 2026-01-07 21:06:39,767 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,780 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,781 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,799 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,800 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,807 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57891]
+INFO 2026-01-07 21:06:39,808 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_timepicker.js 304 [0.04, 127.0.0.1:57891][0m
+INFO 2026-01-07 21:06:39,808 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_timepicker.js 304 [0.04, 127.0.0.1:57891][0m
+DEBUG 2026-01-07 21:06:39,810 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,812 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,819 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 60482]
+INFO 2026-01-07 21:06:39,831 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_m2m.js 304 [0.05, 127.0.0.1:60482][0m
+INFO 2026-01-07 21:06:39,831 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_m2m.js 304 [0.05, 127.0.0.1:60482][0m
+DEBUG 2026-01-07 21:06:39,839 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,842 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,843 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 63118]
+INFO 2026-01-07 21:06:39,845 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_fk.js 304 [0.06, 127.0.0.1:63118][0m
+INFO 2026-01-07 21:06:39,845 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_fk.js 304 [0.06, 127.0.0.1:63118][0m
+DEBUG 2026-01-07 21:06:39,846 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,862 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,865 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,890 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,891 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,891 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57891]
+INFO 2026-01-07 21:06:39,893 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_generic.js 304 [0.05, 127.0.0.1:57891][0m
+INFO 2026-01-07 21:06:39,893 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_generic.js 304 [0.05, 127.0.0.1:57891][0m
+DEBUG 2026-01-07 21:06:39,896 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,897 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,905 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 60482]
+INFO 2026-01-07 21:06:39,908 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_m2m.js 304 [0.05, 127.0.0.1:60482][0m
+INFO 2026-01-07 21:06:39,908 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_m2m.js 304 [0.05, 127.0.0.1:60482][0m
+DEBUG 2026-01-07 21:06:39,910 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,912 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,916 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 63118]
+INFO 2026-01-07 21:06:39,923 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_fk.js 304 [0.06, 127.0.0.1:63118][0m
+INFO 2026-01-07 21:06:39,923 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_fk.js 304 [0.06, 127.0.0.1:63118][0m
+DEBUG 2026-01-07 21:06:39,928 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,931 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,948 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,961 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,961 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:39,962 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57891]
+INFO 2026-01-07 21:06:39,962 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_inline.js 304 [0.03, 127.0.0.1:57891][0m
+INFO 2026-01-07 21:06:39,962 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_inline.js 304 [0.03, 127.0.0.1:57891][0m
+DEBUG 2026-01-07 21:06:39,966 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,970 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,973 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 60482]
+INFO 2026-01-07 21:06:39,974 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_generic.js 304 [0.05, 127.0.0.1:60482][0m
+INFO 2026-01-07 21:06:39,974 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_generic.js 304 [0.05, 127.0.0.1:60482][0m
+DEBUG 2026-01-07 21:06:39,979 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,983 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,986 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,987 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,989 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,990 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,991 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:39,993 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 63118]
+INFO 2026-01-07 21:06:39,994 runserver 12200 21204 [mHTTP GET /static/admin/js/vendor/jquery/jquery.js 200 [0.05, 127.0.0.1:63118][0m
+INFO 2026-01-07 21:06:39,994 runserver 12200 21204 [mHTTP GET /static/admin/js/vendor/jquery/jquery.js 200 [0.05, 127.0.0.1:63118][0m
+DEBUG 2026-01-07 21:06:39,997 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:39,998 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:40,016 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:40,024 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:40,029 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:40,046 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:40,046 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:40,048 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 60482]
+INFO 2026-01-07 21:06:40,048 runserver 12200 21204 [mHTTP GET /static/admin/js/core.js 200 [0.05, 127.0.0.1:60482][0m
+INFO 2026-01-07 21:06:40,048 runserver 12200 21204 [mHTTP GET /static/admin/js/core.js 200 [0.05, 127.0.0.1:60482][0m
+DEBUG 2026-01-07 21:06:40,050 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:40,050 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:40,051 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57891]
+INFO 2026-01-07 21:06:40,052 runserver 12200 21204 [mHTTP GET /static/admin/js/jquery.init.js 200 [0.05, 127.0.0.1:57891][0m
+INFO 2026-01-07 21:06:40,052 runserver 12200 21204 [mHTTP GET /static/admin/js/jquery.init.js 200 [0.05, 127.0.0.1:57891][0m
+DEBUG 2026-01-07 21:06:40,063 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:40,064 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:40,069 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 63118]
+INFO 2026-01-07 21:06:40,071 runserver 12200 21204 [36mHTTP GET /static/admin/js/admin/RelatedObjectLookups.js 304 [0.04, 127.0.0.1:63118][0m
+INFO 2026-01-07 21:06:40,071 runserver 12200 21204 [36mHTTP GET /static/admin/js/admin/RelatedObjectLookups.js 304 [0.04, 127.0.0.1:63118][0m
+DEBUG 2026-01-07 21:06:40,074 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:40,076 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:40,084 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:40,095 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:40,097 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:40,098 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 60482]
+INFO 2026-01-07 21:06:40,109 runserver 12200 21204 [36mHTTP GET /static/admin/js/actions.js 304 [0.04, 127.0.0.1:60482][0m
+INFO 2026-01-07 21:06:40,109 runserver 12200 21204 [36mHTTP GET /static/admin/js/actions.js 304 [0.04, 127.0.0.1:60482][0m
+DEBUG 2026-01-07 21:06:40,115 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:40,124 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:40,129 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:40,130 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:40,135 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:40,141 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57891]
+INFO 2026-01-07 21:06:40,143 runserver 12200 21204 [mHTTP GET /static/admin/js/urlify.js 200 [0.07, 127.0.0.1:57891][0m
+INFO 2026-01-07 21:06:40,143 runserver 12200 21204 [mHTTP GET /static/admin/js/urlify.js 200 [0.07, 127.0.0.1:57891][0m
+DEBUG 2026-01-07 21:06:40,145 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:40,146 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:40,150 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 63118]
+INFO 2026-01-07 21:06:40,153 runserver 12200 21204 [mHTTP GET /static/admin/js/prepopulate.js 200 [0.07, 127.0.0.1:63118][0m
+INFO 2026-01-07 21:06:40,153 runserver 12200 21204 [mHTTP GET /static/admin/js/prepopulate.js 200 [0.07, 127.0.0.1:63118][0m
+DEBUG 2026-01-07 21:06:40,158 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:06:40,177 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:40,179 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 56095]
+DEBUG 2026-01-07 21:06:40,182 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:40,190 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 60371]
+DEBUG 2026-01-07 21:06:40,197 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:40,199 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:40,201 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:40,202 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:40,202 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:40,203 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 60482]
+DEBUG 2026-01-07 21:06:40,203 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 60482]
+INFO 2026-01-07 21:06:40,204 runserver 12200 21204 [mHTTP GET /static/admin/js/vendor/xregexp/xregexp.js 200 [0.08, 127.0.0.1:60482][0m
+INFO 2026-01-07 21:06:40,204 runserver 12200 21204 [mHTTP GET /static/admin/js/vendor/xregexp/xregexp.js 200 [0.08, 127.0.0.1:60482][0m
+DEBUG 2026-01-07 21:06:40,221 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:40,224 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 63118]
+DEBUG 2026-01-07 21:06:40,227 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 63118]
+INFO 2026-01-07 21:06:40,228 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/js/toolbar.js 304 [0.05, 127.0.0.1:63118][0m
+INFO 2026-01-07 21:06:40,228 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/js/toolbar.js 304 [0.05, 127.0.0.1:63118][0m
+DEBUG 2026-01-07 21:06:40,238 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 56095]
+DEBUG 2026-01-07 21:06:40,247 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 56095]
+DEBUG 2026-01-07 21:06:40,249 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 56095]
+INFO 2026-01-07 21:06:40,253 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/css/toolbar.css 304 [0.07, 127.0.0.1:56095][0m
+INFO 2026-01-07 21:06:40,253 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/css/toolbar.css 304 [0.07, 127.0.0.1:56095][0m
+DEBUG 2026-01-07 21:06:40,257 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 60371]
+DEBUG 2026-01-07 21:06:40,263 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 60371]
+DEBUG 2026-01-07 21:06:40,263 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 60371]
+DEBUG 2026-01-07 21:06:40,264 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 60371]
+INFO 2026-01-07 21:06:40,265 runserver 12200 21204 [mHTTP GET /static/admin/img/icon-yes.svg 200 [0.07, 127.0.0.1:60371][0m
+INFO 2026-01-07 21:06:40,265 runserver 12200 21204 [mHTTP GET /static/admin/img/icon-yes.svg 200 [0.07, 127.0.0.1:60371][0m
+INFO 2026-01-07 21:06:52,380 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:52252]
+INFO 2026-01-07 21:06:52,380 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:52252]
+DEBUG 2026-01-07 21:06:52,401 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 52252] to WebSocket
+DEBUG 2026-01-07 21:06:52,404 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 52252] rejected by application
+INFO 2026-01-07 21:06:52,405 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:52252]
+INFO 2026-01-07 21:06:52,405 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:52252]
+DEBUG 2026-01-07 21:06:52,408 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 52252]
+INFO 2026-01-07 21:06:52,409 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:52252]
+INFO 2026-01-07 21:06:52,409 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:52252]
+INFO 2026-01-07 21:07:22,416 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:65130]
+INFO 2026-01-07 21:07:22,416 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:65130]
+DEBUG 2026-01-07 21:07:22,417 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 65130] to WebSocket
+DEBUG 2026-01-07 21:07:22,421 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 65130] rejected by application
+INFO 2026-01-07 21:07:22,421 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:65130]
+INFO 2026-01-07 21:07:22,421 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:65130]
+DEBUG 2026-01-07 21:07:22,422 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 65130]
+INFO 2026-01-07 21:07:22,424 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:65130]
+INFO 2026-01-07 21:07:22,424 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:65130]
+DEBUG 2026-01-07 21:07:45,714 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:07:45,716 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57891]
+DEBUG 2026-01-07 21:07:45,717 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57891]
+INFO 2026-01-07 21:07:45,717 runserver 12200 21204 [mHTTP GET /admin/jsi18n/ 200 [65.56, 127.0.0.1:57891][0m
+INFO 2026-01-07 21:07:45,717 runserver 12200 21204 [mHTTP GET /admin/jsi18n/ 200 [65.56, 127.0.0.1:57891][0m
+DEBUG 2026-01-07 21:07:45,743 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57023]
+DEBUG 2026-01-07 21:07:45,762 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 65229]
+DEBUG 2026-01-07 21:07:45,764 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 63090]
+DEBUG 2026-01-07 21:07:45,784 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 63090]
+DEBUG 2026-01-07 21:07:45,785 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 63090]
+DEBUG 2026-01-07 21:07:45,787 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 63090]
+INFO 2026-01-07 21:07:45,789 runserver 12200 21204 [36mHTTP GET /static/grappelli/images/spritesheet-1694777276.png 304 [0.02, 127.0.0.1:63090][0m
+INFO 2026-01-07 21:07:45,789 runserver 12200 21204 [36mHTTP GET /static/grappelli/images/spritesheet-1694777276.png 304 [0.02, 127.0.0.1:63090][0m
+DEBUG 2026-01-07 21:07:45,791 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 65229]
+DEBUG 2026-01-07 21:07:45,791 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 65229]
+DEBUG 2026-01-07 21:07:45,792 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 65229]
+INFO 2026-01-07 21:07:45,793 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/js/utils.js 304 [0.03, 127.0.0.1:65229][0m
+INFO 2026-01-07 21:07:45,793 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/js/utils.js 304 [0.03, 127.0.0.1:65229][0m
+DEBUG 2026-01-07 21:07:45,796 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 57023]
+DEBUG 2026-01-07 21:07:45,797 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57023]
+DEBUG 2026-01-07 21:07:45,801 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57023]
+INFO 2026-01-07 21:07:45,804 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/css/print.css 304 [0.06, 127.0.0.1:57023][0m
+INFO 2026-01-07 21:07:45,804 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/css/print.css 304 [0.06, 127.0.0.1:57023][0m
+DEBUG 2026-01-07 21:07:45,826 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 57023]
+DEBUG 2026-01-07 21:07:45,837 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 57023]
+DEBUG 2026-01-07 21:07:45,839 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 57023]
+DEBUG 2026-01-07 21:07:45,840 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 57023]
+INFO 2026-01-07 21:07:45,841 runserver 12200 21204 [36mHTTP GET /static/grappelli/images/backgrounds/changelist-results.png 304 [0.01, 127.0.0.1:57023][0m
+INFO 2026-01-07 21:07:45,841 runserver 12200 21204 [36mHTTP GET /static/grappelli/images/backgrounds/changelist-results.png 304 [0.01, 127.0.0.1:57023][0m
+DEBUG 2026-01-07 21:07:45,845 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 63090]
+DEBUG 2026-01-07 21:07:45,858 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 63090]
+DEBUG 2026-01-07 21:07:45,859 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 63090]
+DEBUG 2026-01-07 21:07:45,859 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 63090]
+INFO 2026-01-07 21:07:45,860 runserver 12200 21204 [36mHTTP GET /static/grappelli/images/icons/form-select.png 304 [0.02, 127.0.0.1:63090][0m
+INFO 2026-01-07 21:07:45,860 runserver 12200 21204 [36mHTTP GET /static/grappelli/images/icons/form-select.png 304 [0.02, 127.0.0.1:63090][0m
+INFO 2026-01-07 21:07:52,443 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:50974]
+INFO 2026-01-07 21:07:52,443 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:50974]
+DEBUG 2026-01-07 21:07:52,444 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 50974] to WebSocket
+DEBUG 2026-01-07 21:07:52,448 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 50974] rejected by application
+INFO 2026-01-07 21:07:52,470 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:50974]
+INFO 2026-01-07 21:07:52,470 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:50974]
+DEBUG 2026-01-07 21:07:52,472 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 50974]
+INFO 2026-01-07 21:07:52,475 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:50974]
+INFO 2026-01-07 21:07:52,475 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:50974]
+INFO 2026-01-07 21:08:22,480 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:53174]
+INFO 2026-01-07 21:08:22,480 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:53174]
+DEBUG 2026-01-07 21:08:22,481 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 53174] to WebSocket
+DEBUG 2026-01-07 21:08:22,483 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 53174] rejected by application
+INFO 2026-01-07 21:08:22,484 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:53174]
+INFO 2026-01-07 21:08:22,484 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:53174]
+DEBUG 2026-01-07 21:08:22,485 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 53174]
+INFO 2026-01-07 21:08:22,486 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:53174]
+INFO 2026-01-07 21:08:22,486 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:53174]
+INFO 2026-01-07 21:08:52,502 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:56525]
+INFO 2026-01-07 21:08:52,502 runserver 12200 21204 WebSocket HANDSHAKING /ws/notifications/ [127.0.0.1:56525]
+DEBUG 2026-01-07 21:08:52,503 http_protocol 12200 21204 Upgraded connection ['127.0.0.1', 56525] to WebSocket
+DEBUG 2026-01-07 21:08:52,507 ws_protocol 12200 21204 WebSocket ['127.0.0.1', 56525] rejected by application
+INFO 2026-01-07 21:08:52,508 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:56525]
+INFO 2026-01-07 21:08:52,508 runserver 12200 21204 WebSocket REJECT /ws/notifications/ [127.0.0.1:56525]
+DEBUG 2026-01-07 21:08:52,510 ws_protocol 12200 21204 WebSocket closed for ['127.0.0.1', 56525]
+INFO 2026-01-07 21:08:52,512 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:56525]
+INFO 2026-01-07 21:08:52,512 runserver 12200 21204 WebSocket DISCONNECT /ws/notifications/ [127.0.0.1:56525]
+DEBUG 2026-01-07 21:10:56,937 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,046 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,047 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,048 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 61867]
+INFO 2026-01-07 21:11:07,049 runserver 12200 21204 [mHTTP GET /admin/academic/classteacher/add/ 200 [10.11, 127.0.0.1:61867][0m
+INFO 2026-01-07 21:11:07,049 runserver 12200 21204 [mHTTP GET /admin/academic/classteacher/add/ 200 [10.11, 127.0.0.1:61867][0m
+DEBUG 2026-01-07 21:11:07,143 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,146 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 64876]
+DEBUG 2026-01-07 21:11:07,174 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59543]
+DEBUG 2026-01-07 21:11:07,212 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 49160]
+DEBUG 2026-01-07 21:11:07,220 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 55245]
+DEBUG 2026-01-07 21:11:07,225 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:07,245 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,249 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,253 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 61867]
+INFO 2026-01-07 21:11:07,254 runserver 12200 21204 [36mHTTP GET /static/grappelli/stylesheets/mueller/grid/output.css 304 [0.11, 127.0.0.1:61867][0m
+INFO 2026-01-07 21:11:07,254 runserver 12200 21204 [36mHTTP GET /static/grappelli/stylesheets/mueller/grid/output.css 304 [0.11, 127.0.0.1:61867][0m
+DEBUG 2026-01-07 21:11:07,263 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 64876]
+DEBUG 2026-01-07 21:11:07,264 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 64876]
+DEBUG 2026-01-07 21:11:07,265 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 64876]
+INFO 2026-01-07 21:11:07,273 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/jquery.min.js 304 [0.13, 127.0.0.1:64876][0m
+INFO 2026-01-07 21:11:07,273 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/jquery.min.js 304 [0.13, 127.0.0.1:64876][0m
+DEBUG 2026-01-07 21:11:07,274 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 59543]
+DEBUG 2026-01-07 21:11:07,274 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59543]
+DEBUG 2026-01-07 21:11:07,276 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59543]
+INFO 2026-01-07 21:11:07,277 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/ui/jquery-ui.min.js 304 [0.10, 127.0.0.1:59543][0m
+INFO 2026-01-07 21:11:07,277 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/ui/jquery-ui.min.js 304 [0.10, 127.0.0.1:59543][0m
+DEBUG 2026-01-07 21:11:07,279 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,286 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 49160]
+DEBUG 2026-01-07 21:11:07,287 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 49160]
+DEBUG 2026-01-07 21:11:07,288 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 49160]
+INFO 2026-01-07 21:11:07,290 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/css/toolbar.css 304 [0.08, 127.0.0.1:49160][0m
+INFO 2026-01-07 21:11:07,290 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/css/toolbar.css 304 [0.08, 127.0.0.1:49160][0m
+DEBUG 2026-01-07 21:11:07,294 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:07,296 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:07,301 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 58092]
+INFO 2026-01-07 21:11:07,306 runserver 12200 21204 [36mHTTP GET /static/admin/js/actions.js 304 [0.08, 127.0.0.1:58092][0m
+INFO 2026-01-07 21:11:07,306 runserver 12200 21204 [36mHTTP GET /static/admin/js/actions.js 304 [0.08, 127.0.0.1:58092][0m
+DEBUG 2026-01-07 21:11:07,323 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 64876]
+DEBUG 2026-01-07 21:11:07,326 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59543]
+DEBUG 2026-01-07 21:11:07,342 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 49160]
+DEBUG 2026-01-07 21:11:07,359 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:07,379 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 64876]
+DEBUG 2026-01-07 21:11:07,383 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 64876]
+DEBUG 2026-01-07 21:11:07,385 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 64876]
+INFO 2026-01-07 21:11:07,386 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_timepicker.js 304 [0.06, 127.0.0.1:64876][0m
+INFO 2026-01-07 21:11:07,386 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_timepicker.js 304 [0.06, 127.0.0.1:64876][0m
+DEBUG 2026-01-07 21:11:07,388 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,390 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,391 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 61867]
+INFO 2026-01-07 21:11:07,391 runserver 12200 21204 [36mHTTP GET /static/grappelli/stylesheets/screen.css 304 [0.11, 127.0.0.1:61867][0m
+INFO 2026-01-07 21:11:07,391 runserver 12200 21204 [36mHTTP GET /static/grappelli/stylesheets/screen.css 304 [0.11, 127.0.0.1:61867][0m
+DEBUG 2026-01-07 21:11:07,394 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 59543]
+DEBUG 2026-01-07 21:11:07,394 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59543]
+DEBUG 2026-01-07 21:11:07,395 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59543]
+INFO 2026-01-07 21:11:07,397 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/ui/jquery-ui.min.css 304 [0.07, 127.0.0.1:59543][0m
+INFO 2026-01-07 21:11:07,397 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/ui/jquery-ui.min.css 304 [0.07, 127.0.0.1:59543][0m
+DEBUG 2026-01-07 21:11:07,407 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 49160]
+DEBUG 2026-01-07 21:11:07,410 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 49160]
+DEBUG 2026-01-07 21:11:07,414 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 49160]
+INFO 2026-01-07 21:11:07,423 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_collapsible_group.js 304 [0.08, 127.0.0.1:49160][0m
+INFO 2026-01-07 21:11:07,423 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_collapsible_group.js 304 [0.08, 127.0.0.1:49160][0m
+DEBUG 2026-01-07 21:11:07,429 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,431 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:07,434 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:07,434 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 58092]
+INFO 2026-01-07 21:11:07,435 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/grappelli.js 304 [0.08, 127.0.0.1:58092][0m
+INFO 2026-01-07 21:11:07,435 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/grappelli.js 304 [0.08, 127.0.0.1:58092][0m
+DEBUG 2026-01-07 21:11:07,437 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 64876]
+DEBUG 2026-01-07 21:11:07,440 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59543]
+DEBUG 2026-01-07 21:11:07,462 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 49160]
+DEBUG 2026-01-07 21:11:07,466 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:07,481 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,488 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,490 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 61867]
+INFO 2026-01-07 21:11:07,490 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/jquery-migrate-3.0.1.min.js 304 [0.06, 127.0.0.1:61867][0m
+INFO 2026-01-07 21:11:07,490 runserver 12200 21204 [36mHTTP GET /static/grappelli/jquery/jquery-migrate-3.0.1.min.js 304 [0.06, 127.0.0.1:61867][0m
+DEBUG 2026-01-07 21:11:07,491 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:07,493 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:07,493 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 58092]
+INFO 2026-01-07 21:11:07,494 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_inline.js 304 [0.03, 127.0.0.1:58092][0m
+INFO 2026-01-07 21:11:07,494 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_inline.js 304 [0.03, 127.0.0.1:58092][0m
+DEBUG 2026-01-07 21:11:07,497 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 64876]
+DEBUG 2026-01-07 21:11:07,498 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 64876]
+DEBUG 2026-01-07 21:11:07,499 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 64876]
+INFO 2026-01-07 21:11:07,499 runserver 12200 21204 [36mHTTP GET /static/admin/js/admin/RelatedObjectLookups.js 304 [0.06, 127.0.0.1:64876][0m
+INFO 2026-01-07 21:11:07,499 runserver 12200 21204 [36mHTTP GET /static/admin/js/admin/RelatedObjectLookups.js 304 [0.06, 127.0.0.1:64876][0m
+DEBUG 2026-01-07 21:11:07,503 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 49160]
+DEBUG 2026-01-07 21:11:07,504 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 49160]
+DEBUG 2026-01-07 21:11:07,505 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 49160]
+INFO 2026-01-07 21:11:07,505 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_collapsible.js 304 [0.05, 127.0.0.1:49160][0m
+INFO 2026-01-07 21:11:07,505 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_collapsible.js 304 [0.05, 127.0.0.1:49160][0m
+DEBUG 2026-01-07 21:11:07,508 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 59543]
+DEBUG 2026-01-07 21:11:07,510 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59543]
+DEBUG 2026-01-07 21:11:07,510 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59543]
+INFO 2026-01-07 21:11:07,512 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_generic.js 304 [0.07, 127.0.0.1:59543][0m
+INFO 2026-01-07 21:11:07,512 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_generic.js 304 [0.07, 127.0.0.1:59543][0m
+DEBUG 2026-01-07 21:11:07,521 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:07,523 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,524 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 64876]
+DEBUG 2026-01-07 21:11:07,531 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 49160]
+DEBUG 2026-01-07 21:11:07,539 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 59543]
+DEBUG 2026-01-07 21:11:07,567 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:07,568 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:07,569 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 58092]
+INFO 2026-01-07 21:11:07,570 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_generic.js 304 [0.05, 127.0.0.1:58092][0m
+INFO 2026-01-07 21:11:07,570 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_generic.js 304 [0.05, 127.0.0.1:58092][0m
+DEBUG 2026-01-07 21:11:07,572 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 64876]
+DEBUG 2026-01-07 21:11:07,573 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 64876]
+DEBUG 2026-01-07 21:11:07,575 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 64876]
+INFO 2026-01-07 21:11:07,579 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_fk.js 304 [0.05, 127.0.0.1:64876][0m
+INFO 2026-01-07 21:11:07,579 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_fk.js 304 [0.05, 127.0.0.1:64876][0m
+DEBUG 2026-01-07 21:11:07,581 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,583 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,585 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 61867]
+INFO 2026-01-07 21:11:07,586 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_fk.js 304 [0.06, 127.0.0.1:61867][0m
+INFO 2026-01-07 21:11:07,586 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_fk.js 304 [0.06, 127.0.0.1:61867][0m
+DEBUG 2026-01-07 21:11:07,587 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 49160]
+DEBUG 2026-01-07 21:11:07,589 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 49160]
+DEBUG 2026-01-07 21:11:07,590 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 49160]
+INFO 2026-01-07 21:11:07,591 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_m2m.js 304 [0.06, 127.0.0.1:49160][0m
+INFO 2026-01-07 21:11:07,591 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_related_m2m.js 304 [0.06, 127.0.0.1:49160][0m
+DEBUG 2026-01-07 21:11:07,592 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 59543]
+DEBUG 2026-01-07 21:11:07,592 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 59543]
+DEBUG 2026-01-07 21:11:07,593 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 59543]
+INFO 2026-01-07 21:11:07,595 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_m2m.js 304 [0.06, 127.0.0.1:59543][0m
+INFO 2026-01-07 21:11:07,595 runserver 12200 21204 [36mHTTP GET /static/grappelli/js/jquery.grp_autocomplete_m2m.js 304 [0.06, 127.0.0.1:59543][0m
+DEBUG 2026-01-07 21:11:07,598 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:07,608 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 49160]
+DEBUG 2026-01-07 21:11:07,610 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 64876]
+DEBUG 2026-01-07 21:11:07,613 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,629 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 49160]
+DEBUG 2026-01-07 21:11:07,633 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 49160]
+DEBUG 2026-01-07 21:11:07,638 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 49160]
+INFO 2026-01-07 21:11:07,639 runserver 12200 21204 [36mHTTP GET /static/admin/js/admin/DateTimeShortcuts.js 304 [0.03, 127.0.0.1:49160][0m
+INFO 2026-01-07 21:11:07,639 runserver 12200 21204 [36mHTTP GET /static/admin/js/admin/DateTimeShortcuts.js 304 [0.03, 127.0.0.1:49160][0m
+DEBUG 2026-01-07 21:11:07,641 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 64876]
+DEBUG 2026-01-07 21:11:07,643 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 64876]
+DEBUG 2026-01-07 21:11:07,643 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 64876]
+INFO 2026-01-07 21:11:07,645 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/js/toolbar.js 304 [0.03, 127.0.0.1:64876][0m
+INFO 2026-01-07 21:11:07,645 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/js/toolbar.js 304 [0.03, 127.0.0.1:64876][0m
+DEBUG 2026-01-07 21:11:07,647 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,652 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:07,660 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,661 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:07,663 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 61867]
+INFO 2026-01-07 21:11:07,665 runserver 12200 21204 [mHTTP GET /static/admin/js/prepopulate_init.js 200 [0.05, 127.0.0.1:61867][0m
+INFO 2026-01-07 21:11:07,665 runserver 12200 21204 [mHTTP GET /static/admin/js/prepopulate_init.js 200 [0.05, 127.0.0.1:61867][0m
+DEBUG 2026-01-07 21:11:07,668 http_protocol 12200 21204 HTTP response chunk for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:07,669 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:07,670 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 58092]
+INFO 2026-01-07 21:11:07,670 runserver 12200 21204 [mHTTP GET /static/admin/js/calendar.js 200 [0.07, 127.0.0.1:58092][0m
+INFO 2026-01-07 21:11:07,670 runserver 12200 21204 [mHTTP GET /static/admin/js/calendar.js 200 [0.07, 127.0.0.1:58092][0m
+DEBUG 2026-01-07 21:11:11,123 http_protocol 12200 21204 HTTP 200 response started for ['127.0.0.1', 55245]
+DEBUG 2026-01-07 21:11:11,123 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 55245]
+DEBUG 2026-01-07 21:11:11,124 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 55245]
+INFO 2026-01-07 21:11:11,125 runserver 12200 21204 [mHTTP GET /admin/jsi18n/ 200 [3.91, 127.0.0.1:55245][0m
+INFO 2026-01-07 21:11:11,125 runserver 12200 21204 [mHTTP GET /admin/jsi18n/ 200 [3.91, 127.0.0.1:55245][0m
+DEBUG 2026-01-07 21:11:11,379 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 55245]
+DEBUG 2026-01-07 21:11:11,383 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:11,384 http_protocol 12200 21204 HTTP b'GET' request for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:11,410 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:11,421 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 61867]
+DEBUG 2026-01-07 21:11:11,425 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 61867]
+INFO 2026-01-07 21:11:11,429 runserver 12200 21204 [36mHTTP GET /static/grappelli/images/spritesheet-1694777276.png 304 [0.04, 127.0.0.1:61867][0m
+INFO 2026-01-07 21:11:11,429 runserver 12200 21204 [36mHTTP GET /static/grappelli/images/spritesheet-1694777276.png 304 [0.04, 127.0.0.1:61867][0m
+DEBUG 2026-01-07 21:11:11,438 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:11,439 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 58092]
+DEBUG 2026-01-07 21:11:11,440 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 58092]
+INFO 2026-01-07 21:11:11,440 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/js/utils.js 304 [0.06, 127.0.0.1:58092][0m
+INFO 2026-01-07 21:11:11,440 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/js/utils.js 304 [0.06, 127.0.0.1:58092][0m
+DEBUG 2026-01-07 21:11:11,442 http_protocol 12200 21204 HTTP 304 response started for ['127.0.0.1', 55245]
+DEBUG 2026-01-07 21:11:11,443 http_protocol 12200 21204 HTTP close for ['127.0.0.1', 55245]
+DEBUG 2026-01-07 21:11:11,443 http_protocol 12200 21204 HTTP response complete for ['127.0.0.1', 55245]
+INFO 2026-01-07 21:11:11,451 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/css/print.css 304 [0.07, 127.0.0.1:55245][0m
+INFO 2026-01-07 21:11:11,451 runserver 12200 21204 [36mHTTP GET /static/debug_toolbar/css/print.css 304 [0.07, 127.0.0.1:55245][0m
