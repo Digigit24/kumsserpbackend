@@ -77,6 +77,52 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
             for row in user_query.values('college_id', 'user_type').annotate(total=Count('id'))
         }
 
+        # Get role assignments from HierarchyUserRole (role.code as user_type equivalent)
+        hierarchy_role_query = HierarchyUserRole.objects.filter(is_active=True).select_related('role', 'user')
+        if college_id_header and college_id_header.lower() != 'all':
+            try:
+                college_id_filter = int(college_id_header)
+                hierarchy_role_query = hierarchy_role_query.filter(
+                    Q(college_id=college_id_filter) | Q(college_id__isnull=True)
+                )
+            except (ValueError, TypeError):
+                pass
+
+        hierarchy_role_counts = {}
+        for hr in hierarchy_role_query.filter(user__is_active=True):
+            role_code = (hr.role.code or '').lower()
+            key = (hr.college_id, role_code)
+            hierarchy_role_counts[key] = hierarchy_role_counts.get(key, 0) + 1
+
+        # Get role assignments from AccountUserRole (role.code as user_type equivalent)
+        account_role_query = AccountUserRole.objects.filter(is_active=True).select_related('role', 'user')
+        if college_id_header and college_id_header.lower() != 'all':
+            try:
+                college_id_filter = int(college_id_header)
+                account_role_query = account_role_query.filter(
+                    Q(college_id=college_id_filter) | Q(college_id__isnull=True)
+                )
+            except (ValueError, TypeError):
+                pass
+
+        account_role_counts = {}
+        for ar in account_role_query.filter(user__is_active=True):
+            role_code = (ar.role.code or '').lower()
+            key = (ar.college_id, role_code)
+            account_role_counts[key] = account_role_counts.get(key, 0) + 1
+
+        # Merge all counts: user_type + hierarchy_roles + account_roles
+        all_role_counts = {}
+        # Add user_type counts
+        for key, count in user_type_counts.items():
+            all_role_counts[key] = count
+        # Add hierarchy role counts
+        for key, count in hierarchy_role_counts.items():
+            all_role_counts[key] = all_role_counts.get(key, 0) + count
+        # Add account role counts
+        for key, count in account_role_counts.items():
+            all_role_counts[key] = all_role_counts.get(key, 0) + count
+
         # Comprehensive role display names with levels (lower number = higher authority)
         user_type_labels = {
             'ceo': ('CEO', 0),
@@ -150,7 +196,7 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
         # Handle global users (college_id is None)
         global_user_items = [
             (user_type, count)
-            for (cid, user_type), count in user_type_counts.items()
+            for (cid, user_type), count in all_role_counts.items()
             if cid is None and count > 0
         ]
 
@@ -170,7 +216,7 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
             # Get user types for this college
             user_type_items = [
                 (user_type, count)
-                for (cid, user_type), count in user_type_counts.items()
+                for (cid, user_type), count in all_role_counts.items()
                 if cid == college.id and count > 0
             ]
 
@@ -221,7 +267,7 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def roles_summary(self, request):
-        """Get summary of all roles and their counts per college based on actual users."""
+        """Get summary of all roles and their counts per college based on actual users and role assignments."""
         college_id = request.headers.get('X-College-Id')
         cache_key = f'roles_summary_{college_id or "all"}'
         cached_data = cache.get(cache_key)
@@ -280,7 +326,10 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                 'roles': []
             }
 
-            # Get actual user counts by type from database - only users that exist
+            # Collect all role counts from multiple sources
+            role_counts = {}
+
+            # 1. Get counts from user_type field
             user_type_data = User.objects.filter(
                 college_id=college.id,
                 is_active=True
@@ -288,17 +337,41 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                 user_type='super_admin'
             ).values('user_type').annotate(count=Count('id'))
 
-            role_list = []
             for row in user_type_data:
-                user_type = row['user_type']
-                count = row['count']
-                label, level = user_type_labels.get(user_type, (user_type.replace('_', ' ').title(), 9))
+                role_counts[row['user_type']] = row['count']
 
-                # Only include roles with actual users (count > 0)
+            # 2. Get counts from HierarchyUserRole assignments
+            hierarchy_roles = HierarchyUserRole.objects.filter(
+                college_id=college.id,
+                is_active=True,
+                user__is_active=True
+            ).select_related('role').values('role__code').annotate(count=Count('id'))
+
+            for row in hierarchy_roles:
+                role_code = (row['role__code'] or '').lower()
+                if role_code:
+                    role_counts[role_code] = role_counts.get(role_code, 0) + row['count']
+
+            # 3. Get counts from AccountUserRole assignments
+            account_roles = AccountUserRole.objects.filter(
+                college_id=college.id,
+                is_active=True,
+                user__is_active=True
+            ).select_related('role').values('role__code').annotate(count=Count('id'))
+
+            for row in account_roles:
+                role_code = (row['role__code'] or '').lower()
+                if role_code:
+                    role_counts[role_code] = role_counts.get(role_code, 0) + row['count']
+
+            # Build role list with labels
+            role_list = []
+            for role_code, count in role_counts.items():
                 if count > 0:
+                    label, level = user_type_labels.get(role_code, (role_code.replace('_', ' ').title(), 9))
                     role_list.append({
                         'role_name': label,
-                        'role_code': user_type,
+                        'role_code': role_code,
                         'count': count,
                         'level': level
                     })
