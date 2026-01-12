@@ -238,3 +238,7 @@ def log_user_logout(sender, request, user, **kwargs):
             )
         except Exception:
             pass
+
+
+# Import hierarchy signals
+from .hierarchy_signals import *  # noqa

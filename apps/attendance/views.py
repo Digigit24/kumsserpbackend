@@ -1,6 +1,7 @@
 """
 DRF ViewSets for Attendance app with comprehensive API documentation.
 """
+from apps.core.cache_mixins import CachedReadOnlyMixin
 from rest_framework import status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -26,7 +27,7 @@ from .serializers import (
     BulkDeleteSerializer,
     BulkAttendanceSerializer,
 )
-from apps.core.mixins import CollegeScopedModelViewSet
+from apps.core.mixins import CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
 
 
 # ============================================================================
@@ -77,7 +78,7 @@ from apps.core.mixins import CollegeScopedModelViewSet
         tags=['Attendance - Students']
     ),
 )
-class StudentAttendanceViewSet(CollegeScopedModelViewSet):
+class StudentAttendanceViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     """ViewSet for managing student attendance."""
     queryset = StudentAttendance.objects.all_colleges()
     serializer_class = StudentAttendanceSerializer
@@ -258,11 +259,12 @@ class StudentAttendanceViewSet(CollegeScopedModelViewSet):
         tags=['Attendance - Subjects']
     ),
 )
-class SubjectAttendanceViewSet(CollegeScopedModelViewSet):
+class SubjectAttendanceViewSet(RelatedCollegeScopedModelViewSet):
     """ViewSet for managing subject attendance."""
     queryset = SubjectAttendance.objects.all_colleges()
     serializer_class = SubjectAttendanceSerializer
     permission_classes = [IsAuthenticated]
+    related_college_lookup = 'student__college_id'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['student', 'subject_assignment', 'date', 'period', 'status', 'marked_by']
     search_fields = ['student__first_name', 'student__last_name']
@@ -321,7 +323,7 @@ class SubjectAttendanceViewSet(CollegeScopedModelViewSet):
         tags=['Attendance - Staff']
     ),
 )
-class StaffAttendanceViewSet(CollegeScopedModelViewSet):
+class StaffAttendanceViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     """ViewSet for managing staff attendance."""
     queryset = StaffAttendance.objects.all_colleges()
     serializer_class = StaffAttendanceSerializer
@@ -385,7 +387,7 @@ class StaffAttendanceViewSet(CollegeScopedModelViewSet):
         tags=['Attendance - Notifications']
     ),
 )
-class AttendanceNotificationViewSet(CollegeScopedModelViewSet):
+class AttendanceNotificationViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     """ViewSet for managing attendance notifications."""
     queryset = AttendanceNotification.objects.all_colleges()
     serializer_class = AttendanceNotificationSerializer

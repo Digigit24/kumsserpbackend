@@ -11,8 +11,16 @@ from .models import (
     Weekend,
     SystemSetting,
     NotificationSetting,
-    ActivityLog
+    ActivityLog,
+    OrganizationNode,
+    DynamicRole,
+    HierarchyPermission,
+    RolePermission,
+    HierarchyUserRole,
+    Team,
+    HierarchyTeamMember
 )
+from mptt.admin import MPTTModelAdmin
 
 
 class CollegeAwareAdmin(admin.ModelAdmin):
@@ -302,3 +310,72 @@ class ActivityLogAdmin(CollegeAwareAdmin):
             )
         return '-'
     ip_address_display.short_description = 'IP Address'
+
+
+# ============================================================================
+# ORGANIZATIONAL HIERARCHY ADMIN
+# ============================================================================
+
+@admin.register(OrganizationNode)
+class OrganizationNodeAdmin(MPTTModelAdmin):
+    """Admin for Organization Node with tree structure."""
+    list_display = ['name', 'node_type', 'role', 'user', 'college', 'is_active', 'order']
+    list_filter = ['node_type', 'is_active', 'college']
+    search_fields = ['name', 'description']
+    autocomplete_fields = ['user', 'college', 'role', 'parent']
+    mptt_level_indent = 20
+
+
+@admin.register(DynamicRole)
+class DynamicRoleAdmin(admin.ModelAdmin):
+    """Admin for Dynamic Roles."""
+    list_display = ['name', 'code', 'level', 'is_global', 'college', 'is_active']
+    list_filter = ['is_global', 'is_active', 'college']
+    search_fields = ['name', 'code', 'description']
+    prepopulated_fields = {'code': ('name',)}
+
+
+@admin.register(HierarchyPermission)
+class HierarchyPermissionAdmin(admin.ModelAdmin):
+    """Admin for Hierarchy Permissions."""
+    list_display = ['code', 'name', 'app_label', 'resource', 'action', 'category']
+    list_filter = ['app_label', 'action', 'category']
+    search_fields = ['code', 'name', 'description']
+
+
+@admin.register(RolePermission)
+class RolePermissionAdmin(admin.ModelAdmin):
+    """Admin for Role Permission mappings."""
+    list_display = ['role', 'permission', 'scope', 'can_delegate']
+    list_filter = ['scope', 'can_delegate', 'role']
+    search_fields = ['role__name', 'permission__code']
+    autocomplete_fields = ['role', 'permission']
+
+
+@admin.register(HierarchyUserRole)
+class HierarchyUserRoleAdmin(admin.ModelAdmin):
+    """Admin for Hierarchy User Role assignments."""
+    list_display = ['user', 'role', 'college', 'assigned_by', 'assigned_at', 'is_active']
+    list_filter = ['is_active', 'college', 'role']
+    search_fields = ['user__email', 'user__first_name', 'user__last_name', 'role__name']
+    autocomplete_fields = ['user', 'role', 'college', 'assigned_by']
+    date_hierarchy = 'assigned_at'
+
+
+@admin.register(Team)
+class TeamAdmin(admin.ModelAdmin):
+    """Admin for Teams."""
+    list_display = ['name', 'team_type', 'lead_user', 'college', 'is_active']
+    list_filter = ['team_type', 'is_active', 'college']
+    search_fields = ['name', 'description']
+    autocomplete_fields = ['node', 'lead_user', 'college']
+
+
+@admin.register(HierarchyTeamMember)
+class HierarchyTeamMemberAdmin(admin.ModelAdmin):
+    """Admin for Team Members."""
+    list_display = ['user', 'team', 'role_in_team', 'auto_assigned', 'joined_at']
+    list_filter = ['role_in_team', 'auto_assigned', 'team__team_type']
+    search_fields = ['user__email', 'user__first_name', 'user__last_name', 'team__name']
+    autocomplete_fields = ['team', 'user']
+    date_hierarchy = 'joined_at'

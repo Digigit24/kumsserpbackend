@@ -1,8 +1,9 @@
 from rest_framework import filters, viewsets
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+from apps.core.cache_mixins import CachedReadOnlyMixin
 
-from apps.core.mixins import CollegeScopedModelViewSet
+from apps.core.mixins import CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
 from .models import (
     QuestionBank,
     Question,
@@ -23,7 +24,7 @@ from .serializers import (
 )
 
 
-class QuestionBankViewSet(CollegeScopedModelViewSet):
+class QuestionBankViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     queryset = QuestionBank.objects.all_colleges()
     serializer_class = QuestionBankSerializer
     permission_classes = [IsAuthenticated]
@@ -34,8 +35,8 @@ class QuestionBankViewSet(CollegeScopedModelViewSet):
     ordering = ['name']
 
 
-class QuestionViewSet(viewsets.ModelViewSet):
-    queryset = Question.objects.all()
+class QuestionViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+    queryset = Question.objects.select_related('bank')
     serializer_class = QuestionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -43,19 +44,21 @@ class QuestionViewSet(viewsets.ModelViewSet):
     search_fields = ['question_text']
     ordering_fields = ['created_at', 'marks']
     ordering = ['-created_at']
+    related_college_lookup = 'bank__college_id'
 
 
-class QuestionOptionViewSet(viewsets.ModelViewSet):
-    queryset = QuestionOption.objects.all()
+class QuestionOptionViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+    queryset = QuestionOption.objects.select_related('question__bank')
     serializer_class = QuestionOptionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['question', 'is_active', 'is_correct']
     ordering_fields = ['created_at']
     ordering = ['created_at']
+    related_college_lookup = 'question__bank__college_id'
 
 
-class OnlineExamViewSet(CollegeScopedModelViewSet):
+class OnlineExamViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     queryset = OnlineExam.objects.all_colleges()
     serializer_class = OnlineExamSerializer
     permission_classes = [IsAuthenticated]
@@ -66,31 +69,34 @@ class OnlineExamViewSet(CollegeScopedModelViewSet):
     ordering = ['-start_datetime']
 
 
-class ExamQuestionViewSet(viewsets.ModelViewSet):
-    queryset = ExamQuestion.objects.all()
+class ExamQuestionViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+    queryset = ExamQuestion.objects.select_related('exam', 'question__bank')
     serializer_class = ExamQuestionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['exam', 'question', 'is_active']
     ordering_fields = ['order', 'created_at']
     ordering = ['order']
+    related_college_lookup = 'exam__college_id'
 
 
-class StudentExamAttemptViewSet(viewsets.ModelViewSet):
-    queryset = StudentExamAttempt.objects.all()
+class StudentExamAttemptViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+    queryset = StudentExamAttempt.objects.select_related('exam', 'student')
     serializer_class = StudentExamAttemptSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['exam', 'student', 'status', 'is_active']
     ordering_fields = ['start_time', 'created_at']
     ordering = ['-start_time']
+    related_college_lookup = 'exam__college_id'
 
 
-class StudentAnswerViewSet(viewsets.ModelViewSet):
-    queryset = StudentAnswer.objects.all()
+class StudentAnswerViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+    queryset = StudentAnswer.objects.select_related('attempt__exam', 'question__bank', 'selected_option')
     serializer_class = StudentAnswerSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['attempt', 'question', 'is_active']
     ordering_fields = ['created_at']
     ordering = ['created_at']
+    related_college_lookup = 'attempt__exam__college_id'

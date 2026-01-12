@@ -26,7 +26,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
     'grappelli',
 
     'django.contrib.admin',
@@ -44,6 +43,7 @@ INSTALLED_APPS = [
     'drf_spectacular',  # API documentation
     'django_filters',
     'storages',  # AWS S3 storage
+    'mptt',  # Django MPTT for tree structures
 
     'django_extensions',
 
@@ -75,14 +75,28 @@ INSTALLED_APPS = [
 
 ASGI_APPLICATION = 'kumss_erp.asgi.application'
 
-CHANNEL_LAYERS = {
+# Redis configuration for real-time messaging (SSE + Pub/Sub)
+REDIS_URL = config('REDIS_URL', default='redis://127.0.0.1:6379')
+
+# Django Cache Configuration using Redis
+CACHES = {
     'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [config('REDIS_URL', default='redis://127.0.0.1:6379')],
-        },
-    },
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': REDIS_URL,
+        'KEY_PREFIX': 'kumss',
+        'TIMEOUT': 300,  # 5 minutes default
+    }
 }
+
+# Channel Layers - Disabled (Using SSE instead of WebSocket)
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             "hosts": [config('REDIS_URL', default='redis://127.0.0.1:6379')],
+#         },
+#     },
+# }
 
 MIDDLEWARE = [
     'django.middleware.gzip.GZipMiddleware',  # Compress all responses
@@ -267,6 +281,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3030",
     "http://127.0.0.1:5173",
     "http://localhost:5173",
+    "https://kumss.celiyo.com"
 ]
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
@@ -324,6 +339,11 @@ SPECTACULAR_SETTINGS = {
 
 # Logging Configuration
 # https://docs.djangoproject.com/en/5.0/topics/logging/
+LOG_TO_FILE = config('LOG_TO_FILE', default=False, cast=bool)
+DEFAULT_LOG_HANDLERS = ['console']
+if LOG_TO_FILE:
+    DEFAULT_LOG_HANDLERS.append('file')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -342,32 +362,26 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'debug.log',
-            'formatter': 'verbose',
-        },
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console'],
+            'handlers': DEFAULT_LOG_HANDLERS,
             'level': 'INFO',
             'propagate': True,
         },
         'django.request': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
+            'handlers': DEFAULT_LOG_HANDLERS,
+            'level': 'INFO',
             'propagate': False,
         },
         'apps': { # Capture logs from all apps within the 'apps' directory
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'handlers': DEFAULT_LOG_HANDLERS,
+            'level': 'INFO',
             'propagate': True,
         },
         'corsheaders': { # Specifically log corsheaders middleware
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'handlers': DEFAULT_LOG_HANDLERS,
+            'level': 'INFO',
             'propagate': True,
         },
         'django.db.backends': { # Log SQL queries
@@ -377,7 +391,15 @@ LOGGING = {
         }
     },
     'root': {
-        'handlers': ['file', 'console'],
-        'level': 'DEBUG',
+        'handlers': DEFAULT_LOG_HANDLERS,
+        'level': 'INFO',
     },
 }
+
+if LOG_TO_FILE:
+    LOGGING['handlers']['file'] = {
+        'level': 'DEBUG',
+        'class': 'logging.FileHandler',
+        'filename': BASE_DIR / 'logs' / 'debug.log',
+        'formatter': 'verbose',
+    }

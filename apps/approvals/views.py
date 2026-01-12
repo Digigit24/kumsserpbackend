@@ -154,14 +154,24 @@ class ApprovalRequestViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def review(self, request, pk=None):
         """Approve or reject an approval request."""
-        approval_request = self.get_object()
+        approval_request = ApprovalRequest.objects.filter(pk=pk).first()
+        if not approval_request:
+            approval_request = ApprovalRequest.objects.filter(
+                request_type='procurement_requirement',
+                object_id=pk
+            ).first()
+        if not approval_request:
+            return Response(
+                {'error': 'No approval request match'},
+                status=status.HTTP_404_NOT_FOUND
+            )
         serializer = ApproveRejectSerializer(data=request.data)
 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if user is an approver
-        if request.user not in approval_request.approvers.all():
+        # Check if user is an approver (superusers bypass)
+        if not request.user.is_superuser and request.user not in approval_request.approvers.all():
             return Response(
                 {'error': 'You are not authorized to review this request'},
                 status=status.HTTP_403_FORBIDDEN

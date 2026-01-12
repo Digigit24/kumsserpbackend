@@ -20,7 +20,7 @@ User = get_user_model()
 
 class FacultyListSerializer(serializers.ModelSerializer):
     """Serializer for listing faculties (minimal fields)."""
-    college_name = serializers.CharField(source='college.short_name', read_only=True)
+    college_name = serializers.CharField(source='college.name', read_only=True)
     hod_name = serializers.CharField(source='hod.get_full_name', read_only=True)
 
     class Meta:
@@ -51,7 +51,7 @@ class FacultySerializer(TenantAuditMixin, serializers.ModelSerializer):
 
 class ProgramListSerializer(serializers.ModelSerializer):
     """Serializer for listing programs (minimal fields)."""
-    college_name = serializers.CharField(source='college.short_name', read_only=True)
+    college_name = serializers.CharField(source='college.name', read_only=True)
     faculty_name = serializers.CharField(source='faculty.short_name', read_only=True)
 
     class Meta:
@@ -149,7 +149,7 @@ class SectionSerializer(TenantAuditMixin, serializers.ModelSerializer):
 
 class SubjectListSerializer(serializers.ModelSerializer):
     """Serializer for listing subjects (minimal fields)."""
-    college_name = serializers.CharField(source='college.short_name', read_only=True)
+    college_name = serializers.CharField(source='college.name', read_only=True)
 
     class Meta:
         model = Subject

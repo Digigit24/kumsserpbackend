@@ -953,8 +953,8 @@ class StoreIndent(CollegeScopedModel):
             })
 
     def submit(self):
-        """College store submits request to college admin"""
-        self.status = 'pending_college_approval'
+        """College store submits request to super admin"""
+        self.status = 'pending_super_admin'
         self.save(update_fields=['status', 'updated_at'])
 
     def college_admin_approve(self, user=None):
@@ -973,10 +973,10 @@ class StoreIndent(CollegeScopedModel):
         self.save(update_fields=['status', 'rejection_reason', 'updated_at'])
 
     def super_admin_approve(self, user=None):
-        """Super admin approves - status set to super_admin_approved"""
-        if self.status != 'pending_super_admin':
+        """Super admin approves - status set to approved"""
+        if self.status not in ['pending_super_admin', 'pending_college_approval', 'submitted']:
             raise ValidationError('Invalid status for super admin approval')
-        self.status = 'super_admin_approved'
+        self.status = 'approved'
         self.approved_by = user
         self.approved_date = timezone.now()
         self.save(update_fields=['status', 'approved_by', 'approved_date', 'updated_at'])
@@ -1098,6 +1098,25 @@ class MaterialIssueNote(AuditModel):
         super().save(*args, **kwargs)
 
     def dispatch(self):
+        for issue_item in self.items.all():
+            try:
+                inventory = CentralStoreInventory.objects.get(
+                    central_store=self.central_store,
+                    item=issue_item.item
+                )
+            except CentralStoreInventory.DoesNotExist:
+                raise ValidationError({'items': 'Item not available in central store inventory'})
+            if (inventory.quantity_available or 0) <= 0:
+                raise ValidationError({
+                    'items': f'Required stock not available for {issue_item.item.name}.'
+                })
+            if issue_item.issued_quantity > inventory.quantity_available:
+                raise ValidationError({
+                    'items': (
+                        f'Required stock not available for {issue_item.item.name}. '
+                        f'Available: {inventory.quantity_available}'
+                    )
+                })
         self.status = 'in_transit'
         self.dispatch_date = timezone.now()
         self.save(update_fields=['status', 'dispatch_date', 'updated_at'])

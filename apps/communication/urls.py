@@ -15,6 +15,7 @@ from .views import (
     NotificationRuleViewSet,
     ChatMessageViewSet,
 )
+from .sse_views import sse_events, sse_test
 
 router = DefaultRouter()
 router.register(r'notices', NoticeViewSet, basename='notice')
@@ -28,5 +29,10 @@ router.register(r'notification-rules', NotificationRuleViewSet, basename='notifi
 router.register(r'chats', ChatMessageViewSet, basename='chatmessage')
 
 urlpatterns = [
+    # SSE (Server-Sent Events) endpoints for real-time communication
+    path('sse/events/', sse_events, name='sse-events'),
+    path('sse/test/', sse_test, name='sse-test'),
+
+    # REST API endpoints
     path('', include(router.urls)),
 ]

@@ -788,3 +788,377 @@ class TeamMembership(CollegeScopedModel):
 
     def __str__(self):
         return f"{self.leader.get_full_name()} -> {self.member.get_full_name()} ({self.relationship_type})"
+
+
+# ============================================================================
+# ORGANIZATIONAL HIERARCHY MODELS (NEW)
+# ============================================================================
+
+from mptt.models import MPTTModel, TreeForeignKey
+
+
+class OrganizationNode(MPTTModel):
+    """MPTT-based tree structure for organization hierarchy."""
+
+    NODE_TYPES = (
+        ('ceo', 'CEO'),
+        ('iti_principal', 'ITI Principal'),
+        ('principal_parallel', 'Principals Parallel'),
+        ('construction', 'Construction And'),
+        ('central_store', 'Central Store'),
+        ('spmm_principal', 'SPMM Principal'),
+        ('psk', 'PSK'),
+        ('principal', 'Principal'),
+        ('viceprincipal_super', 'Viceprincipal/Super'),
+        ('store_manager', 'Store Manager'),
+        ('clerk', 'Clerk'),
+        ('accountant', 'Accountant'),
+        ('librarian', 'Librarian'),
+        ('admission', 'Admission and'),
+        ('hostel_incharge', 'Hostel Incharge'),
+        ('telecaller', 'Telecaller'),
+        ('hostel_rector', 'Hostel Rector'),
+        ('mess_canteen', 'Mess/Canteen'),
+        ('jr_engineer', 'Jr Engineer'),
+        ('viceprincipal', 'Viceprincipal'),
+        ('store', 'Store'),
+        ('professor', 'Professor'),
+        ('associate_professor', 'Associate Professor'),
+        ('assistant_professor', 'Assistant Professor'),
+        ('lab_assistant', 'Lab Assistant'),
+        ('teacher', 'Teacher/Trade'),
+        ('hod', 'HOD'),
+        ('staff', 'Staff'),
+        ('department', 'Department'),
+    )
+
+    name = models.CharField(max_length=255, help_text="Node name")
+    node_type = models.CharField(max_length=50, choices=NODE_TYPES)
+    description = models.TextField(blank=True)
+
+    parent = TreeForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='children'
+    )
+
+    # Linked entities
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='org_nodes'
+    )
+    college = models.ForeignKey(
+        College,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='org_nodes'
+    )
+
+    # Role assignment
+    role = models.ForeignKey(
+        'DynamicRole',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='nodes'
+    )
+
+    is_active = models.BooleanField(default=True, db_index=True)
+    order = models.IntegerField(default=0, help_text="Display order")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class MPTTMeta:
+        order_insertion_by = ['order', 'name']
+
+    class Meta:
+        verbose_name = 'Organization Node'
+        verbose_name_plural = 'Organization Nodes'
+        db_table = 'core_organization_node'
+        app_label = 'core'
+        indexes = [
+            models.Index(fields=['node_type', 'is_active']),
+            models.Index(fields=['college', 'is_active']),
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.get_node_type_display()})"
+
+
+class DynamicRole(models.Model):
+    """Flexible role definition - NOT hardcoded."""
+
+    name = models.CharField(max_length=100, unique=True)
+    code = models.SlugField(max_length=50, unique=True)
+    description = models.TextField(blank=True)
+    level = models.IntegerField(default=0, help_text="Higher = more authority")
+
+    college = models.ForeignKey(
+        College,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='dynamic_roles'
+    )
+    is_global = models.BooleanField(
+        default=False,
+        help_text="Global roles like CEO, central manager"
+    )
+    is_active = models.BooleanField(default=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Dynamic Role'
+        verbose_name_plural = 'Dynamic Roles'
+        db_table = 'core_dynamic_role'
+        app_label = 'core'
+        indexes = [
+            models.Index(fields=['is_global', 'is_active']),
+            models.Index(fields=['college', 'is_active']),
+        ]
+
+    def __str__(self):
+        return self.name
+
+
+class HierarchyPermission(models.Model):
+    """Granular permission system. Format: app.action_resource"""
+
+    ACTIONS = (
+        ('view', 'View'),
+        ('create', 'Create'),
+        ('update', 'Update'),
+        ('delete', 'Delete'),
+        ('approve', 'Approve'),
+        ('export', 'Export'),
+        ('import', 'Import'),
+    )
+
+    code = models.CharField(max_length=100, unique=True, help_text="e.g., students.create")
+    name = models.CharField(max_length=255)
+    app_label = models.CharField(max_length=50, help_text="e.g., students")
+    resource = models.CharField(max_length=50, help_text="e.g., student")
+    action = models.CharField(max_length=20, choices=ACTIONS)
+    description = models.TextField(blank=True)
+    category = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Academic, Financial, Administrative, etc."
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Hierarchy Permission'
+        verbose_name_plural = 'Hierarchy Permissions'
+        db_table = 'core_hierarchy_permission'
+        app_label = 'core'
+        indexes = [
+            models.Index(fields=['app_label', 'action']),
+            models.Index(fields=['category']),
+        ]
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
+class RolePermission(models.Model):
+    """Links roles to permissions - THIS IS DYNAMIC."""
+
+    SCOPES = (
+        ('global', 'Global'),
+        ('college', 'College'),
+        ('department', 'Department'),
+        ('self', 'Self Only'),
+    )
+
+    role = models.ForeignKey(
+        DynamicRole,
+        on_delete=models.CASCADE,
+        related_name='role_permissions'
+    )
+    permission = models.ForeignKey(
+        HierarchyPermission,
+        on_delete=models.CASCADE,
+        related_name='role_assignments'
+    )
+    can_delegate = models.BooleanField(
+        default=False,
+        help_text="Can assign this permission to others"
+    )
+    scope = models.CharField(
+        max_length=20,
+        choices=SCOPES,
+        default='college'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Role Permission'
+        verbose_name_plural = 'Role Permissions'
+        db_table = 'core_role_permission'
+        app_label = 'core'
+        unique_together = [['role', 'permission']]
+        indexes = [
+            models.Index(fields=['role', 'permission']),
+        ]
+
+    def __str__(self):
+        return f"{self.role.name} - {self.permission.code}"
+
+
+class HierarchyUserRole(models.Model):
+    """Users can have multiple hierarchy roles - part of organizational hierarchy system."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='hierarchy_roles'
+    )
+    role = models.ForeignKey(
+        DynamicRole,
+        on_delete=models.CASCADE,
+        related_name='hierarchy_user_assignments'
+    )
+
+    college = models.ForeignKey(
+        College,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+
+    valid_from = models.DateField(null=True, blank=True)
+    valid_until = models.DateField(null=True, blank=True)
+
+    assigned_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='hierarchy_role_assignments_made'
+    )
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+
+    class Meta:
+        verbose_name = 'Hierarchy User Role'
+        verbose_name_plural = 'Hierarchy User Roles'
+        db_table = 'core_hierarchy_user_role'
+        app_label = 'core'
+        unique_together = [['user', 'role', 'college']]
+        indexes = [
+            models.Index(fields=['user', 'is_active']),
+            models.Index(fields=['role', 'is_active']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.role.name}"
+
+
+class Team(models.Model):
+    """Teams are auto-created based on hierarchy nodes."""
+
+    TEAM_TYPES = (
+        ('principal_team', 'Principal Team'),
+        ('teacher_team', 'Teacher Team'),
+        ('department_team', 'Department Team'),
+        ('administrative_team', 'Administrative Team'),
+        ('hostel_team', 'Hostel Team'),
+        ('store_team', 'Store Team'),
+    )
+
+    name = models.CharField(max_length=255)
+    node = models.OneToOneField(
+        OrganizationNode,
+        on_delete=models.CASCADE,
+        related_name='team',
+        null=True,
+        blank=True
+    )
+    lead_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='leading_teams'
+    )
+    description = models.TextField(blank=True)
+    team_type = models.CharField(max_length=50, choices=TEAM_TYPES)
+    college = models.ForeignKey(
+        College,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='hierarchy_teams'
+    )
+    is_active = models.BooleanField(default=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Hierarchy Team'
+        verbose_name_plural = 'Hierarchy Teams'
+        db_table = 'core_hierarchy_team'
+        app_label = 'core'
+        indexes = [
+            models.Index(fields=['college', 'is_active']),
+            models.Index(fields=['team_type', 'is_active']),
+        ]
+
+    def __str__(self):
+        return self.name
+
+
+class HierarchyTeamMember(models.Model):
+    """Users belong to teams - AUTO-ASSIGNED based on hierarchy."""
+
+    ROLES = (
+        ('lead', 'Lead'),
+        ('deputy', 'Deputy'),
+        ('coordinator', 'Coordinator'),
+        ('member', 'Member'),
+    )
+
+    team = models.ForeignKey(
+        Team,
+        on_delete=models.CASCADE,
+        related_name='team_members'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='hierarchy_team_memberships'
+    )
+    role_in_team = models.CharField(
+        max_length=50,
+        choices=ROLES,
+        default='member'
+    )
+    auto_assigned = models.BooleanField(
+        default=False,
+        help_text="Was this membership auto-assigned?"
+    )
+    assignment_reason = models.TextField(
+        blank=True,
+        help_text="Reason for auto-assignment"
+    )
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Hierarchy Team Member'
+        verbose_name_plural = 'Hierarchy Team Members'
+        db_table = 'core_hierarchy_team_member'
+        app_label = 'core'
+        unique_together = [['team', 'user']]
+        indexes = [
+            models.Index(fields=['user', 'team']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.team.name}"

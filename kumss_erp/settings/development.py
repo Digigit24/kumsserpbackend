@@ -22,6 +22,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # CORS settings for development (if needed)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3030",
+    "https://kumss.celiyo.com"
+
 ]   
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
@@ -35,5 +37,12 @@ CSRF_COOKIE_SECURE = False
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
+# Cache - use local memory in development to avoid Redis dependency
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "kumss-dev-cache",
     }
 }

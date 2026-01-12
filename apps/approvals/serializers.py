@@ -133,10 +133,10 @@ class FeePaymentApprovalRequestSerializer(serializers.Serializer):
         default='medium'
     )
     approver_ids = serializers.ListField(
-        child=serializers.IntegerField(),
+        child=serializers.UUIDField(),
         required=True,
         min_length=1,
-        help_text="List of user IDs who can approve this request"
+        help_text="List of user UUIDs who can approve this request"
     )
     deadline_hours = serializers.IntegerField(
         required=False,
@@ -195,10 +195,10 @@ class NotificationCreateSerializer(serializers.ModelSerializer):
 class BulkNotificationSerializer(serializers.Serializer):
     """Serializer for creating bulk notifications."""
     recipient_ids = serializers.ListField(
-        child=serializers.IntegerField(),
+        child=serializers.UUIDField(),
         required=True,
         min_length=1,
-        help_text="List of user IDs to notify"
+        help_text="List of user UUIDs to notify"
     )
     notification_type = serializers.ChoiceField(
         choices=Notification.NOTIFICATION_TYPES,

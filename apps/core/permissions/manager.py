@@ -8,6 +8,23 @@ from apps.core.permissions.registry import get_default_permissions, PERMISSION_R
 User = get_user_model()
 
 
+def _get_hierarchy_role_code(user):
+    try:
+        from apps.core.models import HierarchyUserRole
+    except Exception:
+        return None
+
+    hierarchy_role = HierarchyUserRole.objects.filter(
+        user=user,
+        is_active=True
+    ).select_related('role').order_by('-role__level').first()
+
+    if hierarchy_role:
+        return hierarchy_role.role.code
+
+    return None
+
+
 def get_user_permissions(user, college=None):
     """
     Returns merged permission JSON for a user.
@@ -30,23 +47,27 @@ def get_user_permissions(user, college=None):
             for resource, config in PERMISSION_REGISTRY.items()
         }
 
-    # Get user's role from user_type field
-    role = getattr(user, 'user_type', 'student')
+    hierarchy_role_code = _get_hierarchy_role_code(user)
+    if hierarchy_role_code:
+        role = hierarchy_role_code
+    else:
+        # Get user's role from user_type field
+        role = getattr(user, 'user_type', 'student')
 
-    # Map UserType to permission role names
-    role_mapping = {
-        'super_admin': 'admin',
-        'college_admin': 'college_admin',
-        'teacher': 'teacher',
-        'student': 'student',
-        'parent': 'student',  # Parents have same permissions as students
-        'staff': 'staff',
-        'store_manager': 'store_manager',
-        'central_manager': 'central_manager',
-        'hod': 'hod',
-    }
+        # Map UserType to permission role names
+        role_mapping = {
+            'super_admin': 'admin',
+            'college_admin': 'college_admin',
+            'teacher': 'teacher',
+            'student': 'student',
+            'parent': 'student',  # Parents have same permissions as students
+            'staff': 'staff',
+            'store_manager': 'store_manager',
+            'central_manager': 'central_manager',
+            'hod': 'hod',
+        }
 
-    role = role_mapping.get(role, 'student')
+        role = role_mapping.get(role, 'student')
 
     # Get college-specific permissions if available
     if college:
@@ -87,6 +108,13 @@ def check_permission(user, resource, action, college=None):
         return False, 'none'
 
     perm_config = permissions[resource][action]
+
+    if isinstance(perm_config, bool):
+        return perm_config, 'all' if perm_config else 'none'
+
+    if not isinstance(perm_config, dict):
+        return False, 'none'
+
     enabled = perm_config.get('enabled', False)
     scope = perm_config.get('scope', 'none')
 

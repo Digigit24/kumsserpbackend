@@ -21,6 +21,13 @@ from .upload_views import (
     FileDeleteView,
     PresignedUrlView,
 )
+from .hierarchy_views import (
+    OrganizationNodeViewSet,
+    DynamicRoleViewSet,
+    HierarchyPermissionViewSet,
+    HierarchyUserRoleViewSet,
+    TeamViewSet,
+)
 
 app_name = 'core'
 
@@ -36,6 +43,13 @@ router.register(r'notification-settings', NotificationSettingViewSet, basename='
 router.register(r'activity-logs', ActivityLogViewSet, basename='activity-log')
 router.register(r'permissions', PermissionViewSet, basename='permission')
 router.register(r'team-memberships', TeamMembershipViewSet, basename='team-membership')
+
+# Hierarchy endpoints
+router.register(r'organization/nodes', OrganizationNodeViewSet, basename='org-node')
+router.register(r'organization/roles', DynamicRoleViewSet, basename='dynamic-role')
+router.register(r'organization/hierarchy-permissions', HierarchyPermissionViewSet, basename='hierarchy-permission')
+router.register(r'organization/user-roles', HierarchyUserRoleViewSet, basename='hierarchy-user-role')
+router.register(r'organization/teams', TeamViewSet, basename='hierarchy-team')
 
 urlpatterns = [
     path('', include(router.urls)),

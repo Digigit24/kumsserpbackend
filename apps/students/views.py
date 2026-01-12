@@ -5,6 +5,7 @@ from rest_framework import status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.core.cache import cache
 from django_filters.rest_framework import DjangoFilterBackend
 import django_filters
 from drf_spectacular.utils import (
@@ -13,6 +14,7 @@ from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiResponse,
 )
+from apps.core.cache_mixins import CachedReadOnlyMixin
 from drf_spectacular.types import OpenApiTypes
 
 from .models import (
@@ -206,7 +208,7 @@ class StudentGroupViewSet(CollegeScopedModelViewSet):
         tags=['Students']
     ),
 )
-class StudentViewSet(CollegeScopedModelViewSet):
+class StudentViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     """ViewSet for managing students."""
     queryset = Student.objects.all_colleges()
     serializer_class = StudentSerializer
@@ -221,6 +223,32 @@ class StudentViewSet(CollegeScopedModelViewSet):
         if self.action == 'list':
             return StudentListSerializer
         return StudentSerializer
+
+    def _invalidate_cache(self):
+        try:
+            cache.clear()
+        except Exception:
+            pass
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        self._invalidate_cache()
+        return response
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        self._invalidate_cache()
+        return response
+
+    def partial_update(self, request, *args, **kwargs):
+        response = super().partial_update(request, *args, **kwargs)
+        self._invalidate_cache()
+        return response
+
+    def destroy(self, request, *args, **kwargs):
+        response = super().destroy(request, *args, **kwargs)
+        self._invalidate_cache()
+        return response
 
     def perform_destroy(self, instance):
         instance.soft_delete()
