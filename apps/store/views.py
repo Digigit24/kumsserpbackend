@@ -814,7 +814,10 @@ class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Only super admin can add central inventory items'},
                           status=status.HTTP_403_FORBIDDEN)
         response = super().create(request, *args, **kwargs)
-        cache.delete_many(cache.keys('*centralstoreinventory*'))
+        if hasattr(cache, 'delete_pattern'):
+            cache.delete_pattern('*centralstoreinventory*')
+        else:
+            cache.clear()
         return response
 
     @action(detail=False, methods=['get'])
