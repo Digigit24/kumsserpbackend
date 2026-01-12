@@ -3,6 +3,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.cache import cache
 from django.contrib.auth import get_user_model
+from apps.accounts.models import UserRole as AccountUserRole
 from .models import OrganizationNode, RolePermission, HierarchyUserRole
 from .hierarchy_services import TeamAutoAssignmentService, PermissionChecker
 
@@ -35,6 +36,34 @@ def sync_role_permissions(sender, instance, created, **kwargs):
 def clear_user_permission_cache_on_role_change(sender, instance, **kwargs):
     """Clear permission cache when user role changes."""
     PermissionChecker.clear_user_cache(instance.user_id)
+
+
+@receiver(post_save, sender=HierarchyUserRole)
+def invalidate_tree_cache_on_hierarchy_role_change(sender, instance, **kwargs):
+    """Clear organization tree cache when hierarchy role is assigned/updated."""
+    cache.delete_pattern('org_tree_*')
+    cache.delete_pattern('roles_summary_*')
+
+
+@receiver(post_delete, sender=HierarchyUserRole)
+def invalidate_tree_cache_on_hierarchy_role_delete(sender, instance, **kwargs):
+    """Clear organization tree cache when hierarchy role is deleted."""
+    cache.delete_pattern('org_tree_*')
+    cache.delete_pattern('roles_summary_*')
+
+
+@receiver(post_save, sender=AccountUserRole)
+def invalidate_tree_cache_on_account_role_change(sender, instance, **kwargs):
+    """Clear organization tree cache when account role is assigned/updated."""
+    cache.delete_pattern('org_tree_*')
+    cache.delete_pattern('roles_summary_*')
+
+
+@receiver(post_delete, sender=AccountUserRole)
+def invalidate_tree_cache_on_account_role_delete(sender, instance, **kwargs):
+    """Clear organization tree cache when account role is deleted."""
+    cache.delete_pattern('org_tree_*')
+    cache.delete_pattern('roles_summary_*')
 
 
 @receiver(post_save, sender=get_user_model())

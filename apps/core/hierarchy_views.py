@@ -404,6 +404,13 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
         cache.set(cache_key, virtual_tree, timeout=300)  # 5 minutes
         return Response(virtual_tree)
 
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def clear_cache(self, request):
+        """Manually clear all organizational hierarchy cache."""
+        cache.delete_pattern('org_tree_*')
+        cache.delete_pattern('roles_summary_*')
+        return Response({'status': 'success', 'message': 'Cache cleared successfully'})
+
     def perform_create(self, serializer):
         cache.delete_pattern('org_tree_*')
         cache.delete_pattern('roles_summary_*')
