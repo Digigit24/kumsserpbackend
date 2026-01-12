@@ -8,10 +8,25 @@ from django.core.cache import cache
 
 
 def _clear_hierarchy_cache():
-    if hasattr(cache, 'delete_pattern'):
-        _clear_hierarchy_cache()
-    else:
-        cache.clear()
+    """Clear hierarchy-related cache entries"""
+    try:
+        if hasattr(cache, 'delete_pattern'):
+            cache.delete_pattern('*hierarchy*')
+            cache.delete_pattern('*organization*')
+        else:
+            # Fallback: use selective key deletion
+            patterns = ['*hierarchy*', '*organization*', '*role*', '*permission*']
+            for pattern in patterns:
+                try:
+                    keys = cache.keys(pattern)
+                    if keys:
+                        cache.delete_many(keys)
+                except:
+                    pass
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Hierarchy cache clear failed: {e}")
 
 from django.db import models
 from django.db.models import Count, Q

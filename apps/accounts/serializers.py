@@ -301,8 +301,16 @@ class UserCreateSerializer(serializers.ModelSerializer):
             created_by=actor,
             updated_by=actor,
         )
+        # Use selective cache invalidation for student data
         try:
-            cache.clear()
+            patterns = ['*student*', '*user*', '*account*']
+            for pattern in patterns:
+                try:
+                    keys = cache.keys(pattern)
+                    if keys:
+                        cache.delete_many(keys)
+                except:
+                    pass
         except Exception:
             pass
 

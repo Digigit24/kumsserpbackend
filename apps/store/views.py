@@ -635,16 +635,34 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
     @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])
     def approve(self, request, pk=None):
         """Legacy approve - kept for backward compatibility"""
-        indent = self.get_object()
-        indent.approve(user=request.user)
-        return Response({'status': indent.status})
+        try:
+            indent = self.get_object()
+            indent.approve(user=request.user)
+            return Response({'status': indent.status})
+        except ValidationError as exc:
+            detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
+            return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error approving indent {pk}: {str(e)}")
+            return Response({'detail': 'An error occurred while approving the indent'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])
     def reject(self, request, pk=None):
         """Legacy reject - kept for backward compatibility"""
-        indent = self.get_object()
-        indent.reject(user=request.user, reason=request.data.get('reason'))
-        return Response({'status': indent.status})
+        try:
+            indent = self.get_object()
+            indent.reject(user=request.user, reason=request.data.get('reason'))
+            return Response({'status': indent.status})
+        except ValidationError as exc:
+            detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
+            return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error rejecting indent {pk}: {str(e)}")
+            return Response({'detail': 'An error occurred while rejecting the indent'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def pending_college_approvals(self, request):
