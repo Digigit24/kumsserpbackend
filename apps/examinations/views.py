@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.core.cache_mixins import CachedReadOnlyMixin
 
-from apps.core.mixins import CollegeScopedModelViewSet
+from apps.core.mixins import CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
 from .models import (
     MarksGrade,
     ExamType,
@@ -67,28 +67,30 @@ class ExamViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     ordering = ['-start_date']
 
 
-class ExamScheduleViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
-    queryset = ExamSchedule.objects.all()
+class ExamScheduleViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+    queryset = ExamSchedule.objects.select_related('exam', 'subject', 'classroom', 'invigilator')
     serializer_class = ExamScheduleSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['exam', 'subject', 'date', 'is_active']
     ordering_fields = ['date', 'start_time']
     ordering = ['date']
+    related_college_lookup = 'exam__college_id'
 
 
-class ExamAttendanceViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
-    queryset = ExamAttendance.objects.all()
+class ExamAttendanceViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+    queryset = ExamAttendance.objects.select_related('exam_schedule__exam', 'student')
     serializer_class = ExamAttendanceSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['exam_schedule', 'student', 'status', 'is_active']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+    related_college_lookup = 'exam_schedule__exam__college_id'
 
 
-class AdmitCardViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
-    queryset = AdmitCard.objects.all()
+class AdmitCardViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+    queryset = AdmitCard.objects.select_related('student', 'exam')
     serializer_class = AdmitCardSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -96,50 +98,55 @@ class AdmitCardViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     search_fields = ['card_number']
     ordering_fields = ['issue_date']
     ordering = ['-issue_date']
+    related_college_lookup = 'exam__college_id'
 
 
-class MarksRegisterViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
-    queryset = MarksRegister.objects.all()
+class MarksRegisterViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+    queryset = MarksRegister.objects.select_related('exam', 'subject', 'section')
     serializer_class = MarksRegisterSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['exam', 'subject', 'section', 'is_active']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+    related_college_lookup = 'exam__college_id'
 
 
-class StudentMarksViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
-    queryset = StudentMarks.objects.all()
+class StudentMarksViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+    queryset = StudentMarks.objects.select_related('register__exam', 'student')
     serializer_class = StudentMarksSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['register', 'student', 'is_active']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+    related_college_lookup = 'register__exam__college_id'
 
 
-class ExamResultViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
-    queryset = ExamResult.objects.all()
+class ExamResultViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+    queryset = ExamResult.objects.select_related('student', 'exam')
     serializer_class = ExamResultSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['student', 'exam', 'result_status', 'is_active']
     ordering_fields = ['percentage', 'created_at']
     ordering = ['-percentage']
+    related_college_lookup = 'exam__college_id'
 
 
-class ProgressCardViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
-    queryset = ProgressCard.objects.all()
+class ProgressCardViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+    queryset = ProgressCard.objects.select_related('student', 'exam')
     serializer_class = ProgressCardSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['student', 'exam', 'is_active']
     ordering_fields = ['issue_date']
     ordering = ['-issue_date']
+    related_college_lookup = 'exam__college_id'
 
 
-class MarkSheetViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
-    queryset = MarkSheet.objects.all()
+class MarkSheetViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+    queryset = MarkSheet.objects.select_related('student', 'exam')
     serializer_class = MarkSheetSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -147,13 +154,15 @@ class MarkSheetViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     search_fields = ['sheet_number']
     ordering_fields = ['issue_date']
     ordering = ['-issue_date']
+    related_college_lookup = 'exam__college_id'
 
 
-class TabulationSheetViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
-    queryset = TabulationSheet.objects.all()
+class TabulationSheetViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+    queryset = TabulationSheet.objects.select_related('exam', 'class_obj', 'section')
     serializer_class = TabulationSheetSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['exam', 'class_obj', 'section', 'is_active']
     ordering_fields = ['issue_date']
     ordering = ['-issue_date']
+    related_college_lookup = 'exam__college_id'

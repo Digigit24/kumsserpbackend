@@ -466,7 +466,7 @@ class RoleViewSet(CollegeScopedModelViewSet):
         members = []
         for assignment in assignments:
             members.append({
-                'user_id': assignment.user_id,
+                'user_id': str(assignment.user_id),
                 'name': assignment.user.get_full_name(),
                 'role': assignment.role.name,
                 'level': assignment.role.level,

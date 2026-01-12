@@ -239,17 +239,17 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
 
         message_data = {
             'id': message.id,
-            'sender_id': request.user.id,
+            'sender_id': str(request.user.id),
             'sender_name': request.user.get_full_name() or request.user.username,
-            'receiver_id': receiver.id,
+            'receiver_id': str(receiver.id),
             'message': message_content,
             'attachment': attachment_url,
             'attachment_type': message.attachment_type,
             'timestamp': message.timestamp.isoformat(),
             'is_read': message.is_read,
-            'conversation_id': conversation.id,
+            'conversation_id': str(conversation.id),
         }
-        publish_message_event(receiver.id, message_data)
+        publish_message_event(str(receiver.id), message_data)
 
         # Serialize and return
         serializer = self.get_serializer(message)
@@ -286,9 +286,9 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
         for conv in conversations_as_user1:
             other_user = conv.user2
             conversations_data.append({
-                'conversation_id': conv.id,
+                'conversation_id': str(conv.id),
                 'other_user': {
-                    'id': other_user.id,
+                    'id': str(other_user.id),
                     'username': other_user.username,
                     'full_name': other_user.get_full_name() or other_user.username,
                     'avatar': other_user.avatar.url if other_user.avatar else None,
@@ -304,9 +304,9 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
         for conv in conversations_as_user2:
             other_user = conv.user1
             conversations_data.append({
-                'conversation_id': conv.id,
+                'conversation_id': str(conv.id),
                 'other_user': {
-                    'id': other_user.id,
+                    'id': str(other_user.id),
                     'username': other_user.username,
                     'full_name': other_user.get_full_name() or other_user.username,
                     'avatar': other_user.avatar.url if other_user.avatar else None,
@@ -373,10 +373,10 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
 
         # Also return conversation metadata
         return Response({
-            'conversation_id': conversation.id,
+            'conversation_id': str(conversation.id),
             'messages': serializer.data,
             'other_user': {
-                'id': other_user.id,
+                'id': str(other_user.id),
                 'username': other_user.username,
                 'full_name': other_user.get_full_name() or other_user.username,
                 'avatar': other_user.avatar.url if other_user.avatar else None,
@@ -483,8 +483,8 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
 
         # Publish typing event
         publish_typing_event(
-            receiver.id,
-            request.user.id,
+            str(receiver.id),
+            str(request.user.id),
             request.user.get_full_name() or request.user.username,
             is_typing
         )
@@ -527,9 +527,9 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
             unread = conv.unread_count_user1
             total_unread += unread
             conversations_data.append({
-                'conversation_id': conv.id,
+                'conversation_id': str(conv.id),
                 'unread_count': unread,
-                'other_user_id': conv.user2.id,
+                'other_user_id': str(conv.user2.id),
                 'other_user_name': conv.user2.get_full_name() or conv.user2.username,
             })
 
@@ -537,9 +537,9 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
             unread = conv.unread_count_user2
             total_unread += unread
             conversations_data.append({
-                'conversation_id': conv.id,
+                'conversation_id': str(conv.id),
                 'unread_count': unread,
-                'other_user_id': conv.user1.id,
+                'other_user_id': str(conv.user1.id),
                 'other_user_name': conv.user1.get_full_name() or conv.user1.username,
             })
 

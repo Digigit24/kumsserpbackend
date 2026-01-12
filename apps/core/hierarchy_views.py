@@ -578,7 +578,32 @@ class HierarchyUserRoleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return HierarchyUserRole.objects.filter(is_active=True)
+        queryset = HierarchyUserRole.objects.filter(is_active=True)
+        user = getattr(self.request, 'user', None)
+        college_id = self.request.headers.get('X-College-Id')
+
+        is_global_user = (
+            getattr(user, 'is_superadmin', False) or
+            getattr(user, 'is_superuser', False) or
+            getattr(user, 'user_type', None) == 'central_manager'
+        )
+
+        if user and not is_global_user and getattr(user, 'college_id', None):
+            college_id = user.college_id
+
+        if college_id and str(college_id).lower() != 'all':
+            try:
+                return queryset.filter(college_id=int(college_id))
+            except (ValueError, TypeError):
+                return queryset
+
+        if college_id == 'all' and not is_global_user:
+            return queryset.none()
+
+        if not college_id and not is_global_user:
+            return queryset.none()
+
+        return queryset
 
     @action(detail=False, methods=['post'])
     def assign(self, request):

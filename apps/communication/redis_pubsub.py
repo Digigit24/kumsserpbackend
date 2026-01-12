@@ -86,7 +86,7 @@ def publish_event(channel: str, event_type: str, data: Dict[str, Any]) -> bool:
             'event': event_type,
             'data': data
         }
-        redis_client.publish(channel, json.dumps(message))
+        redis_client.publish(channel, json.dumps(message, default=str))
         logger.debug(f"Published {event_type} to {channel}")
         return True
     except Exception as e:
@@ -280,7 +280,7 @@ def get_online_users() -> set:
         return set()
 
     try:
-        return {int(uid) for uid in redis_client.smembers('online_users')}
+        return {uid.decode('utf-8') if isinstance(uid, (bytes, bytearray)) else str(uid) for uid in redis_client.smembers('online_users')}
     except Exception as e:
         logger.error(f"Failed to get online users: {e}")
         return set()
@@ -297,14 +297,15 @@ def set_user_online(user_id: int, ttl: int = 300) -> bool:
     Returns:
         bool: True if successful
     """
+    user_id = str(user_id)
     redis_client = get_redis()
     if not redis_client:
         return False
 
     try:
-        # Add to online users set
+        # Add user to online users set
         redis_client.sadd('online_users', user_id)
-        # Set a key with TTL for auto-cleanup
+        # Set TTL for user online status
         redis_client.setex(f'online:user:{user_id}', ttl, '1')
         return True
     except Exception as e:
@@ -322,6 +323,7 @@ def set_user_offline(user_id: int) -> bool:
     Returns:
         bool: True if successful
     """
+    user_id = str(user_id)
     redis_client = get_redis()
     if not redis_client:
         return False
@@ -337,14 +339,15 @@ def set_user_offline(user_id: int) -> bool:
 
 def is_user_online(user_id: int) -> bool:
     """
-    Check if a user is currently online.
+    Check if a user is online.
 
     Args:
         user_id: ID of the user
 
     Returns:
-        bool: True if user is online
+        bool: True if online, False otherwise
     """
+    user_id = str(user_id)
     redis_client = get_redis()
     if not redis_client:
         return False

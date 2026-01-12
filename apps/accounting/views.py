@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.core.cache_mixins import CachedReadOnlyMixin
 
-from apps.core.mixins import CollegeScopedModelViewSet
+from apps.core.mixins import CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
 from .models import (
     IncomeCategory,
     ExpenseCategory,
@@ -78,6 +78,7 @@ class IncomeViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     search_fields = ['description', 'invoice_number']
     ordering_fields = ['date', 'amount', 'created_at']
     ordering = ['-date']
+    related_college_lookup = 'account__college_id'
 
 
 class ExpenseViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
@@ -102,8 +103,8 @@ class VoucherViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     ordering = ['-date']
 
 
-class AccountTransactionViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
-    queryset = AccountTransaction.objects.all()
+class AccountTransactionViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+    queryset = AccountTransaction.objects.select_related('account')
     serializer_class = AccountTransactionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -111,3 +112,4 @@ class AccountTransactionViewSet(CachedReadOnlyMixin, viewsets.ModelViewSet):
     search_fields = ['description', 'reference_type']
     ordering_fields = ['date', 'amount', 'created_at']
     ordering = ['-date']
+    related_college_lookup = 'account__college_id'

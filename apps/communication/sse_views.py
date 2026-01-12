@@ -69,7 +69,7 @@ def event_stream_generator(pubsub, user_id, college_id=None):
     """
     # Send initial connection success event
     yield f"event: connected\n"
-    yield f"data: {json.dumps({'status': 'connected', 'user_id': user_id})}\n\n"
+    yield f"data: {json.dumps({'status': 'connected', 'user_id': str(user_id)}, default=str)}\n\n"
 
     # Mark user as online
     set_user_online(user_id, ttl=300)
@@ -88,13 +88,13 @@ def event_stream_generator(pubsub, user_id, college_id=None):
             event_data = event.get('data', {})
 
             yield f"event: {event_type}\n"
-            yield f"data: {json.dumps(event_data)}\n\n"
+            yield f"data: {json.dumps(event_data, default=str)}\n\n"
 
             # Send heartbeat if needed
             current_time = time.time()
             if current_time - last_heartbeat > HEARTBEAT_INTERVAL:
                 yield f"event: heartbeat\n"
-                yield f"data: {json.dumps({'timestamp': current_time})}\n\n"
+                yield f"data: {json.dumps({'timestamp': current_time}, default=str)}\n\n"
                 last_heartbeat = current_time
 
     except GeneratorExit:
@@ -108,7 +108,7 @@ def event_stream_generator(pubsub, user_id, college_id=None):
         # Send disconnection event
         try:
             yield f"event: disconnected\n"
-            yield f"data: {json.dumps({'status': 'disconnected'})}\n\n"
+            yield f"data: {json.dumps({'status': 'disconnected'}, default=str)}\n\n"
         except:
             pass
 
@@ -128,7 +128,7 @@ def sse_events(request):
 
     if not user or not user.is_authenticated:
         response = StreamingHttpResponse(
-            (f"event: error\ndata: {json.dumps({'error': 'Unauthorized'})}\n\n",),
+            (f"event: error\ndata: {json.dumps({'error': 'Unauthorized'}, default=str)}\n\n",),
             content_type='text/event-stream'
         )
         response['Cache-Control'] = 'no-cache'
@@ -139,7 +139,7 @@ def sse_events(request):
 
     if not pubsub:
         response = StreamingHttpResponse(
-            (f"event: error\ndata: {json.dumps({'error': 'Redis not available'})}\n\n",),
+            (f"event: error\ndata: {json.dumps({'error': 'Redis not available'}, default=str)}\n\n",),
             content_type='text/event-stream'
         )
         response['Cache-Control'] = 'no-cache'
@@ -183,11 +183,11 @@ def sse_test(request):
     def test_generator():
         for i in range(5):
             yield f"event: test\n"
-            yield f"data: {json.dumps({'count': i, 'message': f'Test event {i}'})}\n\n"
+            yield f"data: {json.dumps({'count': i, 'message': f'Test event {i}'}, default=str)}\n\n"
             time.sleep(1)
 
         yield f"event: complete\n"
-        yield f"data: {json.dumps({'message': 'Test complete'})}\n\n"
+        yield f"data: {json.dumps({'message': 'Test complete'}, default=str)}\n\n"
 
     response = StreamingHttpResponse(
         test_generator(),

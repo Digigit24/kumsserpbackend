@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.core.cache_mixins import CachedReadOnlyMixin
 
-from apps.core.mixins import CollegeScopedModelViewSet
+from apps.core.mixins import CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
 from .models import (
     FeeGroup,
     FeeType,
@@ -81,28 +81,30 @@ class FeeDiscountViewSet(CollegeScopedModelViewSet):
     ordering = ['name']
 
 
-class FeeStructureViewSet(viewsets.ModelViewSet):
-    queryset = FeeStructure.objects.all()
+class FeeStructureViewSet(RelatedCollegeScopedModelViewSet):
+    queryset = FeeStructure.objects.select_related('student', 'fee_master')
     serializer_class = FeeStructureSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['student', 'fee_master', 'is_paid', 'is_active']
     ordering_fields = ['due_date', 'created_at']
     ordering = ['due_date']
+    related_college_lookup = 'student__college_id'
 
 
-class StudentFeeDiscountViewSet(viewsets.ModelViewSet):
-    queryset = StudentFeeDiscount.objects.all()
+class StudentFeeDiscountViewSet(RelatedCollegeScopedModelViewSet):
+    queryset = StudentFeeDiscount.objects.select_related('student', 'discount')
     serializer_class = StudentFeeDiscountSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['student', 'discount', 'is_active']
     ordering_fields = ['applied_date', 'created_at']
     ordering = ['-applied_date']
+    related_college_lookup = 'student__college_id'
 
 
-class FeeCollectionViewSet(viewsets.ModelViewSet):
-    queryset = FeeCollection.objects.all()
+class FeeCollectionViewSet(RelatedCollegeScopedModelViewSet):
+    queryset = FeeCollection.objects.select_related('student', 'collected_by')
     serializer_class = FeeCollectionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -110,10 +112,11 @@ class FeeCollectionViewSet(viewsets.ModelViewSet):
     search_fields = ['transaction_id']
     ordering_fields = ['payment_date', 'amount', 'created_at']
     ordering = ['-payment_date']
+    related_college_lookup = 'student__college_id'
 
 
-class FeeReceiptViewSet(viewsets.ModelViewSet):
-    queryset = FeeReceipt.objects.all()
+class FeeReceiptViewSet(RelatedCollegeScopedModelViewSet):
+    queryset = FeeReceipt.objects.select_related('collection__student')
     serializer_class = FeeReceiptSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -121,40 +124,44 @@ class FeeReceiptViewSet(viewsets.ModelViewSet):
     search_fields = ['receipt_number']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+    related_college_lookup = 'collection__student__college_id'
 
 
-class FeeInstallmentViewSet(viewsets.ModelViewSet):
-    queryset = FeeInstallment.objects.all()
+class FeeInstallmentViewSet(RelatedCollegeScopedModelViewSet):
+    queryset = FeeInstallment.objects.select_related('student', 'fee_structure')
     serializer_class = FeeInstallmentSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['student', 'fee_structure', 'is_paid', 'is_active']
     ordering_fields = ['installment_number', 'due_date']
     ordering = ['installment_number']
+    related_college_lookup = 'student__college_id'
 
 
-class FeeFineViewSet(viewsets.ModelViewSet):
-    queryset = FeeFine.objects.all()
+class FeeFineViewSet(RelatedCollegeScopedModelViewSet):
+    queryset = FeeFine.objects.select_related('student', 'fee_structure')
     serializer_class = FeeFineSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['student', 'fine_date', 'is_paid', 'is_active']
     ordering_fields = ['fine_date', 'created_at']
     ordering = ['-fine_date']
+    related_college_lookup = 'student__college_id'
 
 
-class FeeRefundViewSet(viewsets.ModelViewSet):
-    queryset = FeeRefund.objects.all()
+class FeeRefundViewSet(RelatedCollegeScopedModelViewSet):
+    queryset = FeeRefund.objects.select_related('student', 'processed_by')
     serializer_class = FeeRefundSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['student', 'refund_date', 'payment_method', 'is_active']
     ordering_fields = ['refund_date', 'amount']
     ordering = ['-refund_date']
+    related_college_lookup = 'student__college_id'
 
 
-class BankPaymentViewSet(viewsets.ModelViewSet):
-    queryset = BankPayment.objects.all()
+class BankPaymentViewSet(RelatedCollegeScopedModelViewSet):
+    queryset = BankPayment.objects.select_related('collection__student')
     serializer_class = BankPaymentSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -162,10 +169,11 @@ class BankPaymentViewSet(viewsets.ModelViewSet):
     search_fields = ['cheque_dd_number', 'transaction_id', 'bank_name']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+    related_college_lookup = 'collection__student__college_id'
 
 
-class OnlinePaymentViewSet(viewsets.ModelViewSet):
-    queryset = OnlinePayment.objects.all()
+class OnlinePaymentViewSet(RelatedCollegeScopedModelViewSet):
+    queryset = OnlinePayment.objects.select_related('collection__student')
     serializer_class = OnlinePaymentSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -173,13 +181,15 @@ class OnlinePaymentViewSet(viewsets.ModelViewSet):
     search_fields = ['transaction_id', 'order_id']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+    related_college_lookup = 'collection__student__college_id'
 
 
-class FeeReminderViewSet(viewsets.ModelViewSet):
-    queryset = FeeReminder.objects.all()
+class FeeReminderViewSet(RelatedCollegeScopedModelViewSet):
+    queryset = FeeReminder.objects.select_related('student', 'fee_structure')
     serializer_class = FeeReminderSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['student', 'fee_structure', 'status', 'is_active']
     ordering_fields = ['reminder_date', 'created_at']
     ordering = ['-reminder_date']
+    related_college_lookup = 'student__college_id'
