@@ -15,7 +15,12 @@ from .views import (
     NotificationRuleViewSet,
     ChatMessageViewSet,
 )
-from .sse_views import sse_events, sse_test
+# from .sse_views import sse_events, sse_test  # Commented out - replaced by WebSocket microservice
+from .websocket_integration import (
+    send_notification_to_user,
+    broadcast_notification_to_college,
+    get_online_users,
+)
 
 router = DefaultRouter()
 router.register(r'notices', NoticeViewSet, basename='notice')
@@ -29,9 +34,14 @@ router.register(r'notification-rules', NotificationRuleViewSet, basename='notifi
 router.register(r'chats', ChatMessageViewSet, basename='chatmessage')
 
 urlpatterns = [
-    # SSE (Server-Sent Events) endpoints for real-time communication
-    path('sse/events/', sse_events, name='sse-events'),
-    path('sse/test/', sse_test, name='sse-test'),
+    # SSE (Server-Sent Events) endpoints - DEPRECATED, replaced by WebSocket microservice
+    # path('sse/events/', sse_events, name='sse-events'),
+    # path('sse/test/', sse_test, name='sse-test'),
+
+    # WebSocket microservice integration endpoints
+    path('ws/notify/', send_notification_to_user, name='ws-notify'),
+    path('ws/broadcast/', broadcast_notification_to_college, name='ws-broadcast'),
+    path('ws/online-users/', get_online_users, name='ws-online-users'),
 
     # REST API endpoints
     path('', include(router.urls)),

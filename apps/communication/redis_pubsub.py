@@ -1,14 +1,20 @@
 """
 Redis Pub/Sub utilities for real-time messaging.
 Replaces WebSocket with Server-Sent Events (SSE) + Redis.
-"""
-import json
-import logging
-import redis
-from django.conf import settings
-from typing import Dict, Any, Optional
 
-logger = logging.getLogger(__name__)
+DEPRECATED: This file is commented out in favor of Node.js WebSocket microservice.
+The Redis Pub/Sub implementation has been replaced with Socket.io for better real-time performance.
+See: /websocket-service/ directory for the new microservice implementation.
+
+Functions are kept but commented out for reference.
+"""
+# import json
+# import logging
+# import redis
+# from django.conf import settings
+# from typing import Dict, Any, Optional
+
+# logger = logging.getLogger(__name__)
 
 
 class RedisClient:
@@ -94,94 +100,26 @@ def publish_event(channel: str, event_type: str, data: Dict[str, Any]) -> bool:
         return False
 
 
-def publish_message_event(receiver_id: int, message_data: Dict[str, Any]) -> bool:
-    """
-    Publish a new message event to the receiver's channel.
+# Stub functions that do nothing - replaced by WebSocket microservice
+def publish_message_event(receiver_id, message_data):
+    """DEPRECATED: Use WebSocket microservice instead"""
+    pass
 
-    Args:
-        receiver_id: ID of the message receiver
-        message_data: Message data including id, sender, content, etc.
+def publish_typing_event(receiver_id, sender_id, sender_name, is_typing):
+    """DEPRECATED: Use WebSocket microservice instead"""
+    pass
 
-    Returns:
-        bool: True if published successfully
-    """
-    channel = f"user:{receiver_id}"
-    return publish_event(channel, 'message', message_data)
+def publish_read_receipt(sender_id, message_id, reader_id, reader_name):
+    """DEPRECATED: Use WebSocket microservice instead"""
+    pass
 
+def publish_notification(user_id, notification_data):
+    """DEPRECATED: Use WebSocket microservice instead"""
+    pass
 
-def publish_typing_event(receiver_id: int, sender_id: int, sender_name: str, is_typing: bool) -> bool:
-    """
-    Publish a typing indicator event.
-
-    Args:
-        receiver_id: ID of the user who should see the typing indicator
-        sender_id: ID of the user who is typing
-        sender_name: Name of the user who is typing
-        is_typing: True if user is typing, False if stopped
-
-    Returns:
-        bool: True if published successfully
-    """
-    channel = f"user:{receiver_id}"
-    data = {
-        'sender_id': sender_id,
-        'sender_name': sender_name,
-        'is_typing': is_typing
-    }
-    return publish_event(channel, 'typing', data)
-
-
-def publish_read_receipt(sender_id: int, message_id: int, reader_id: int, reader_name: str) -> bool:
-    """
-    Publish a read receipt to the original message sender.
-
-    Args:
-        sender_id: ID of the original message sender
-        message_id: ID of the message that was read
-        reader_id: ID of the user who read the message
-        reader_name: Name of the user who read the message
-
-    Returns:
-        bool: True if published successfully
-    """
-    channel = f"user:{sender_id}"
-    data = {
-        'message_id': message_id,
-        'reader_id': reader_id,
-        'reader_name': reader_name,
-        'read_at': None  # Will be set by the caller
-    }
-    return publish_event(channel, 'read_receipt', data)
-
-
-def publish_notification(user_id: int, notification_data: Dict[str, Any]) -> bool:
-    """
-    Publish a notification to a user's channel.
-
-    Args:
-        user_id: ID of the user to notify
-        notification_data: Notification data
-
-    Returns:
-        bool: True if published successfully
-    """
-    channel = f"user:{user_id}"
-    return publish_event(channel, 'notification', notification_data)
-
-
-def publish_college_notification(college_id: int, notification_data: Dict[str, Any]) -> bool:
-    """
-    Publish a notification to all users in a college.
-
-    Args:
-        college_id: ID of the college
-        notification_data: Notification data
-
-    Returns:
-        bool: True if published successfully
-    """
-    channel = f"college:{college_id}"
-    return publish_event(channel, 'notification', notification_data)
+def publish_college_notification(college_id, notification_data):
+    """DEPRECATED: Use WebSocket microservice instead"""
+    pass
 
 
 def subscribe_to_user_events(user_id: int):
@@ -267,93 +205,19 @@ def listen_for_events(pubsub, timeout: Optional[int] = None):
             pass
 
 
-def get_online_users() -> set:
-    """
-    Get set of currently online user IDs from Redis.
-    Uses a Redis SET to track online users.
+# Stub functions that do nothing - replaced by WebSocket microservice
+def get_online_users():
+    """DEPRECATED: Use WebSocket microservice instead"""
+    return set()
 
-    Returns:
-        set: Set of user IDs currently online
-    """
-    redis_client = get_redis()
-    if not redis_client:
-        return set()
+def set_user_online(user_id, ttl=300):
+    """DEPRECATED: Use WebSocket microservice instead"""
+    return True
 
-    try:
-        return {uid.decode('utf-8') if isinstance(uid, (bytes, bytearray)) else str(uid) for uid in redis_client.smembers('online_users')}
-    except Exception as e:
-        logger.error(f"Failed to get online users: {e}")
-        return set()
+def set_user_offline(user_id):
+    """DEPRECATED: Use WebSocket microservice instead"""
+    return True
 
-
-def set_user_online(user_id: int, ttl: int = 300) -> bool:
-    """
-    Mark a user as online. Uses Redis SET with TTL.
-
-    Args:
-        user_id: ID of the user
-        ttl: Time to live in seconds (default 5 minutes)
-
-    Returns:
-        bool: True if successful
-    """
-    user_id = str(user_id)
-    redis_client = get_redis()
-    if not redis_client:
-        return False
-
-    try:
-        # Add user to online users set
-        redis_client.sadd('online_users', user_id)
-        # Set TTL for user online status
-        redis_client.setex(f'online:user:{user_id}', ttl, '1')
-        return True
-    except Exception as e:
-        logger.error(f"Failed to set user {user_id} online: {e}")
-        return False
-
-
-def set_user_offline(user_id: int) -> bool:
-    """
-    Mark a user as offline.
-
-    Args:
-        user_id: ID of the user
-
-    Returns:
-        bool: True if successful
-    """
-    user_id = str(user_id)
-    redis_client = get_redis()
-    if not redis_client:
-        return False
-
-    try:
-        redis_client.srem('online_users', user_id)
-        redis_client.delete(f'online:user:{user_id}')
-        return True
-    except Exception as e:
-        logger.error(f"Failed to set user {user_id} offline: {e}")
-        return False
-
-
-def is_user_online(user_id: int) -> bool:
-    """
-    Check if a user is online.
-
-    Args:
-        user_id: ID of the user
-
-    Returns:
-        bool: True if online, False otherwise
-    """
-    user_id = str(user_id)
-    redis_client = get_redis()
-    if not redis_client:
-        return False
-
-    try:
-        return redis_client.exists(f'online:user:{user_id}') > 0
-    except Exception as e:
-        logger.error(f"Failed to check if user {user_id} is online: {e}")
-        return False
+def is_user_online(user_id):
+    """DEPRECATED: Use WebSocket microservice instead - returns False as stub"""
+    return False
