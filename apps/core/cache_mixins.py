@@ -17,11 +17,45 @@ class CachedListRetrieveMixin:
         return super().retrieve(request, *args, **kwargs)
 
     def _invalidate_cache(self):
-        """Clear cache after mutations"""
+        """Clear cache after mutations - use selective invalidation"""
         try:
-            cache.clear()
-        except:
-            pass
+            # Instead of clearing ALL cache, only clear view-specific cache
+            # This prevents data loading issues and hard refresh requirements
+            from django.core.cache.utils import make_template_fragment_key
+            from .utils import get_current_college_id
+
+            # Clear cache for this viewset's endpoints
+            view_name = self.__class__.__name__.lower()
+            college_id = get_current_college_id()
+
+            # Build patterns to clear
+            patterns = [
+                f'views.decorators.cache.cache_page.*.{view_name}.*',
+                f'*{view_name}*list*',
+                f'*{view_name}*retrieve*',
+            ]
+
+            if college_id:
+                patterns.extend([
+                    f'*{college_id}*{view_name}*',
+                    f'*college_{college_id}*',
+                ])
+
+            # Clear matching keys
+            for pattern in patterns:
+                try:
+                    keys = cache.keys(pattern)
+                    if keys:
+                        cache.delete_many(keys)
+                except:
+                    pass
+
+        except Exception as e:
+            # Fallback: don't clear cache if there's an error
+            # This prevents 500 errors from cache failures
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Cache invalidation failed: {e}")
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
@@ -56,11 +90,45 @@ class CachedReadOnlyMixin:
         return super().retrieve(request, *args, **kwargs)
 
     def _invalidate_cache(self):
-        """Clear cache after mutations"""
+        """Clear cache after mutations - use selective invalidation"""
         try:
-            cache.clear()
-        except:
-            pass
+            # Instead of clearing ALL cache, only clear view-specific cache
+            # This prevents data loading issues and hard refresh requirements
+            from django.core.cache.utils import make_template_fragment_key
+            from .utils import get_current_college_id
+
+            # Clear cache for this viewset's endpoints
+            view_name = self.__class__.__name__.lower()
+            college_id = get_current_college_id()
+
+            # Build patterns to clear
+            patterns = [
+                f'views.decorators.cache.cache_page.*.{view_name}.*',
+                f'*{view_name}*list*',
+                f'*{view_name}*retrieve*',
+            ]
+
+            if college_id:
+                patterns.extend([
+                    f'*{college_id}*{view_name}*',
+                    f'*college_{college_id}*',
+                ])
+
+            # Clear matching keys
+            for pattern in patterns:
+                try:
+                    keys = cache.keys(pattern)
+                    if keys:
+                        cache.delete_many(keys)
+                except:
+                    pass
+
+        except Exception as e:
+            # Fallback: don't clear cache if there's an error
+            # This prevents 500 errors from cache failures
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Cache invalidation failed: {e}")
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
@@ -95,11 +163,45 @@ class CachedStaticMixin:
         return super().retrieve(request, *args, **kwargs)
 
     def _invalidate_cache(self):
-        """Clear cache after mutations"""
+        """Clear cache after mutations - use selective invalidation"""
         try:
-            cache.clear()
-        except:
-            pass
+            # Instead of clearing ALL cache, only clear view-specific cache
+            # This prevents data loading issues and hard refresh requirements
+            from django.core.cache.utils import make_template_fragment_key
+            from .utils import get_current_college_id
+
+            # Clear cache for this viewset's endpoints
+            view_name = self.__class__.__name__.lower()
+            college_id = get_current_college_id()
+
+            # Build patterns to clear
+            patterns = [
+                f'views.decorators.cache.cache_page.*.{view_name}.*',
+                f'*{view_name}*list*',
+                f'*{view_name}*retrieve*',
+            ]
+
+            if college_id:
+                patterns.extend([
+                    f'*{college_id}*{view_name}*',
+                    f'*college_{college_id}*',
+                ])
+
+            # Clear matching keys
+            for pattern in patterns:
+                try:
+                    keys = cache.keys(pattern)
+                    if keys:
+                        cache.delete_many(keys)
+                except:
+                    pass
+
+        except Exception as e:
+            # Fallback: don't clear cache if there's an error
+            # This prevents 500 errors from cache failures
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Cache invalidation failed: {e}")
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)

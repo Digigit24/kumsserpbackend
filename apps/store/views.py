@@ -570,9 +570,18 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def submit(self, request, pk=None):
         """College store manager submits indent to super admin"""
-        indent = self.get_object()
-        indent.submit()
-        return Response({'status': indent.status, 'message': 'Submitted to super admin for approval'})
+        try:
+            indent = self.get_object()
+            indent.submit()
+            return Response({'status': indent.status, 'message': 'Submitted to super admin for approval'})
+        except ValidationError as exc:
+            detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
+            return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error submitting indent {pk}: {str(e)}")
+            return Response({'detail': 'An error occurred while submitting the indent'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])
     def college_admin_approve(self, request, pk=None):
@@ -706,21 +715,30 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
     @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
     def issue_materials(self, request, pk=None):
         """Phase 9.8: Create MaterialIssueNote (only after super admin approval)"""
-        indent = self.get_object()
-        if indent.status not in ['super_admin_approved', 'approved']:
-            return Response(
-                {'detail': 'Indent must be approved by super admin before issuing materials'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        # Create MaterialIssueNote
-        issue_data = request.data.copy()
-        issue_data['indent'] = indent.id
-        issue_data['central_store'] = indent.central_store.id
-        issue_data['receiving_college'] = indent.college.id
-        serializer = MaterialIssueNoteCreateSerializer(data=issue_data)
-        serializer.is_valid(raise_exception=True)
-        min_note = serializer.save()
-        return Response(MaterialIssueNoteDetailSerializer(min_note).data)
+        try:
+            indent = self.get_object()
+            if indent.status not in ['super_admin_approved', 'approved']:
+                return Response(
+                    {'detail': 'Indent must be approved by super admin before issuing materials'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            # Create MaterialIssueNote
+            issue_data = request.data.copy()
+            issue_data['indent'] = indent.id
+            issue_data['central_store'] = indent.central_store.id
+            issue_data['receiving_college'] = indent.college.id
+            serializer = MaterialIssueNoteCreateSerializer(data=issue_data)
+            serializer.is_valid(raise_exception=True)
+            min_note = serializer.save()
+            return Response(MaterialIssueNoteDetailSerializer(min_note).data)
+        except ValidationError as exc:
+            detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
+            return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error issuing materials for indent {pk}: {str(e)}")
+            return Response({'detail': 'An error occurred while issuing materials'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class MaterialIssueNoteViewSet(viewsets.ModelViewSet):
@@ -848,10 +866,25 @@ class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Only super admin can add central inventory items'},
                           status=status.HTTP_403_FORBIDDEN)
         response = super().create(request, *args, **kwargs)
-        if hasattr(cache, 'delete_pattern'):
-            cache.delete_pattern('*centralstoreinventory*')
-        else:
-            cache.clear()
+        # Use selective cache invalidation
+        try:
+            if hasattr(cache, 'delete_pattern'):
+                cache.delete_pattern('*centralstoreinventory*')
+                cache.delete_pattern('*store*inventory*')
+            else:
+                # Fallback to selective key deletion
+                patterns = ['*centralstoreinventory*', '*store*inventory*', '*inventory*list*']
+                for pattern in patterns:
+                    try:
+                        keys = cache.keys(pattern)
+                        if keys:
+                            cache.delete_many(keys)
+                    except:
+                        pass
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Inventory cache invalidation failed: {e}")
         return response
 
     @action(detail=False, methods=['get'])

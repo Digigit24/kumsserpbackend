@@ -218,17 +218,27 @@ class CollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        serializer.save(
-            **self._college_save_kwargs(serializer, include_created=True)
-        )
+        """Create with proper error handling"""
+        try:
+            serializer.save(
+                **self._college_save_kwargs(serializer, include_created=True)
+            )
+        except Exception as e:
+            logger.error(f"Error creating {serializer.Meta.model.__name__}: {str(e)}")
+            raise
 
     def perform_update(self, serializer):
-        serializer.save(
-            **self._college_save_kwargs(
-                serializer,
-                college_id=getattr(serializer.instance, 'college_id', None) if serializer.instance else None
+        """Update with proper error handling"""
+        try:
+            serializer.save(
+                **self._college_save_kwargs(
+                    serializer,
+                    college_id=getattr(serializer.instance, 'college_id', None) if serializer.instance else None
+                )
             )
-        )
+        except Exception as e:
+            logger.error(f"Error updating {serializer.Meta.model.__name__}: {str(e)}")
+            raise
 
 
 class CollegeScopedReadOnlyModelViewSet(CollegeScopedMixin, viewsets.ReadOnlyModelViewSet):
