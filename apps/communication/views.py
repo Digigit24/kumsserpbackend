@@ -21,6 +21,7 @@ from .models import (
     ChatMessage,
     Conversation,
     TypingIndicator,
+    InAppNotification,
 )
 from .serializers import (
     NoticeSerializer,
@@ -32,6 +33,7 @@ from .serializers import (
     MessageLogSerializer,
     NotificationRuleSerializer,
     ChatMessageSerializer,
+    InAppNotificationSerializer,
 )
 from .redis_pubsub import (
     publish_message_event,
@@ -560,3 +562,187 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
         """
         online_user_ids = list(get_online_users())
         return Response({'online_users': online_user_ids})
+
+
+class InAppNotificationViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for in-app notifications.
+
+    Provides CRUD operations and custom actions for notifications.
+    """
+    queryset = InAppNotification.objects.all()
+    serializer_class = InAppNotificationSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['notification_type', 'is_read', 'priority', 'is_active']
+    ordering_fields = ['created_at', 'priority']
+    ordering = ['-created_at']
+
+    def get_queryset(self):
+        """Filter notifications for current user only."""
+        queryset = super().get_queryset()
+        user = self.request.user
+        return queryset.filter(recipient=user, is_active=True)
+
+    @action(detail=False, methods=['get'], url_path='unread')
+    def unread(self, request):
+        """
+        Get all unread notifications for the current user.
+
+        Returns:
+        {
+            "count": 42,
+            "notifications": [...]
+        }
+        """
+        notifications = self.get_queryset().filter(is_read=False)
+        page = self.paginate_queryset(notifications)
+
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response({
+                'count': notifications.count(),
+                'notifications': serializer.data
+            })
+
+        serializer = self.get_serializer(notifications, many=True)
+        return Response({
+            'count': notifications.count(),
+            'notifications': serializer.data
+        })
+
+    @action(detail=False, methods=['get'], url_path='unread-count')
+    def unread_count(self, request):
+        """
+        Get count of unread notifications.
+
+        Returns:
+        {
+            "count": 42
+        }
+        """
+        count = self.get_queryset().filter(is_read=False).count()
+        return Response({'count': count})
+
+    @action(detail=True, methods=['post'], url_path='mark-read')
+    def mark_read(self, request, pk=None):
+        """
+        Mark a specific notification as read.
+
+        Returns:
+        {
+            "success": true,
+            "notification_id": 123,
+            "read_at": "2026-01-12T10:30:00Z"
+        }
+        """
+        notification = self.get_object()
+        notification.mark_as_read()
+
+        # Notify via WebSocket
+        self.broadcast_notification_update(notification)
+
+        return Response({
+            'success': True,
+            'notification_id': notification.id,
+            'read_at': notification.read_at.isoformat() if notification.read_at else None
+        })
+
+    @action(detail=False, methods=['post'], url_path='mark-all-read')
+    def mark_all_read(self, request):
+        """
+        Mark all unread notifications as read.
+
+        Returns:
+        {
+            "success": true,
+            "count": 42
+        }
+        """
+        notifications = self.get_queryset().filter(is_read=False)
+        count = notifications.count()
+
+        read_time = timezone.now()
+        notifications.update(is_read=True, read_at=read_time)
+
+        # Notify via WebSocket
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+
+        channel_layer = get_channel_layer()
+        if channel_layer:
+            group_name = f"notifications_user_{request.user.id}"
+            async_to_sync(channel_layer.group_send)(
+                group_name,
+                {
+                    'type': 'notification_update',
+                    'event': 'all_read',
+                    'count': count,
+                    'read_at': read_time.isoformat()
+                }
+            )
+
+        return Response({
+            'success': True,
+            'count': count
+        })
+
+    @action(detail=True, methods=['delete'], url_path='dismiss')
+    def dismiss(self, request, pk=None):
+        """
+        Dismiss (soft delete) a notification.
+
+        Returns:
+        {
+            "success": true,
+            "notification_id": 123
+        }
+        """
+        notification = self.get_object()
+        notification.is_active = False
+        notification.save(update_fields=['is_active', 'updated_at'])
+
+        return Response({
+            'success': True,
+            'notification_id': notification.id
+        })
+
+    @action(detail=False, methods=['delete'], url_path='dismiss-all')
+    def dismiss_all(self, request):
+        """
+        Dismiss all notifications.
+
+        Returns:
+        {
+            "success": true,
+            "count": 42
+        }
+        """
+        count = self.get_queryset().update(is_active=False)
+
+        return Response({
+            'success': True,
+            'count': count
+        })
+
+    def broadcast_notification_update(self, notification):
+        """Broadcast notification update via WebSocket."""
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+
+        try:
+            channel_layer = get_channel_layer()
+            if channel_layer:
+                group_name = f"notifications_user_{notification.recipient_id}"
+                async_to_sync(channel_layer.group_send)(
+                    group_name,
+                    {
+                        'type': 'notification_update',
+                        'event': 'notification_read',
+                        'notification_id': notification.id,
+                        'is_read': notification.is_read,
+                        'read_at': notification.read_at.isoformat() if notification.read_at else None
+                    }
+                )
+        except Exception as e:
+            logger.error(f"Error broadcasting notification update: {e}")

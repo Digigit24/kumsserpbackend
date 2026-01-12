@@ -13,6 +13,7 @@ from .models import (
     ChatMessage,
     Conversation,
     TypingIndicator,
+    InAppNotification,
 )
 
 User = get_user_model()
@@ -181,3 +182,24 @@ class TypingIndicatorSerializer(serializers.ModelSerializer):
             'conversation_partner_name', 'is_typing', 'timestamp'
         ]
         read_only_fields = ['id', 'timestamp']
+
+
+class InAppNotificationSerializer(serializers.ModelSerializer):
+    """Serializer for in-app notifications."""
+    recipient_name = serializers.CharField(source='recipient.get_full_name', read_only=True)
+    time_ago = serializers.SerializerMethodField()
+
+    class Meta:
+        model = InAppNotification
+        fields = [
+            'id', 'recipient', 'recipient_name', 'notification_type',
+            'title', 'message', 'link', 'related_object_type', 'related_object_id',
+            'is_read', 'read_at', 'icon', 'priority',
+            'created_at', 'updated_at', 'is_active', 'time_ago'
+        ]
+        read_only_fields = ['id', 'recipient', 'created_at', 'updated_at']
+
+    def get_time_ago(self, obj):
+        """Get human-readable time ago string."""
+        from django.utils.timesince import timesince
+        return timesince(obj.created_at)

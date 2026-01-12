@@ -14,6 +14,7 @@ from .views import (
     MessageLogViewSet,
     NotificationRuleViewSet,
     ChatMessageViewSet,
+    InAppNotificationViewSet,
 )
 from .sse_views import sse_events, sse_test
 
@@ -27,6 +28,7 @@ router.register(r'bulk-messages', BulkMessageViewSet, basename='bulkmessage')
 router.register(r'message-logs', MessageLogViewSet, basename='messagelog')
 router.register(r'notification-rules', NotificationRuleViewSet, basename='notificationrule')
 router.register(r'chats', ChatMessageViewSet, basename='chatmessage')
+router.register(r'notifications', InAppNotificationViewSet, basename='inappnotification')
 
 urlpatterns = [
     # SSE (Server-Sent Events) endpoints for real-time communication

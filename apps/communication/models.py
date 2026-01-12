@@ -6,6 +6,7 @@ from datetime import datetime
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 
 from apps.core.models import CollegeScopedModel, AuditModel, College
 from apps.accounts.models import User
@@ -426,3 +427,95 @@ class TypingIndicator(models.Model):
 
     def __str__(self):
         return f"{self.user.username} typing to {self.conversation_partner.username}"
+
+
+class InAppNotification(AuditModel):
+    """
+    In-app notifications for users.
+    Tracks read/unread status and supports various notification types.
+    """
+    NOTIFICATION_TYPES = (
+        ('message', 'New Message'),
+        ('notice', 'Notice Posted'),
+        ('event', 'Event Created'),
+        ('event_reminder', 'Event Reminder'),
+        ('registration', 'Registration Update'),
+        ('assignment', 'Assignment Posted'),
+        ('grade', 'Grade Posted'),
+        ('announcement', 'Announcement'),
+        ('system', 'System Notification'),
+    )
+
+    recipient = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notifications',
+        help_text="Notification recipient"
+    )
+    notification_type = models.CharField(
+        max_length=50,
+        choices=NOTIFICATION_TYPES,
+        help_text="Type of notification"
+    )
+    title = models.CharField(max_length=200, help_text="Notification title")
+    message = models.TextField(help_text="Notification message")
+
+    # Links and metadata
+    link = models.CharField(max_length=500, null=True, blank=True, help_text="Link to related resource")
+    related_object_type = models.CharField(max_length=50, null=True, blank=True, help_text="Related model type")
+    related_object_id = models.IntegerField(null=True, blank=True, help_text="Related object ID")
+
+    # Read status
+    is_read = models.BooleanField(default=False, help_text="Read flag")
+    read_at = models.DateTimeField(null=True, blank=True, help_text="Read timestamp")
+
+    # Additional metadata
+    icon = models.CharField(max_length=50, null=True, blank=True, help_text="Icon name/class")
+    priority = models.CharField(
+        max_length=20,
+        default='normal',
+        choices=[('low', 'Low'), ('normal', 'Normal'), ('high', 'High'), ('urgent', 'Urgent')],
+        help_text="Notification priority"
+    )
+
+    class Meta:
+        db_table = 'in_app_notification'
+        indexes = [
+            models.Index(fields=['recipient', '-created_at']),
+            models.Index(fields=['recipient', 'is_read', '-created_at']),
+            models.Index(fields=['notification_type', 'recipient']),
+        ]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.notification_type} for {self.recipient.username}: {self.title}"
+
+    def mark_as_read(self):
+        """Mark notification as read."""
+        if not self.is_read:
+            self.is_read = True
+            self.read_at = timezone.now()
+            self.save(update_fields=['is_read', 'read_at', 'updated_at'])
+
+    @classmethod
+    def create_notification(cls, recipient, notification_type, title, message, **kwargs):
+        """
+        Helper method to create a notification.
+
+        Args:
+            recipient: User object
+            notification_type: Type of notification
+            title: Notification title
+            message: Notification message
+            **kwargs: Additional fields (link, related_object_type, related_object_id, icon, priority)
+
+        Returns:
+            InAppNotification: Created notification object
+        """
+        return cls.objects.create(
+            recipient=recipient,
+            notification_type=notification_type,
+            title=title,
+            message=message,
+            **kwargs
+        )

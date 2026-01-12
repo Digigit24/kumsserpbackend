@@ -88,15 +88,17 @@ CACHES = {
     }
 }
 
-# Channel Layers - Disabled (Using SSE instead of WebSocket)
-# CHANNEL_LAYERS = {
-#     'default': {
-#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         'CONFIG': {
-#             "hosts": [config('REDIS_URL', default='redis://127.0.0.1:6379')],
-#         },
-#     },
-# }
+# Channel Layers - WebSocket communication via Redis
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [REDIS_URL],
+            "capacity": 1500,  # Maximum number of messages to store
+            "expiry": 10,  # Message expiry in seconds
+        },
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.gzip.GZipMiddleware',  # Compress all responses
