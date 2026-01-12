@@ -1,6 +1,7 @@
 import os
 
 from rest_framework import serializers
+from django.utils import timezone
 
 from .models import (
     StoreCategory,
@@ -302,12 +303,45 @@ class SupplierQuotationDetailSerializer(serializers.ModelSerializer):
 
 
 class SupplierQuotationCreateSerializer(serializers.ModelSerializer):
+    quotation_date = serializers.DateField(required=False, allow_null=True)
+    valid_until = serializers.DateField(required=False, allow_null=True)
+    total_amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
+    tax_amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
+    grand_total = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
+    supplier = serializers.PrimaryKeyRelatedField(queryset=SupplierMaster.objects.all(), required=False, allow_null=True)
+
     class Meta:
         model = SupplierQuotation
-        fields = ['quotation_file']  # Only accept file upload
+        fields = '__all__'
+        read_only_fields = ['quotation_number', 'status', 'is_selected']
 
     def validate_quotation_file(self, value):
         return _validate_quotation_file(value)
+
+    def create(self, validated_data):
+        if not validated_data.get('quotation_date'):
+            validated_data['quotation_date'] = timezone.now().date()
+        if not validated_data.get('valid_until'):
+            validated_data['valid_until'] = validated_data['quotation_date']
+
+        total_amount = validated_data.get('total_amount')
+        tax_amount = validated_data.get('tax_amount')
+        grand_total = validated_data.get('grand_total')
+
+        if total_amount is None:
+            validated_data['total_amount'] = 0
+        if tax_amount is None:
+            validated_data['tax_amount'] = 0
+        if grand_total is None:
+            validated_data['grand_total'] = (validated_data.get('total_amount') or 0) + (validated_data.get('tax_amount') or 0)
+
+        if not validated_data.get('supplier'):
+            supplier = SupplierMaster.objects.filter(is_active=True).first()
+            if not supplier:
+                raise serializers.ValidationError({'supplier': 'No active supplier available to use as default.'})
+            validated_data['supplier'] = supplier
+
+        return super().create(validated_data)
 
 
 class QuotationComparisonSerializer(serializers.Serializer):
