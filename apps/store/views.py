@@ -569,10 +569,10 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def submit(self, request, pk=None):
-        """College store manager submits indent to college admin"""
+        """College store manager submits indent to super admin"""
         indent = self.get_object()
         indent.submit()
-        return Response({'status': indent.status, 'message': 'Submitted to college admin for approval'})
+        return Response({'status': indent.status, 'message': 'Submitted to super admin for approval'})
 
     @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])
     def college_admin_approve(self, request, pk=None):
@@ -603,14 +603,14 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
     def super_admin_approve(self, request, pk=None):
-        """Super admin approves and forwards to central store"""
+        """Super admin approves and sets status to approved"""
         indent = self.get_object()
         try:
             indent.super_admin_approve(user=request.user)
         except ValidationError as exc:
             detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
             return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'status': indent.status, 'message': 'Approved by super admin, forwarded to central store'})
+        return Response({'status': indent.status, 'message': 'Approved by super admin'})
 
     @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
     def super_admin_reject(self, request, pk=None):
@@ -805,6 +805,7 @@ class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
     serializer_class = CentralStoreInventorySerializer
     permission_classes = [IsAuthenticated]
     resource_name = 'store'
+    lookup_field = 'item_id'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['central_store', 'item', 'quantity_available']
     search_fields = ['item__name', 'item__code']
@@ -823,6 +824,23 @@ class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return CentralStoreInventoryCreateSerializer
         return CentralStoreInventorySerializer
+
+    def get_object(self):
+        item_id = self.kwargs.get(self.lookup_field)
+        qs = self.get_queryset().filter(item_id=item_id)
+        central_store_id = self.request.query_params.get('central_store')
+        if central_store_id:
+            qs = qs.filter(central_store_id=central_store_id)
+        try:
+            return qs.get()
+        except CentralStoreInventory.DoesNotExist:
+            from rest_framework.exceptions import NotFound
+            raise NotFound('Inventory record not found for this item.')
+        except CentralStoreInventory.MultipleObjectsReturned:
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError({
+                'detail': 'Multiple inventory records found for this item. Provide ?central_store=<id>.'
+            })
 
     def create(self, request, *args, **kwargs):
         """Only super admin can create central inventory"""

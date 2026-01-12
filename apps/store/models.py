@@ -953,8 +953,8 @@ class StoreIndent(CollegeScopedModel):
             })
 
     def submit(self):
-        """College store submits request to college admin"""
-        self.status = 'pending_college_approval'
+        """College store submits request to super admin"""
+        self.status = 'pending_super_admin'
         self.save(update_fields=['status', 'updated_at'])
 
     def college_admin_approve(self, user=None):
@@ -973,10 +973,10 @@ class StoreIndent(CollegeScopedModel):
         self.save(update_fields=['status', 'rejection_reason', 'updated_at'])
 
     def super_admin_approve(self, user=None):
-        """Super admin approves - status set to super_admin_approved"""
+        """Super admin approves - status set to approved"""
         if self.status not in ['pending_super_admin', 'pending_college_approval', 'submitted']:
             raise ValidationError('Invalid status for super admin approval')
-        self.status = 'super_admin_approved'
+        self.status = 'approved'
         self.approved_by = user
         self.approved_date = timezone.now()
         self.save(update_fields=['status', 'approved_by', 'approved_date', 'updated_at'])

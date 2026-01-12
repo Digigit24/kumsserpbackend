@@ -5,6 +5,9 @@ from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.cache import cache
+from django.db import transaction
+from django.utils import timezone
 from dj_rest_auth.serializers import TokenSerializer as DRATokenSerializer
 
 from .models import (
@@ -137,6 +140,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating users."""
+    student_profile = serializers.DictField(write_only=True, required=False)
     password = serializers.CharField(
         write_only=True,
         required=True,
@@ -155,7 +159,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
             'username', 'email', 'phone', 'password', 'password_confirm',
             'first_name', 'last_name', 'middle_name',
             'gender', 'date_of_birth', 'avatar',
-            'college', 'user_type', 'is_active'
+            'college', 'user_type', 'is_active',
+            'student_profile'
         ]
 
     def validate(self, attrs):
@@ -168,10 +173,138 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """Create user with hashed password."""
+        student_profile = validated_data.pop('student_profile', None) or {}
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
-        user = User.objects.create_user(password=password, **validated_data)
+        with transaction.atomic():
+            user = User.objects.create_user(password=password, **validated_data)
+            if user.user_type == UserType.STUDENT:
+                self._create_student_profile(user, student_profile)
         return user
+
+    def _create_student_profile(self, user, student_profile):
+        from apps.students.models import Student
+        from apps.academic.models import Program
+        from apps.core.models import AcademicYear
+
+        if Student.objects.all_colleges().filter(user=user).exists():
+            return
+
+        college_id = student_profile.get('college') or user.college_id
+        if not college_id:
+            raise serializers.ValidationError({
+                'student_profile': 'College is required to create a student profile.'
+            })
+
+        program_id = student_profile.get('program')
+        if program_id:
+            program = Program.objects.all_colleges().filter(id=program_id).first()
+        else:
+            program = Program.objects.all_colleges().filter(college_id=college_id).order_by('id').first()
+        if not program:
+            raise serializers.ValidationError({
+                'student_profile': 'Program is required to create a student profile.'
+            })
+
+        academic_year_id = student_profile.get('academic_year')
+        if academic_year_id:
+            academic_year = AcademicYear.objects.all_colleges().filter(id=academic_year_id).first()
+        else:
+            academic_year = AcademicYear.objects.all_colleges().filter(
+                college_id=college_id,
+                is_current=True
+            ).first()
+            if not academic_year:
+                academic_year = AcademicYear.objects.all_colleges().filter(
+                    college_id=college_id
+                ).order_by('-start_date').first()
+        if not academic_year:
+            raise serializers.ValidationError({
+                'student_profile': 'Academic year is required to create a student profile.'
+            })
+
+        admission_date = student_profile.get('admission_date') or timezone.now().date()
+        admission_type = student_profile.get('admission_type') or 'regular'
+
+        college = College.objects.all_colleges().filter(id=college_id).first()
+        if not college:
+            raise serializers.ValidationError({
+                'student_profile': 'Invalid college for student profile.'
+            })
+
+        admission_number = student_profile.get('admission_number')
+        registration_number = student_profile.get('registration_number')
+        if not admission_number or not registration_number:
+            year = admission_date.year
+            count = Student.objects.all_colleges().filter(college_id=college_id).count() + 1
+            if not admission_number:
+                admission_number = f"ADM-{college.code}-{year}-{count:05d}"
+            if not registration_number:
+                registration_number = f"REG-{college.code}-{year}-{count:05d}"
+
+        first_name = student_profile.get('first_name') or user.first_name
+        last_name = student_profile.get('last_name') or user.last_name
+        email = student_profile.get('email') or user.email
+        gender = student_profile.get('gender') or user.gender
+        date_of_birth = student_profile.get('date_of_birth') or user.date_of_birth
+
+        missing = []
+        if not first_name:
+            missing.append('first_name')
+        if not last_name:
+            missing.append('last_name')
+        if not email:
+            missing.append('email')
+        if not gender:
+            missing.append('gender')
+        if not date_of_birth:
+            missing.append('date_of_birth')
+        if missing:
+            raise serializers.ValidationError({
+                'student_profile': f"Missing required fields: {', '.join(missing)}"
+            })
+
+        request = self.context.get('request')
+        actor = getattr(request, 'user', None)
+
+        Student.objects.create(
+            user=user,
+            college_id=college_id,
+            admission_number=admission_number,
+            admission_date=admission_date,
+            admission_type=admission_type,
+            roll_number=student_profile.get('roll_number'),
+            registration_number=registration_number,
+            program=program,
+            current_class_id=student_profile.get('current_class'),
+            current_section_id=student_profile.get('current_section'),
+            academic_year=academic_year,
+            category_id=student_profile.get('category'),
+            group_id=student_profile.get('group'),
+            first_name=first_name,
+            middle_name=student_profile.get('middle_name') or user.middle_name,
+            last_name=last_name,
+            date_of_birth=date_of_birth,
+            gender=gender,
+            blood_group=student_profile.get('blood_group'),
+            email=email,
+            phone=student_profile.get('phone') or user.phone,
+            alternate_phone=student_profile.get('alternate_phone'),
+            nationality=student_profile.get('nationality') or 'Indian',
+            religion=student_profile.get('religion'),
+            caste=student_profile.get('caste'),
+            mother_tongue=student_profile.get('mother_tongue'),
+            aadhar_number=student_profile.get('aadhar_number'),
+            pan_number=student_profile.get('pan_number'),
+            is_active=student_profile.get('is_active', True),
+            is_alumni=student_profile.get('is_alumni', False),
+            created_by=actor,
+            updated_by=actor,
+        )
+        try:
+            cache.clear()
+        except Exception:
+            pass
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
