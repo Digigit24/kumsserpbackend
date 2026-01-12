@@ -16,6 +16,33 @@ class CachedListRetrieveMixin:
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
+    def _invalidate_cache(self):
+        """Clear cache after mutations"""
+        try:
+            cache.clear()
+        except:
+            pass
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        self._invalidate_cache()
+        return response
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        self._invalidate_cache()
+        return response
+
+    def partial_update(self, request, *args, **kwargs):
+        response = super().partial_update(request, *args, **kwargs)
+        self._invalidate_cache()
+        return response
+
+    def destroy(self, request, *args, **kwargs):
+        response = super().destroy(request, *args, **kwargs)
+        self._invalidate_cache()
+        return response
+
 
 class CachedReadOnlyMixin:
     """For ViewSets with frequent updates - shorter cache"""
@@ -28,6 +55,33 @@ class CachedReadOnlyMixin:
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
+    def _invalidate_cache(self):
+        """Clear cache after mutations"""
+        try:
+            cache.clear()
+        except:
+            pass
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        self._invalidate_cache()
+        return response
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        self._invalidate_cache()
+        return response
+
+    def partial_update(self, request, *args, **kwargs):
+        response = super().partial_update(request, *args, **kwargs)
+        self._invalidate_cache()
+        return response
+
+    def destroy(self, request, *args, **kwargs):
+        response = super().destroy(request, *args, **kwargs)
+        self._invalidate_cache()
+        return response
+
 
 class CachedStaticMixin:
     """For rarely changing data - longer cache"""
@@ -39,6 +93,33 @@ class CachedStaticMixin:
     @method_decorator(cache_page(60 * 15))
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
+
+    def _invalidate_cache(self):
+        """Clear cache after mutations"""
+        try:
+            cache.clear()
+        except:
+            pass
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        self._invalidate_cache()
+        return response
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        self._invalidate_cache()
+        return response
+
+    def partial_update(self, request, *args, **kwargs):
+        response = super().partial_update(request, *args, **kwargs)
+        self._invalidate_cache()
+        return response
+
+    def destroy(self, request, *args, **kwargs):
+        response = super().destroy(request, *args, **kwargs)
+        self._invalidate_cache()
+        return response
 
 
 def invalidate_cache_pattern(pattern):
