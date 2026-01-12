@@ -581,7 +581,11 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         # Verify user is college admin for this college
         if not request.user.is_superuser and indent.college_id != getattr(request.user, 'college_id', None):
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
-        indent.college_admin_approve(user=request.user)
+        try:
+            indent.college_admin_approve(user=request.user)
+        except ValidationError as exc:
+            detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
+            return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'status': indent.status, 'message': 'Forwarded to super admin for approval'})
 
     @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])
@@ -590,21 +594,33 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         indent = self.get_object()
         if not request.user.is_superuser and indent.college_id != getattr(request.user, 'college_id', None):
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
-        indent.college_admin_reject(user=request.user, reason=request.data.get('reason'))
+        try:
+            indent.college_admin_reject(user=request.user, reason=request.data.get('reason'))
+        except ValidationError as exc:
+            detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
+            return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'status': indent.status, 'message': 'Rejected by college admin'})
 
     @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
     def super_admin_approve(self, request, pk=None):
         """Super admin approves and forwards to central store"""
         indent = self.get_object()
-        indent.super_admin_approve(user=request.user)
+        try:
+            indent.super_admin_approve(user=request.user)
+        except ValidationError as exc:
+            detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
+            return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'status': indent.status, 'message': 'Approved by super admin, forwarded to central store'})
 
     @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
     def super_admin_reject(self, request, pk=None):
         """Super admin rejects the indent"""
         indent = self.get_object()
-        indent.super_admin_reject(user=request.user, reason=request.data.get('reason'))
+        try:
+            indent.super_admin_reject(user=request.user, reason=request.data.get('reason'))
+        except ValidationError as exc:
+            detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
+            return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'status': indent.status, 'message': 'Rejected by super admin'})
 
     @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])

@@ -5,6 +5,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from apps.core.permissions.drf_permissions import IsSuperAdmin
 from django.core.cache import cache
+
+
+def _clear_hierarchy_cache():
+    if hasattr(cache, 'delete_pattern'):
+        _clear_hierarchy_cache()
+    else:
+        cache.clear()
+
 from django.db import models
 from django.db.models import Count, Q
 from django.contrib.auth import get_user_model
@@ -407,18 +415,15 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def clear_cache(self, request):
         """Manually clear all organizational hierarchy cache."""
-        cache.delete_pattern('org_tree_*')
-        cache.delete_pattern('roles_summary_*')
+        _clear_hierarchy_cache()
         return Response({'status': 'success', 'message': 'Cache cleared successfully'})
 
     def perform_create(self, serializer):
-        cache.delete_pattern('org_tree_*')
-        cache.delete_pattern('roles_summary_*')
+        _clear_hierarchy_cache()
         serializer.save()
 
     def perform_update(self, serializer):
-        cache.delete_pattern('org_tree_*')
-        cache.delete_pattern('roles_summary_*')
+        _clear_hierarchy_cache()
         serializer.save()
 
 

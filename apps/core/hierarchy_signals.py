@@ -2,6 +2,15 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.cache import cache
+
+
+def _clear_hierarchy_cache():
+    if hasattr(cache, 'delete_pattern'):
+        cache.delete_pattern('org_tree_*')
+        cache.delete_pattern('roles_summary_*')
+    else:
+        cache.clear()
+
 from django.contrib.auth import get_user_model
 from apps.accounts.models import UserRole as AccountUserRole
 from .models import OrganizationNode, RolePermission, HierarchyUserRole
@@ -41,40 +50,34 @@ def clear_user_permission_cache_on_role_change(sender, instance, **kwargs):
 @receiver(post_save, sender=HierarchyUserRole)
 def invalidate_tree_cache_on_hierarchy_role_change(sender, instance, **kwargs):
     """Clear organization tree cache when hierarchy role is assigned/updated."""
-    cache.delete_pattern('org_tree_*')
-    cache.delete_pattern('roles_summary_*')
+    _clear_hierarchy_cache()
 
 
 @receiver(post_delete, sender=HierarchyUserRole)
 def invalidate_tree_cache_on_hierarchy_role_delete(sender, instance, **kwargs):
     """Clear organization tree cache when hierarchy role is deleted."""
-    cache.delete_pattern('org_tree_*')
-    cache.delete_pattern('roles_summary_*')
+    _clear_hierarchy_cache()
 
 
 @receiver(post_save, sender=AccountUserRole)
 def invalidate_tree_cache_on_account_role_change(sender, instance, **kwargs):
     """Clear organization tree cache when account role is assigned/updated."""
-    cache.delete_pattern('org_tree_*')
-    cache.delete_pattern('roles_summary_*')
+    _clear_hierarchy_cache()
 
 
 @receiver(post_delete, sender=AccountUserRole)
 def invalidate_tree_cache_on_account_role_delete(sender, instance, **kwargs):
     """Clear organization tree cache when account role is deleted."""
-    cache.delete_pattern('org_tree_*')
-    cache.delete_pattern('roles_summary_*')
+    _clear_hierarchy_cache()
 
 
 @receiver(post_save, sender=get_user_model())
 def invalidate_tree_cache_on_user_change(sender, instance, **kwargs):
     """Clear organization tree cache when user is created or updated."""
-    cache.delete_pattern('org_tree_*')
-    cache.delete_pattern('roles_summary_*')
+    _clear_hierarchy_cache()
 
 
 @receiver(post_delete, sender=get_user_model())
 def invalidate_tree_cache_on_user_delete(sender, instance, **kwargs):
     """Clear organization tree cache when user is deleted."""
-    cache.delete_pattern('org_tree_*')
-    cache.delete_pattern('roles_summary_*')
+    _clear_hierarchy_cache()

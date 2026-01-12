@@ -740,6 +740,7 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
         fields = ['item_name', 'central_store', 'quantity_on_hand',
                   'quantity_allocated', 'quantity_available', 'min_stock_level',
                   'reorder_point', 'max_stock_level', 'unit_cost', 'is_active']
+        read_only_fields = ['quantity_available']
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -787,6 +788,9 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
 
 class CentralStoreInventorySerializer(CentralStoreInventoryListSerializer):
     """Default - same as list"""
+
+    class Meta(CentralStoreInventoryListSerializer.Meta):
+        read_only_fields = ['quantity_available']
 
     def validate(self, attrs):
         attrs = super().validate(attrs)

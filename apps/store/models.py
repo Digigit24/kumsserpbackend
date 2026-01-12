@@ -974,7 +974,7 @@ class StoreIndent(CollegeScopedModel):
 
     def super_admin_approve(self, user=None):
         """Super admin approves - status set to super_admin_approved"""
-        if self.status != 'pending_super_admin':
+        if self.status not in ['pending_super_admin', 'pending_college_approval', 'submitted']:
             raise ValidationError('Invalid status for super admin approval')
         self.status = 'super_admin_approved'
         self.approved_by = user
