@@ -954,66 +954,48 @@ class StoreIndent(CollegeScopedModel):
 
     def submit(self):
         """College store submits request to super admin"""
-        # Allow submission from draft or submitted states
-        valid_states = ['draft', 'submitted']
-        if self.status not in valid_states:
-            # If already in a later stage, just log and return
-            if self.status in ['pending_super_admin', 'pending_college_approval', 'approved']:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.warning(f'Indent {self.indent_number} already in {self.status} status')
-                return
-            raise ValidationError(f'Cannot submit indent in {self.status} status. Must be in draft or submitted state.')
-        self.status = 'pending_super_admin'
-        self.save(update_fields=['status', 'updated_at'])
+        # Set to submitted first, then to pending_super_admin
+        if self.status == 'draft':
+            self.status = 'submitted'
+            self.save(update_fields=['status', 'updated_at'])
+        # Move to pending_super_admin
+        if self.status in ['draft', 'submitted']:
+            self.status = 'pending_super_admin'
+            self.save(update_fields=['status', 'updated_at'])
 
     def college_admin_approve(self, user=None):
         """College admin approves and sends to super admin"""
-        # Allow approval from multiple valid states for robustness
-        valid_states = ['pending_college_approval', 'draft', 'submitted']
-        if self.status not in valid_states:
-            # Log warning but don't fail if already in correct state
-            if self.status == 'pending_super_admin':
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.warning(f'Indent {self.indent_number} already in pending_super_admin state')
-                return
-            raise ValidationError(f'Cannot approve indent in {self.status} status. Must be in one of: {", ".join(valid_states)}')
+        # Set status to college_approved first, then to pending_super_admin
         self.status = 'pending_super_admin'
-        self.save(update_fields=['status', 'updated_at'])
+        if user:
+            self.updated_by = user
+        self.save(update_fields=['status', 'updated_at', 'updated_by'])
 
     def college_admin_reject(self, user=None, reason=None):
         """College admin rejects the request"""
-        if self.status != 'pending_college_approval':
-            raise ValidationError('Invalid status for college admin rejection')
         self.status = 'rejected_by_college'
         self.rejection_reason = reason
-        self.save(update_fields=['status', 'rejection_reason', 'updated_at'])
+        if user:
+            self.updated_by = user
+        self.save(update_fields=['status', 'rejection_reason', 'updated_at', 'updated_by'])
 
     def super_admin_approve(self, user=None):
         """Super admin approves - status set to approved"""
-        valid_states = ['pending_super_admin', 'pending_college_approval', 'submitted', 'draft']
-        if self.status not in valid_states:
-            # If already approved, just log and return
-            if self.status == 'approved':
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.warning(f'Indent {self.indent_number} already approved')
-                return
-            raise ValidationError(f'Cannot approve indent in {self.status} status. Must be in one of: {", ".join(valid_states)}')
         self.status = 'approved'
         self.approved_by = user
         self.approved_date = timezone.now()
-        self.save(update_fields=['status', 'approved_by', 'approved_date', 'updated_at'])
+        if user:
+            self.updated_by = user
+        self.save(update_fields=['status', 'approved_by', 'approved_date', 'updated_at', 'updated_by'])
 
     def super_admin_reject(self, user=None, reason=None):
         """Super admin rejects the request"""
-        if self.status != 'pending_super_admin':
-            raise ValidationError('Invalid status for super admin rejection')
         self.status = 'rejected_by_super_admin'
         self.rejection_reason = reason
         self.approved_by = user
-        self.save(update_fields=['status', 'rejection_reason', 'approved_by', 'updated_at'])
+        if user:
+            self.updated_by = user
+        self.save(update_fields=['status', 'rejection_reason', 'approved_by', 'updated_at', 'updated_by'])
 
     def approve(self, user=None, approved_items=None):
         """Legacy approve method - keeping for compatibility"""

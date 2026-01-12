@@ -134,6 +134,13 @@ class CollegeViewSet(CollegeScopedModelViewSet):
     ordering_fields = ['name', 'code', 'display_order', 'created_at']
     ordering = ['display_order', 'name']
 
+    def get_queryset(self):
+        """Central managers and superusers can see all colleges"""
+        user = self.request.user
+        if user.is_superuser or getattr(user, 'user_type', None) == 'central_manager':
+            return College.objects.all_colleges()
+        return super().get_queryset()
+
     def get_serializer_class(self):
         """Use different serializers for different actions."""
         if self.action == 'list':
