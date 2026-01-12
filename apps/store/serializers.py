@@ -303,6 +303,9 @@ class SupplierQuotationListSerializer(serializers.ModelSerializer):
 class SupplierQuotationDetailSerializer(serializers.ModelSerializer):
     items = QuotationItemSerializer(many=True, read_only=True)
     supplier_details = SupplierMasterDetailSerializer(source='supplier', read_only=True)
+    supplier_name = serializers.CharField(source='supplier.name', read_only=True)
+    requirement_number = serializers.CharField(source='requirement.requirement_number', read_only=True)
+    requirement_title = serializers.CharField(source='requirement.title', read_only=True)
 
     class Meta:
         model = SupplierQuotation
@@ -354,8 +357,24 @@ class SupplierQuotationCreateSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-class QuotationComparisonSerializer(serializers.Serializer):
-    quotation = SupplierQuotationDetailSerializer()
+class SupplierQuotationUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplierQuotation
+        fields = '__all__'
+        extra_kwargs = {
+            'quotation_number': {'required': False},
+            'quotation_date': {'required': False},
+            'requirement': {'required': False},
+            'supplier': {'required': False},
+            'valid_until': {'required': False},
+            'total_amount': {'required': False},
+            'tax_amount': {'required': False},
+            'grand_total': {'required': False},
+        }
+
+    def validate_quotation_file(self, value):
+        return _validate_quotation_file(value)
+
 
 
 class PurchaseOrderItemSerializer(serializers.ModelSerializer):

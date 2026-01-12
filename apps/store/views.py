@@ -58,6 +58,7 @@ from .serializers import (
     SupplierQuotationListSerializer,
     SupplierQuotationDetailSerializer,
     SupplierQuotationCreateSerializer,
+    SupplierQuotationUpdateSerializer,
     PurchaseOrderListSerializer,
     PurchaseOrderDetailSerializer,
     PurchaseOrderCreateSerializer,
@@ -419,7 +420,15 @@ class SupplierQuotationViewSet(viewsets.ModelViewSet):
             return SupplierQuotationListSerializer
         if self.action == 'create':
             return SupplierQuotationCreateSerializer
+        if self.action in ['update', 'partial_update']:
+            return SupplierQuotationUpdateSerializer
         return SupplierQuotationDetailSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user, updated_by=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self.request.user)
 
     @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
     def mark_selected(self, request, pk=None):

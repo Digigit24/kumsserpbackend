@@ -666,6 +666,36 @@ class ClassTimeViewSet(CollegeScopedModelViewSet):
     ordering_fields = ['period_number', 'start_time']
     ordering = ['period_number']
 
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        params = self.request.query_params
+        timetable_filters = {}
+
+        class_obj = params.get('class_obj')
+        section = params.get('section')
+        day_of_week = params.get('day_of_week')
+        timetable_is_active = params.get('timetable_is_active')
+        if timetable_is_active is None and (class_obj or section or day_of_week):
+            timetable_is_active = params.get('is_active')
+
+        if class_obj:
+            timetable_filters['timetable_entries__class_obj_id'] = class_obj
+        if section:
+            timetable_filters['timetable_entries__section_id'] = section
+        if day_of_week:
+            timetable_filters['timetable_entries__day_of_week'] = day_of_week
+        if timetable_is_active is not None:
+            if str(timetable_is_active).lower() in ['true', '1', 'yes']:
+                timetable_filters['timetable_entries__is_active'] = True
+            elif str(timetable_is_active).lower() in ['false', '0', 'no']:
+                timetable_filters['timetable_entries__is_active'] = False
+
+        if timetable_filters:
+            qs = qs.filter(**timetable_filters).distinct()
+
+        return qs
+
     def perform_destroy(self, instance):
         instance.soft_delete()
 
