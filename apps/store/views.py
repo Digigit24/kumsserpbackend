@@ -360,9 +360,17 @@ class ProcurementRequirementViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def submit_for_approval(self, request, pk=None):
-        obj = self.get_object()
-        obj.submit_for_approval()
-        return Response({'status': obj.status})
+        try:
+            obj = self.get_object()
+            obj.submit_for_approval()
+            obj.refresh_from_db()
+            return Response({'status': obj.status})
+        except ValidationError as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Error submitting for approval: {e}")
+            return Response({'detail': 'An error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
     def quotations(self, request, pk=None):
@@ -432,9 +440,17 @@ class SupplierQuotationViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
     def mark_selected(self, request, pk=None):
-        quotation = self.get_object()
-        quotation.mark_as_selected()
-        return Response({'status': 'selected'})
+        try:
+            quotation = self.get_object()
+            quotation.mark_as_selected()
+            quotation.refresh_from_db()
+            return Response(SupplierQuotationDetailSerializer(quotation).data)
+        except ValidationError as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Error marking quotation: {e}")
+            return Response({'detail': 'An error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class PurchaseOrderViewSet(viewsets.ModelViewSet):

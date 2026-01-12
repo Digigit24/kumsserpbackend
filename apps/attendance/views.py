@@ -175,9 +175,12 @@ class StudentAttendanceViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
         from apps.students.models import Student
         from apps.academic.models import Class, Section
 
-        students = Student.objects.filter(id__in=student_ids)
-        class_obj = Class.objects.get(id=class_obj_id)
-        section = Section.objects.get(id=section_id)
+        try:
+            students = Student.objects.filter(id__in=student_ids)
+            class_obj = Class.objects.get(id=class_obj_id)
+            section = Section.objects.get(id=section_id)
+        except (Class.DoesNotExist, Section.DoesNotExist) as e:
+            return Response({'detail': f'Invalid class or section: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
         attendance_records = []
         for student in students:
