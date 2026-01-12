@@ -53,188 +53,86 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
         return queryset
 
     def _build_virtual_tree(self):
-        """Build optimized virtual tree with role counts only."""
-        colleges = College.objects.filter(is_active=True).order_by('name')
-        dynamic_roles = DynamicRole.objects.filter(is_active=True).select_related('college')
-        account_roles = AccountRole.objects.filter(is_active=True).select_related('college', 'parent')
+        """Build dynamic virtual tree based on actual users in database."""
         User = get_user_model()
 
-        # Fetch all role counts efficiently
-        account_role_counts = dict(
-            AccountUserRole.objects.filter(is_active=True)
-            .values('role_id', 'college_id')
-            .annotate(total=Count('id'))
-            .values_list('role_id', 'total')
-        )
-        dynamic_role_counts = dict(
-            HierarchyUserRole.objects.filter(is_active=True)
-            .values('role_id', 'college_id')
-            .annotate(total=Count('id'))
-            .values_list('role_id', 'total')
-        )
+        # Get college_id from request header for filtering
+        college_id_header = self.request.headers.get('X-College-Id') if hasattr(self, 'request') else None
+
+        # Fetch actual user counts by college and user_type
+        user_query = User.objects.filter(is_active=True).exclude(user_type='super_admin')
+
+        # Apply college filter if specified
+        if college_id_header and college_id_header.lower() != 'all':
+            try:
+                college_id_filter = int(college_id_header)
+                user_query = user_query.filter(
+                    Q(college_id=college_id_filter) | Q(college_id__isnull=True)
+                )
+            except (ValueError, TypeError):
+                pass
+
         user_type_counts = {
             (row['college_id'], row['user_type']): row['total']
-            for row in User.objects.filter(is_active=True)
-            .exclude(user_type='super_admin')
-            .values('college_id', 'user_type')
-            .annotate(total=Count('id'))
+            for row in user_query.values('college_id', 'user_type').annotate(total=Count('id'))
         }
 
-        role_by_code = {role.code.lower(): role for role in dynamic_roles if role.code}
+        # Comprehensive role display names with levels (lower number = higher authority)
+        user_type_labels = {
+            'ceo': ('CEO', 0),
+            'college_admin': ('Principal', 2),
+            'principal': ('Principal', 2),
+            'admin': ('Admin', 3),
+            'viceprincipal': ('Vice Principal', 3),
+            'viceprincipal_super': ('Vice Principal/Superintendent', 3),
+            'hod': ('HOD', 4),
+            'teacher': ('Teacher', 5),
+            'professor': ('Professor', 5),
+            'associate_professor': ('Associate Professor', 5),
+            'assistant_professor': ('Assistant Professor', 5),
+            'store_manager': ('Store Manager', 6),
+            'central_manager': ('Central Store Manager', 6),
+            'accountant': ('Accountant', 6),
+            'librarian': ('Librarian', 7),
+            'hostel_warden': ('Hostel Warden', 7),
+            'warden': ('Warden', 7),
+            'hostel_incharge': ('Hostel Incharge', 7),
+            'hostel_rector': ('Hostel Rector', 7),
+            'staff': ('Staff', 8),
+            'peon': ('Peon', 8),
+            'lab_assistant': ('Lab Assistant', 8),
+            'clerk': ('Clerk', 8),
+            'telecaller': ('Telecaller', 8),
+            'jr_engineer': ('Jr Engineer', 8),
+            'admission': ('Admission Officer', 8),
+            'student': ('Student', 10),
+            'parent': ('Parent', 11),
+        }
+
         node_type_codes = {code for code, _label in OrganizationNode.NODE_TYPES}
 
-        ceo_role = role_by_code.get('ceo')
-
-        user_type_labels = {
-            'college_admin': 'Principal',
-            'admin': 'Admin',
-            'teacher': 'Teacher',
-            'student': 'Student',
-            'parent': 'Parent',
-            'staff': 'Staff',
-            'store_manager': 'Store Manager',
-            'central_manager': 'Central Manager',
-            'hod': 'HOD',
-            'accountant': 'Accountant',
-            'librarian': 'Librarian'
-        }
-
-        global_user_types = [
-            (user_type, count)
-            for (college_id, user_type), count in user_type_counts.items()
-            if college_id is None and count > 0
-        ]
-
+        # Build CEO root node
         root = {
             'id': 'virtual-ceo',
             'name': 'CEO',
             'node_type': 'ceo',
             'description': 'Super Admin',
-            'role': DynamicRoleSerializer(ceo_role).data if ceo_role else None,
+            'role': {'code': 'ceo', 'name': 'CEO', 'level': 0},
             'user': None,
             'children': [],
             'is_active': True,
             'order': 0
         }
 
-        def build_user_type_node(college_id, user_type_code, count):
-            node_type = user_type_code if user_type_code in node_type_codes else 'staff'
-            return {
-                'id': f'virtual-user-type-{college_id}-{user_type_code}',
-                'name': user_type_labels.get(user_type_code, user_type_code.replace('_', ' ').title()),
-                'node_type': node_type,
-                'description': '',
-                'role': {
-                    'code': user_type_code,
-                    'name': user_type_labels.get(user_type_code, user_type_code.replace('_', ' ').title())
-                },
-                'user': None,
-                'children': [],
-                'members_count': count,
-                'is_active': True,
-                'order': 0
-            }
-
-        for user_type, count in global_user_types:
-            root['children'].append(build_user_type_node('global', user_type, count))
-
-        def serialize_account_role(role):
-            return {
-                'id': role.id,
-                'name': role.name,
-                'code': role.code,
-                'description': role.description or '',
-                'level': role.level,
-                'college': role.college_id
-            }
-
-        def get_user_type_count(role_code, college_id):
-            if not role_code or not college_id:
-                return 0
-            return user_type_counts.get((college_id, role_code), 0)
-
-        def get_account_members_count(role, college_id):
-            role_code = (role.code or '').lower()
-            role_count = account_role_counts.get(role.id, 0)
-            user_type_count = get_user_type_count(role_code, college_id)
-            return max(role_count, user_type_count)
-
-        def get_dynamic_members_count(role, college_id):
-            role_code = (role.code or '').lower()
-            role_count = dynamic_role_counts.get(role.id, 0)
-            user_type_count = get_user_type_count(role_code, college_id)
-            return max(role_count, user_type_count)
-
-        def role_to_node(role, role_payload, members_count):
-            role_code = (role.code or '').lower()
-            node_type = role_code if role_code in node_type_codes else 'staff'
-            return {
-                'id': f'virtual-role-{role.id}',
-                'name': role.name,
-                'node_type': node_type,
-                'description': role.description or '',
-                'role': role_payload,
-                'user': None,
-                'children': [],
-                'members_count': members_count,
-                'is_active': True,
-                'order': role.level
-            }
-
-        def attach_roles_by_level(parent_node, role_list, college_id):
-            sorted_roles = sorted(role_list, key=lambda r: (r.level, r.name.lower()))
-            stack = []
-            for role in sorted_roles:
-                count = get_dynamic_members_count(role, college_id)
-                # Always show all roles with their counts (even if 0)
-                node = role_to_node(role, DynamicRoleSerializer(role).data, count)
-                while stack and role.level <= stack[-1][0]:
-                    stack.pop()
-                if stack:
-                    stack[-1][1]['children'].append(node)
-                else:
-                    parent_node['children'].append(node)
-                stack.append((role.level, node))
-
-        def attach_roles_by_parent(parent_node, role_list, college_id):
-            nodes = {}
-            for role in role_list:
-                count = get_account_members_count(role, college_id)
-                # Always show all roles with their counts (even if 0)
-                role_payload = serialize_account_role(role)
-                nodes[role.id] = role_to_node(role, role_payload, count)
-
-            for role in role_list:
-                node = nodes.get(role.id)
-                if not node:
-                    continue
-                if role.parent_id and role.parent_id in nodes:
-                    nodes[role.parent_id]['children'].append(node)
-                else:
-                    parent_node['children'].append(node)
-
-        # Role display names and levels for common user types
-        user_type_labels = {
-            'student': ('Student', 10),
-            'teacher': ('Teacher', 5),
-            'hod': ('HOD', 4),
-            'principal': ('Principal', 2),
-            'staff': ('Staff', 7),
-            'store_manager': ('Store Manager', 6),
-            'librarian': ('Librarian', 7),
-            'accountant': ('Accountant', 6),
-            'lab_assistant': ('Lab Assistant', 8),
-            'clerk': ('Clerk', 8),
-            'college_admin': ('College Admin', 3),
-        }
-
         def build_user_type_node(college_id, user_type, count):
-            """Build a virtual node from user_type data."""
+            """Build a virtual node from actual user_type data."""
             label, level = user_type_labels.get(user_type, (user_type.replace('_', ' ').title(), 9))
+            node_type = user_type if user_type in node_type_codes else 'staff'
+
             return {
-                'id': f'virtual-role-{college_id}-{user_type}',
+                'id': f'virtual-role-{college_id or "global"}-{user_type}',
                 'name': label,
-                'node_type': user_type,
+                'node_type': node_type,
                 'description': f'{count} {label.lower()}(s)',
                 'role': {
                     'id': f'virtual-{user_type}',
@@ -249,32 +147,37 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                 'order': level
             }
 
-        # Handle global users (users without college_id or college_id=None)
+        # Handle global users (college_id is None)
         global_user_items = [
             (user_type, count)
-            for (college_id, user_type), count in user_type_counts.items()
-            if college_id is None and count > 0 and user_type not in ['ceo', 'super_admin']
+            for (cid, user_type), count in user_type_counts.items()
+            if cid is None and count > 0
         ]
 
         for user_type, count in sorted(global_user_items, key=lambda x: user_type_labels.get(x[0], (x[0], 9))[1]):
-            global_node = {
-                'id': f'virtual-user-type-global-{user_type}',
-                'name': user_type_labels.get(user_type, (user_type.replace('_', ' ').title(), 9))[0],
-                'node_type': 'staff',
-                'description': '',
-                'role': {
-                    'code': user_type,
-                    'name': user_type_labels.get(user_type, (user_type.replace('_', ' ').title(), 9))[0]
-                },
-                'user': None,
-                'children': [],
-                'members_count': count,
-                'is_active': True,
-                'order': 0
-            }
-            root['children'].append(global_node)
+            root['children'].append(build_user_type_node(None, user_type, count))
 
-        for college in colleges:
+        # Get colleges to display
+        colleges_query = College.objects.filter(is_active=True).order_by('name')
+        if college_id_header and college_id_header.lower() != 'all':
+            try:
+                colleges_query = colleges_query.filter(id=int(college_id_header))
+            except (ValueError, TypeError):
+                pass
+
+        # Build college nodes with their users
+        for college in colleges_query:
+            # Get user types for this college
+            user_type_items = [
+                (user_type, count)
+                for (cid, user_type), count in user_type_counts.items()
+                if cid == college.id and count > 0
+            ]
+
+            # Skip colleges with no users
+            if not user_type_items:
+                continue
+
             college_node = {
                 'id': f'virtual-college-{college.id}',
                 'name': college.name,
@@ -287,29 +190,32 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                 'order': 0
             }
 
-            user_type_items = [
-                (user_type, count)
-                for (college_id, user_type), count in user_type_counts.items()
-                if college_id == college.id and count > 0
+            # Find principal/college_admin first (they are the top of college hierarchy)
+            principal_item = next(
+                (item for item in user_type_items if item[0] in ['college_admin', 'principal']),
+                None
+            )
+            other_items = [
+                item for item in user_type_items
+                if item[0] not in ['college_admin', 'principal']
             ]
 
-            if user_type_items:
-                principal_item = next((item for item in user_type_items if item[0] in ['college_admin', 'principal']), None)
-                other_items = [item for item in user_type_items if item[0] not in ['college_admin', 'principal']]
+            if principal_item:
+                # Principal is direct child of college
+                principal_node = build_user_type_node(college.id, principal_item[0], principal_item[1])
+                principal_node['id'] = f'virtual-principal-{college.id}'
+                college_node['children'].append(principal_node)
+                # Other roles are children of principal
+                parent_node = principal_node
+            else:
+                # No principal, attach roles directly to college
+                parent_node = college_node
 
-                if principal_item:
-                    principal_node = build_user_type_node(college.id, principal_item[0], principal_item[1])
-                    principal_node['id'] = f'virtual-principal-{college.id}'
-                    college_node['children'].append(principal_node)
-                    parent_node = principal_node
-                else:
-                    parent_node = college_node
+            # Add all other roles sorted by level
+            for user_type, count in sorted(other_items, key=lambda x: user_type_labels.get(x[0], (x[0], 9))[1]):
+                parent_node['children'].append(build_user_type_node(college.id, user_type, count))
 
-                for user_type, count in sorted(other_items, key=lambda x: user_type_labels.get(x[0], (x[0], 9))[1]):
-                    parent_node['children'].append(build_user_type_node(college.id, user_type, count))
-
-                if college_node['children']:
-                    root['children'].append(college_node)
+            root['children'].append(college_node)
 
         return [root]
 
@@ -326,19 +232,36 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
         User = get_user_model()
         summary = {}
 
-        # Role display names and levels
+        # Comprehensive role display names with levels (must match tree building)
         user_type_labels = {
-            'student': ('Student', 10),
-            'teacher': ('Teacher', 5),
-            'hod': ('HOD', 4),
+            'ceo': ('CEO', 0),
+            'college_admin': ('Principal', 2),
             'principal': ('Principal', 2),
-            'staff': ('Staff', 7),
+            'admin': ('Admin', 3),
+            'viceprincipal': ('Vice Principal', 3),
+            'viceprincipal_super': ('Vice Principal/Superintendent', 3),
+            'hod': ('HOD', 4),
+            'teacher': ('Teacher', 5),
+            'professor': ('Professor', 5),
+            'associate_professor': ('Associate Professor', 5),
+            'assistant_professor': ('Assistant Professor', 5),
             'store_manager': ('Store Manager', 6),
-            'librarian': ('Librarian', 7),
+            'central_manager': ('Central Store Manager', 6),
             'accountant': ('Accountant', 6),
+            'librarian': ('Librarian', 7),
+            'hostel_warden': ('Hostel Warden', 7),
+            'warden': ('Warden', 7),
+            'hostel_incharge': ('Hostel Incharge', 7),
+            'hostel_rector': ('Hostel Rector', 7),
+            'staff': ('Staff', 8),
+            'peon': ('Peon', 8),
             'lab_assistant': ('Lab Assistant', 8),
             'clerk': ('Clerk', 8),
-            'college_admin': ('College Admin', 3),
+            'telecaller': ('Telecaller', 8),
+            'jr_engineer': ('Jr Engineer', 8),
+            'admission': ('Admission Officer', 8),
+            'student': ('Student', 10),
+            'parent': ('Parent', 11),
         }
 
         # Get colleges to query
@@ -357,7 +280,7 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                 'roles': []
             }
 
-            # Get actual user counts by type from database
+            # Get actual user counts by type from database - only users that exist
             user_type_data = User.objects.filter(
                 college_id=college.id,
                 is_active=True
@@ -371,12 +294,14 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
                 count = row['count']
                 label, level = user_type_labels.get(user_type, (user_type.replace('_', ' ').title(), 9))
 
-                role_list.append({
-                    'role_name': label,
-                    'role_code': user_type,
-                    'count': count,
-                    'level': level
-                })
+                # Only include roles with actual users (count > 0)
+                if count > 0:
+                    role_list.append({
+                        'role_name': label,
+                        'role_code': user_type,
+                        'count': count,
+                        'level': level
+                    })
 
             college_summary['roles'] = sorted(role_list, key=lambda x: (x['level'], x['role_name']))
             college_summary['total_roles'] = len(college_summary['roles'])
@@ -386,9 +311,9 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
         cache.set(cache_key, summary, timeout=300)
         return Response(summary)
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated, IsSuperAdmin])
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def tree(self, request):
-        """Return full tree structure."""
+        """Return full tree structure filtered by college_id."""
         college_id = request.headers.get('X-College-Id')
         cache_key = f'org_tree_{college_id or "all"}'
         cached_data = cache.get(cache_key)

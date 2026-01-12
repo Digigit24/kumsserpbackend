@@ -1,7 +1,8 @@
 """Signals for organizational hierarchy auto-assignment and permission sync."""
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.cache import cache
+from django.contrib.auth import get_user_model
 from .models import OrganizationNode, RolePermission, HierarchyUserRole
 from .hierarchy_services import TeamAutoAssignmentService, PermissionChecker
 
@@ -34,3 +35,17 @@ def sync_role_permissions(sender, instance, created, **kwargs):
 def clear_user_permission_cache_on_role_change(sender, instance, **kwargs):
     """Clear permission cache when user role changes."""
     PermissionChecker.clear_user_cache(instance.user_id)
+
+
+@receiver(post_save, sender=get_user_model())
+def invalidate_tree_cache_on_user_change(sender, instance, **kwargs):
+    """Clear organization tree cache when user is created or updated."""
+    cache.delete_pattern('org_tree_*')
+    cache.delete_pattern('roles_summary_*')
+
+
+@receiver(post_delete, sender=get_user_model())
+def invalidate_tree_cache_on_user_delete(sender, instance, **kwargs):
+    """Clear organization tree cache when user is deleted."""
+    cache.delete_pattern('org_tree_*')
+    cache.delete_pattern('roles_summary_*')
