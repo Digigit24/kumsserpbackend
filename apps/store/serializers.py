@@ -1,3 +1,5 @@
+import os
+
 from rest_framework import serializers
 
 from .models import (
@@ -28,6 +30,30 @@ from .models import (
     CentralStoreInventory,
     InventoryTransaction,
 )
+
+
+MAX_QUOTATION_FILE_SIZE = 5 * 1024 * 1024
+ALLOWED_QUOTATION_CONTENT_TYPES = {'application/pdf', 'image/jpeg', 'image/png'}
+ALLOWED_QUOTATION_EXTENSIONS = {'.pdf', '.jpg', '.jpeg', '.png'}
+
+
+def _validate_quotation_file(value):
+    if not value:
+        return value
+    if value.size > MAX_QUOTATION_FILE_SIZE:
+        raise serializers.ValidationError('Quotation file must be 5 MB or smaller.')
+    content_type = getattr(value, 'content_type', None)
+    if content_type:
+        content_type = content_type.lower()
+        if content_type not in ALLOWED_QUOTATION_CONTENT_TYPES:
+            raise serializers.ValidationError('Only PDF or image files are allowed.')
+    name = getattr(value, 'name', '')
+    ext = os.path.splitext(name)[1].lower() if name else ''
+    if ext and ext not in ALLOWED_QUOTATION_EXTENSIONS:
+        raise serializers.ValidationError('Only PDF or image files are allowed.')
+    if not content_type and not ext:
+        raise serializers.ValidationError('Only PDF or image files are allowed.')
+    return value
 
 
 class StoreCategorySerializer(serializers.ModelSerializer):
@@ -271,11 +297,17 @@ class SupplierQuotationDetailSerializer(serializers.ModelSerializer):
         model = SupplierQuotation
         fields = '__all__'
 
+    def validate_quotation_file(self, value):
+        return _validate_quotation_file(value)
+
 
 class SupplierQuotationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = SupplierQuotation
         fields = ['quotation_file']  # Only accept file upload
+
+    def validate_quotation_file(self, value):
+        return _validate_quotation_file(value)
 
 
 class QuotationComparisonSerializer(serializers.Serializer):
