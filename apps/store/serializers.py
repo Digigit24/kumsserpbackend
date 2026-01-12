@@ -284,10 +284,20 @@ class QuotationItemCreateSerializer(serializers.ModelSerializer):
 class SupplierQuotationListSerializer(serializers.ModelSerializer):
     requirement_number = serializers.CharField(source='requirement.requirement_number', read_only=True)
     supplier_name = serializers.CharField(source='supplier.name', read_only=True)
+    quotation_file_url = serializers.SerializerMethodField()
+
+    def get_quotation_file_url(self, obj):
+        if not obj.quotation_file:
+            return None
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(obj.quotation_file.url)
+        return obj.quotation_file.url
+
     class Meta:
         model = SupplierQuotation
         fields = ['id', 'quotation_number', 'requirement', 'requirement_number', 'supplier', 'supplier_name',
-                  'quotation_date', 'status', 'is_selected']
+                  'quotation_date', 'status', 'is_selected', 'quotation_file_url']
 
 
 class SupplierQuotationDetailSerializer(serializers.ModelSerializer):
