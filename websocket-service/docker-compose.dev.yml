@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # Redis for real-time messaging
+  redis:
+    image: redis:7-alpine
+    container_name: kumss-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # PostgreSQL Database (optional - if you want to use Docker for DB too)
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: kumss-postgres
+  #   environment:
+  #     POSTGRES_DB: kumss_erp
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
+  #     interval: 10s
+  #     timeout: 3s
+  #     retries: 3
+
+  # WebSocket Service
+  websocket:
+    build: .
+    container_name: kumss-websocket
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - REDIS_URL=redis://redis:6379
+      - DB_HOST=host.docker.internal  # Access Windows PostgreSQL
+      - DB_PORT=5432
+      - DB_NAME=kumss_erp
+      - DB_USER=postgres
+      - DB_PASSWORD=${DB_PASSWORD}
+      - LOG_LEVEL=debug
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+
+volumes:
+  redis_data:
+  # postgres_data:  # Uncomment if using Docker PostgreSQL
+
+networks:
+  default:
+    name: kumss-network
