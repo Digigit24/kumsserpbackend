@@ -144,10 +144,14 @@ WSGI_APPLICATION = 'kumss_erp.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(
         default=config('DATABASE_URL', default='postgresql://postgres:postgres@localhost:5432/kumss_erp_db'),
-        conn_max_age=600,
+        conn_max_age=0,
         conn_health_checks=True,
     )
 }
+
+# Enable atomic requests to ensure each view runs in a transaction
+DATABASES['default']['ATOMIC_REQUESTS'] = True
+DATABASES['default']['AUTOCOMMIT'] = True
 
 # Use a local SQLite database when running tests to avoid touching Postgres
 TESTING = any(arg in sys.argv for arg in ('test', 'pytest'))
