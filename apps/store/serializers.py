@@ -297,7 +297,9 @@ class SupplierQuotationListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SupplierQuotation
         fields = ['id', 'quotation_number', 'requirement', 'requirement_number', 'supplier', 'supplier_name',
-                  'quotation_date', 'status', 'is_selected', 'quotation_file_url']
+                  'quotation_date', 'supplier_reference_number', 'valid_until', 'total_amount', 'tax_amount',
+                  'grand_total', 'payment_terms', 'delivery_time_days', 'warranty_terms',
+                  'status', 'is_selected', 'quotation_file_url']
 
 
 class SupplierQuotationDetailSerializer(serializers.ModelSerializer):
