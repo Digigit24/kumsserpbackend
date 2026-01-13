@@ -566,8 +566,8 @@ class StoreIndentDetailSerializer(serializers.ModelSerializer):
     college_name = serializers.CharField(source='college.name', read_only=True)
     central_store_name = serializers.CharField(source='central_store.name', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
-    requesting_store_manager_name = serializers.CharField(source='requesting_store_manager.get_full_name', read_only=True)
-    approved_by_name = serializers.CharField(source='approved_by.get_full_name', read_only=True)
+    requesting_store_manager_name = serializers.CharField(source='requesting_store_manager.get_full_name', read_only=True, allow_null=True)
+    approved_by_name = serializers.CharField(source='approved_by.get_full_name', read_only=True, allow_null=True)
 
     class Meta:
         model = StoreIndent
