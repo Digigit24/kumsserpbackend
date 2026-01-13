@@ -772,58 +772,61 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
         if not central_store:
             raise serializers.ValidationError({'central_store': 'This field is required.'})
 
-        try:
-            with transaction.atomic():
-                college_id = central_store.college_id
+        with transaction.atomic():
+            college_id = central_store.college_id
 
-                # Check if inventory record already exists
-                if CentralStoreInventory.objects.filter(
-                    central_store=central_store,
-                    item__name__iexact=item_name
-                ).exists():
-                    raise serializers.ValidationError({
-                        'item_name': f'Item "{item_name}" already exists in this central store inventory.'
-                    })
+            # Check for duplicate
+            existing = CentralStoreInventory._base_manager.filter(
+                central_store=central_store,
+                item__name__iexact=item_name
+            ).first()
 
-                # Find or create item - use _base_manager to bypass college filtering
-                item = StoreItem._base_manager.filter(
-                    name__iexact=item_name,
+            if existing:
+                raise serializers.ValidationError({
+                    'item_name': f'Item "{item_name}" already exists.'
+                })
+
+            # Get or create item
+            item = StoreItem._base_manager.filter(
+                name__iexact=item_name,
+                college_id=college_id
+            ).first()
+
+            if not item:
+                # Get or create category
+                category = StoreCategory._base_manager.filter(
+                    name='General',
                     college_id=college_id
                 ).first()
 
-                if not item:
-                    # Get or create category - use _base_manager
-                    category = StoreCategory._base_manager.filter(
+                if not category:
+                    category = StoreCategory._base_manager.create(
                         name='General',
-                        college_id=college_id
-                    ).first()
-
-                    if not category:
-                        category = StoreCategory._base_manager.create(
-                            name='General',
-                            code='GEN',
-                            college_id=college_id,
-                            is_active=True
-                        )
-
-                    # Create item
-                    item = StoreItem._base_manager.create(
-                        name=item_name,
-                        code=item_name.upper().replace(' ', '_')[:20],
-                        category=category,
-                        unit='unit',
-                        price=0,
-                        managed_by='central',
+                        code='GEN',
                         college_id=college_id,
                         is_active=True
                     )
 
-                validated_data['item'] = item
-                return super().create(validated_data)
-        except serializers.ValidationError:
-            raise
-        except Exception as e:
-            raise serializers.ValidationError({'detail': f'Error creating inventory: {str(e)}'})
+                # Create item
+                item = StoreItem._base_manager.create(
+                    name=item_name,
+                    code=item_name.upper().replace(' ', '_')[:20],
+                    category=category,
+                    unit='unit',
+                    price=0,
+                    managed_by='central',
+                    college_id=college_id,
+                    is_active=True
+                )
+
+            # Set audit fields
+            validated_data['item'] = item
+            validated_data['created_by'] = self.context['request'].user
+            validated_data['updated_by'] = self.context['request'].user
+
+            # Create inventory directly
+            inventory = CentralStoreInventory._base_manager.create(**validated_data)
+            return inventory
 
 
 class CentralStoreInventorySerializer(CentralStoreInventoryListSerializer):

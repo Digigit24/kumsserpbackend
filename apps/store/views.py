@@ -867,38 +867,19 @@ class MaterialIssueNoteViewSet(viewsets.ModelViewSet):
 
 
 class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
-    queryset = CentralStoreInventory.objects.select_related('central_store__manager', 'item__category', 'item__central_store').all()
+    queryset = CentralStoreInventory.objects.all()
     serializer_class = CentralStoreInventorySerializer
     permission_classes = [IsAuthenticated]
     resource_name = 'store'
-    lookup_field = 'item_id'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['central_store', 'item', 'quantity_available']
+    filterset_fields = ['central_store', 'item']
     search_fields = ['item__name', 'item__code']
-    ordering_fields = ['quantity_available', 'updated_at']
-    ordering = ['quantity_available']
+    ordering = ['-id']
 
     def get_serializer_class(self):
         if self.action == 'create':
             return CentralStoreInventoryCreateSerializer
         return CentralStoreInventorySerializer
-
-    def get_object(self):
-        item_id = self.kwargs.get(self.lookup_field)
-        qs = self.get_queryset().filter(item_id=item_id)
-        central_store_id = self.request.query_params.get('central_store')
-        if central_store_id:
-            qs = qs.filter(central_store_id=central_store_id)
-        try:
-            return qs.get()
-        except CentralStoreInventory.DoesNotExist:
-            from rest_framework.exceptions import NotFound
-            raise NotFound('Inventory record not found for this item.')
-        except CentralStoreInventory.MultipleObjectsReturned:
-            from rest_framework.exceptions import ValidationError
-            raise ValidationError({
-                'detail': 'Multiple inventory records found for this item. Provide ?central_store=<id>.'
-            })
 
     def create(self, request, *args, **kwargs):
         """Only super admin can create central inventory"""
