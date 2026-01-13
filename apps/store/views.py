@@ -359,8 +359,8 @@ class ProcurementRequirementViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
     def quotations(self, request, pk=None):
         obj = self.get_object()
-        quotations = obj.quotations.all().select_related('supplier', 'requirement__central_store')
-        serializer = SupplierQuotationListSerializer(quotations, many=True)
+        quotations = obj.quotations.all().select_related('supplier', 'requirement__central_store').prefetch_related('items')
+        serializer = SupplierQuotationDetailSerializer(quotations, many=True, context={'request': request})
         return Response(serializer.data)
 
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
@@ -435,6 +435,31 @@ class SupplierQuotationViewSet(viewsets.ModelViewSet):
             import logging
             logging.getLogger(__name__).error(f"Error marking quotation: {e}")
             return Response({'detail': 'An error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def upload_file(self, request):
+        """Upload quotation file and return URL"""
+        file = request.FILES.get('file')
+        if not file:
+            return Response({'detail': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+        from .models import store_file_storage
+        import uuid
+        from datetime import datetime
+
+        # Generate unique filename
+        ext = file.name.split('.')[-1] if '.' in file.name else ''
+        filename = f"quotations/{datetime.now().strftime('%Y%m%d')}_{uuid.uuid4().hex[:8]}.{ext}"
+
+        # Save file to S3
+        saved_path = store_file_storage.save(filename, file)
+        file_url = store_file_storage.url(saved_path)
+
+        # Return absolute URL
+        if request:
+            file_url = request.build_absolute_uri(file_url)
+
+        return Response({'file_url': file_url})
 
 
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
