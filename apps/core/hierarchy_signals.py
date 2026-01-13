@@ -1,15 +1,12 @@
 """Signals for organizational hierarchy auto-assignment and permission sync."""
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from django.core.cache import cache
 
 
 def _clear_hierarchy_cache():
     if hasattr(cache, 'delete_pattern'):
-        cache.delete_pattern('org_tree_*')
-        cache.delete_pattern('roles_summary_*')
+
     else:
-        cache.clear()
 
 from django.contrib.auth import get_user_model
 from apps.accounts.models import UserRole as AccountUserRole

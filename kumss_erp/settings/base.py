@@ -76,15 +76,10 @@ INSTALLED_APPS = [
 ASGI_APPLICATION = 'kumss_erp.asgi.application'
 
 # Redis configuration for real-time messaging (SSE + Pub/Sub)
-REDIS_URL = config('REDIS_URL', default='redis://127.0.0.1:6379')
-
-# Django Cache Configuration using Redis
+# CACHE DISABLED - Using dummy cache to prevent stale data issues
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': REDIS_URL,
-        'KEY_PREFIX': 'kumss',
-        'TIMEOUT': 300,  # 5 minutes default
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
     }
 }
 

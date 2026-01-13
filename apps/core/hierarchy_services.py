@@ -1,5 +1,4 @@
 """Services for organizational hierarchy and permission management."""
-from django.core.cache import cache
 from .models import (
     HierarchyUserRole,
     RolePermission,
@@ -48,7 +47,7 @@ class PermissionChecker:
     def get_primary_hierarchy_role(self):
         """Get the user's primary (highest level) hierarchy role."""
         cache_key = f'user_primary_role_{self.user.id}'
-        cached_role = cache.get(cache_key)
+        cached_role =
 
         if cached_role:
             return cached_role
@@ -60,7 +59,6 @@ class PermissionChecker:
         ).select_related('role').order_by('-role__level').first()
 
         if user_role:
-            cache.set(cache_key, user_role.role, timeout=3600)  # 1 hour
             return user_role.role
 
         return None
@@ -102,20 +100,18 @@ class PermissionChecker:
             return True
 
         cache_key = f'user_hierarchy_perms_{self.user.id}'
-        permissions = cache.get(cache_key)
+        permissions =
 
         if permissions is None:
             permissions = self.get_user_permissions_from_hierarchy()
-            cache.set(cache_key, permissions, timeout=3600)  # 1 hour
 
         return permission_code in permissions
 
     @classmethod
     def clear_user_cache(cls, user_id):
         """Clear permission cache for specific user."""
-        cache.delete(f'user_perms_{user_id}')
-        cache.delete(f'user_primary_role_{user_id}')
-        cache.delete(f'user_hierarchy_perms_{user_id}')
+
+
 
 
 class TeamAutoAssignmentService:

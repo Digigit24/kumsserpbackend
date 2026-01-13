@@ -5,7 +5,6 @@ from rest_framework import status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.core.cache import cache
 from django_filters.rest_framework import DjangoFilterBackend
 import django_filters
 from drf_spectacular.utils import (
@@ -234,7 +233,6 @@ class StudentViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
             college_id = get_current_college_id()
 
             patterns = [
-                f'views.decorators.cache.cache_page.*.student*',
                 f'*student*list*',
                 f'*student*retrieve*',
             ]
@@ -247,9 +245,7 @@ class StudentViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
 
             for pattern in patterns:
                 try:
-                    keys = cache.keys(pattern)
                     if keys:
-                        cache.delete_many(keys)
                 except:
                     pass
 

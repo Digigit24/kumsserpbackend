@@ -7,8 +7,6 @@ from django.db import models
 from django.db.models import Exists, OuterRef
 from django.core.exceptions import ValidationError
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
-from django.core.cache import cache
 
 from apps.core.mixins import (
     CollegeScopedMixin, CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
@@ -97,12 +95,8 @@ class StoreCategoryViewSet(CollegeScopedModelViewSet):
     search_fields = ['name', 'code']
     ordering_fields = ['name', 'code', 'created_at']
     ordering = ['name']
-
-    @method_decorator(cache_page(60 * 15))  # 15 minutes
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-
-    @method_decorator(cache_page(60 * 15))
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
@@ -116,12 +110,8 @@ class StoreItemViewSet(CollegeScopedModelViewSet):
     search_fields = ['name', 'code', 'barcode']
     ordering_fields = ['name', 'stock_quantity', 'min_stock_level', 'price', 'created_at']
     ordering = ['name']
-
-    @method_decorator(cache_page(60 * 5))  # 5 minutes
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-
-    @method_decorator(cache_page(60 * 3))  # 3 minutes
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
@@ -135,7 +125,6 @@ class StoreItemViewSet(CollegeScopedModelViewSet):
             raise PermissionDenied("College admins cannot create central store items")
 
         response = super().create(request, *args, **kwargs)
-        cache.delete_many(cache.keys('*storeitem*'))  # Clear cache
         return response
 
     def update(self, request, *args, **kwargs):
@@ -147,7 +136,6 @@ class StoreItemViewSet(CollegeScopedModelViewSet):
             raise PermissionDenied("College admins cannot modify central store items")
 
         response = super().update(request, *args, **kwargs)
-        cache.delete_many(cache.keys('*storeitem*'))  # Clear cache
         return response
 
 
@@ -218,12 +206,8 @@ class SupplierMasterViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'supplier_code', 'gstin', 'city']
     ordering_fields = ['name', 'rating', 'created_at']
     ordering = ['name']
-
-    @method_decorator(cache_page(60 * 10))  # 10 minutes
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-
-    @method_decorator(cache_page(60 * 10))
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
@@ -570,8 +554,6 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         elif self.action == 'retrieve':
             qs = qs.prefetch_related('items__central_store_item__category')
         return qs
-
-    @method_decorator(cache_page(60 * 2))
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 

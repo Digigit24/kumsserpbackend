@@ -3,7 +3,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils import timezone
-from django.core.cache import cache
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 from datetime import datetime
@@ -137,9 +136,6 @@ class DashboardStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewS
         cache_key = self.get_cache_key('dashboard_stats', college_id, filters)
 
         # Try to get from cache
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            return Response(cached_data)
 
         # Calculate statistics
         service = DashboardStatsService(college_id, filters)
@@ -150,7 +146,6 @@ class DashboardStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewS
         response_data = serializer.data
 
         # Cache for 5 minutes (dashboard updates frequently)
-        cache.set(cache_key, response_data, 60 * 5)
 
         return Response(response_data)
 
@@ -252,9 +247,6 @@ class AcademicStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewSe
         cache_key = self.get_cache_key('academic_stats', college_id, filters)
 
         # Try to get from cache
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            return Response(cached_data)
 
         # Calculate statistics
         service = AcademicStatsService(college_id, filters)
@@ -265,7 +257,6 @@ class AcademicStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewSe
         response_data = serializer.data
 
         # Cache for 15 minutes
-        cache.set(cache_key, response_data, 60 * 15)
 
         return Response(response_data)
 
@@ -357,9 +348,6 @@ class FinancialStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewS
         cache_key = self.get_cache_key('financial_stats', college_id, filters)
 
         # Try to get from cache
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            return Response(cached_data)
 
         # Calculate statistics
         service = FinancialStatsService(college_id, filters)
@@ -370,7 +358,6 @@ class FinancialStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewS
         response_data = serializer.data
 
         # Cache for 15 minutes
-        cache.set(cache_key, response_data, 60 * 15)
 
         return Response(response_data)
 
@@ -458,9 +445,6 @@ class LibraryStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewSet
         cache_key = self.get_cache_key('library_stats', college_id, filters)
 
         # Try to get from cache
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            return Response(cached_data)
 
         # Calculate statistics
         service = LibraryStatsService(college_id, filters)
@@ -471,7 +455,6 @@ class LibraryStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewSet
         response_data = serializer.data
 
         # Cache for 15 minutes
-        cache.set(cache_key, response_data, 60 * 15)
 
         return Response(response_data)
 
@@ -511,9 +494,6 @@ class HRStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewSet):
         cache_key = self.get_cache_key('hr_stats', college_id, filters)
 
         # Try to get from cache
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            return Response(cached_data)
 
         # Calculate statistics
         service = HRStatsService(college_id, filters)
@@ -524,7 +504,6 @@ class HRStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewSet):
         response_data = serializer.data
 
         # Cache for 15 minutes
-        cache.set(cache_key, response_data, 60 * 15)
 
         return Response(response_data)
 
@@ -560,9 +539,6 @@ class StoreStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewSet):
         cache_key = self.get_cache_key('store_sales_stats', college_id, filters)
 
         # Try to get from cache
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            return Response(cached_data)
 
         # Calculate statistics
         service = StoreStatsService(college_id, filters)
@@ -573,7 +549,6 @@ class StoreStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewSet):
         response_data = serializer.data
 
         # Cache for 15 minutes
-        cache.set(cache_key, response_data, 60 * 15)
 
         return Response(response_data)
 
@@ -626,9 +601,6 @@ class HostelStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewSet)
         cache_key = self.get_cache_key('hostel_occupancy_stats', college_id, filters)
 
         # Try to get from cache
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            return Response(cached_data)
 
         # Calculate statistics
         service = HostelStatsService(college_id, filters)
@@ -639,7 +611,6 @@ class HostelStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.ViewSet)
         response_data = serializer.data
 
         # Cache for 15 minutes
-        cache.set(cache_key, response_data, 60 * 15)
 
         return Response(response_data)
 
@@ -692,9 +663,6 @@ class CommunicationStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.V
         cache_key = self.get_cache_key('communication_stats', college_id, filters)
 
         # Try to get from cache
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            return Response(cached_data)
 
         # Calculate statistics
         service = CommunicationStatsService(college_id, filters)
@@ -705,7 +673,6 @@ class CommunicationStatsViewSet(CollegeScopedMixin, StatsFilterMixin, viewsets.V
         response_data = serializer.data
 
         # Cache for 15 minutes
-        cache.set(cache_key, response_data, 60 * 15)
 
         return Response(response_data)
 

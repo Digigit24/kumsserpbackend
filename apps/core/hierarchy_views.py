@@ -4,26 +4,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from apps.core.permissions.drf_permissions import IsSuperAdmin
-from django.core.cache import cache
 
 
 def _clear_hierarchy_cache():
-    """Clear hierarchy-related cache entries"""
-    try:
-        if hasattr(cache, 'delete_pattern'):
-            cache.delete_pattern('*hierarchy*')
-            cache.delete_pattern('*organization*')
-        else:
-            # Fallback: use selective key deletion
-            patterns = ['*hierarchy*', '*organization*', '*role*', '*permission*']
-            for pattern in patterns:
-                try:
-                    keys = cache.keys(pattern)
-                    if keys:
-                        cache.delete_many(keys)
-                except:
-                    pass
-    except Exception as e:
+    """Clear hierarchy-related cache entries"""    except Exception as e:
         import logging
         logger = logging.getLogger(__name__)
         logger.warning(f"Hierarchy cache clear failed: {e}")
@@ -293,10 +277,7 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
         """Get summary of all roles and their counts per college based on actual users and role assignments."""
         college_id = request.headers.get('X-College-Id')
         cache_key = f'roles_summary_{college_id or "all"}'
-        cached_data = cache.get(cache_key)
 
-        if cached_data:
-            return Response(cached_data)
 
         User = get_user_model()
         summary = {}
@@ -404,7 +385,6 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
 
             summary[college.name] = college_summary
 
-        cache.set(cache_key, summary, timeout=300)
         return Response(summary)
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
@@ -412,19 +392,14 @@ class OrganizationNodeViewSet(viewsets.ModelViewSet):
         """Return full tree structure filtered by college_id."""
         college_id = request.headers.get('X-College-Id')
         cache_key = f'org_tree_{college_id or "all"}'
-        cached_data = cache.get(cache_key)
 
-        if cached_data:
-            return Response(cached_data)
 
         root_nodes = self.get_queryset().filter(parent__isnull=True)
         if root_nodes.exists():
             serializer = OrganizationNodeTreeSerializer(root_nodes, many=True)
-            cache.set(cache_key, serializer.data, timeout=300)  # 5 minutes
             return Response(serializer.data)
 
         virtual_tree = self._build_virtual_tree()
-        cache.set(cache_key, virtual_tree, timeout=300)  # 5 minutes
         return Response(virtual_tree)
 
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
@@ -575,7 +550,6 @@ class DynamicRoleViewSet(viewsets.ModelViewSet):
         """Clear permission cache for all users with this role."""
         user_ids = HierarchyUserRole.objects.filter(role=role, is_active=True).values_list('user_id', flat=True)
         for user_id in user_ids:
-            cache.delete(f'user_perms_{user_id}')
 
 
 class HierarchyPermissionViewSet(viewsets.ReadOnlyModelViewSet):
@@ -647,7 +621,6 @@ class HierarchyUserRoleViewSet(viewsets.ModelViewSet):
             }
         )
 
-        cache.delete(f'user_perms_{user_id}')
         return Response(HierarchyUserRoleSerializer(user_role).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'])
@@ -661,7 +634,6 @@ class HierarchyUserRoleViewSet(viewsets.ModelViewSet):
             role_id=role_id
         ).update(is_active=False)
 
-        cache.delete(f'user_perms_{user_id}')
         return Response({'status': 'role revoked'})
 
 

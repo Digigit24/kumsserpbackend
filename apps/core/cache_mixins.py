@@ -1,7 +1,6 @@
 """Cache mixins for API ViewSets"""
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from django.core.cache import cache
 
 
 class CachedListRetrieveMixin:
@@ -44,9 +43,8 @@ class CachedListRetrieveMixin:
             # Clear matching keys
             for pattern in patterns:
                 try:
-                    keys = cache.keys(pattern)
+                    keys =
                     if keys:
-                        cache.delete_many(keys)
                 except:
                     pass
 
@@ -117,9 +115,8 @@ class CachedReadOnlyMixin:
             # Clear matching keys
             for pattern in patterns:
                 try:
-                    keys = cache.keys(pattern)
+                    keys =
                     if keys:
-                        cache.delete_many(keys)
                 except:
                     pass
 
@@ -190,9 +187,8 @@ class CachedStaticMixin:
             # Clear matching keys
             for pattern in patterns:
                 try:
-                    keys = cache.keys(pattern)
+                    keys =
                     if keys:
-                        cache.delete_many(keys)
                 except:
                     pass
 
@@ -227,8 +223,7 @@ class CachedStaticMixin:
 def invalidate_cache_pattern(pattern):
     """Helper to invalidate cache by pattern"""
     try:
-        keys = cache.keys(f'*{pattern}*')
+        keys =
         if keys:
-            cache.delete_many(keys)
     except:
         pass  # Fallback if Redis not available
