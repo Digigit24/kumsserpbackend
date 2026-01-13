@@ -4,14 +4,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from apps.core.permissions.drf_permissions import IsSuperAdmin
-
-
-def _clear_hierarchy_cache():
-    """Clear hierarchy-related cache entries"""    except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.warning(f"Hierarchy cache clear failed: {e}")
-
 from django.db import models
 from django.db.models import Count, Q
 from django.contrib.auth import get_user_model
@@ -548,8 +540,7 @@ class DynamicRoleViewSet(viewsets.ModelViewSet):
 
     def _clear_user_permission_cache(self, role):
         """Clear permission cache for all users with this role."""
-        user_ids = HierarchyUserRole.objects.filter(role=role, is_active=True).values_list('user_id', flat=True)
-        for user_id in user_ids:
+        pass
 
 
 class HierarchyPermissionViewSet(viewsets.ReadOnlyModelViewSet):

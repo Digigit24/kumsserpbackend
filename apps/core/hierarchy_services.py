@@ -47,11 +47,6 @@ class PermissionChecker:
     def get_primary_hierarchy_role(self):
         """Get the user's primary (highest level) hierarchy role."""
         cache_key = f'user_primary_role_{self.user.id}'
-        cached_role =
-
-        if cached_role:
-            return cached_role
-
         # Get the role with the highest level
         user_role = HierarchyUserRole.objects.filter(
             user=self.user,
@@ -100,7 +95,6 @@ class PermissionChecker:
             return True
 
         cache_key = f'user_hierarchy_perms_{self.user.id}'
-        permissions =
 
         if permissions is None:
             permissions = self.get_user_permissions_from_hierarchy()

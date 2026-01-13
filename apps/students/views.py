@@ -223,55 +223,20 @@ class StudentViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
             return StudentListSerializer
         return StudentSerializer
 
-    def _invalidate_cache(self):
-        """Clear cache after mutations - use selective invalidation"""
-        try:
-            from apps.core.utils import get_current_college_id
-
-            # Clear cache for student-related endpoints only
-            view_name = self.__class__.__name__.lower()
-            college_id = get_current_college_id()
-
-            patterns = [
-                f'*student*list*',
-                f'*student*retrieve*',
-            ]
-
-            if college_id:
-                patterns.extend([
-                    f'*{college_id}*student*',
-                    f'*college_{college_id}*',
-                ])
-
-            for pattern in patterns:
-                try:
-                    if keys:
-                except:
-                    pass
-
-        except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.warning(f"Student cache invalidation failed: {e}")
-
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
-        self._invalidate_cache()
         return response
 
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)
-        self._invalidate_cache()
         return response
 
     def partial_update(self, request, *args, **kwargs):
         response = super().partial_update(request, *args, **kwargs)
-        self._invalidate_cache()
         return response
 
     def destroy(self, request, *args, **kwargs):
         response = super().destroy(request, *args, **kwargs)
-        self._invalidate_cache()
         return response
 
     def perform_destroy(self, instance):
