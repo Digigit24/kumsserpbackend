@@ -778,70 +778,77 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        item_name = validated_data.pop('item_name')
-        from .models import StoreItem, StoreCategory, CentralStoreInventory
+        from .models import StoreItem, StoreCategory, CentralStore
         from django.db import transaction
+        import logging
+        logger = logging.getLogger(__name__)
 
-        # Get central store
-        central_store = validated_data.get('central_store')
-        if not central_store:
-            raise serializers.ValidationError({'central_store': 'This field is required.'})
+        try:
+            item_name = validated_data.pop('item_name')
+            central_store = validated_data.get('central_store')
 
-        with transaction.atomic():
-            college_id = central_store.college_id
+            if not central_store:
+                raise serializers.ValidationError({'central_store': 'Required'})
 
-            # Check for duplicate
-            existing = CentralStoreInventory._base_manager.filter(
-                central_store=central_store,
-                item__name__iexact=item_name
-            ).first()
+            with transaction.atomic():
+                college_id = central_store.college_id
 
-            if existing:
-                raise serializers.ValidationError({
-                    'item_name': f'Item "{item_name}" already exists.'
-                })
-
-            # Get or create item
-            item = StoreItem._base_manager.filter(
-                name__iexact=item_name,
-                college_id=college_id
-            ).first()
-
-            if not item:
-                # Get or create category
-                category = StoreCategory._base_manager.filter(
-                    name='General',
+                # Find or create item
+                item = StoreItem._base_manager.filter(
+                    name__iexact=item_name,
                     college_id=college_id
                 ).first()
 
-                if not category:
-                    category = StoreCategory._base_manager.create(
+                if not item:
+                    # Get or create category
+                    category = StoreCategory._base_manager.filter(
                         name='General',
-                        code='GEN',
+                        college_id=college_id
+                    ).first()
+
+                    if not category:
+                        category = StoreCategory._base_manager.create(
+                            name='General',
+                            code='GEN',
+                            college_id=college_id,
+                            is_active=True
+                        )
+
+                    # Create item
+                    item = StoreItem._base_manager.create(
+                        name=item_name,
+                        code=item_name.upper().replace(' ', '_')[:20],
+                        category=category,
+                        unit='unit',
+                        price=0,
+                        managed_by='central',
                         college_id=college_id,
                         is_active=True
                     )
 
-                # Create item
-                item = StoreItem._base_manager.create(
-                    name=item_name,
-                    code=item_name.upper().replace(' ', '_')[:20],
-                    category=category,
-                    unit='unit',
-                    price=0,
-                    managed_by='central',
-                    college_id=college_id,
-                    is_active=True
+                # Create inventory
+                inventory = CentralStoreInventory._base_manager.create(
+                    central_store=central_store,
+                    item=item,
+                    quantity_on_hand=validated_data.get('quantity_on_hand', 0),
+                    quantity_allocated=validated_data.get('quantity_allocated', 0),
+                    quantity_available=validated_data.get('quantity_on_hand', 0) - validated_data.get('quantity_allocated', 0),
+                    min_stock_level=validated_data.get('min_stock_level', 0),
+                    reorder_point=validated_data.get('reorder_point', 0),
+                    max_stock_level=validated_data.get('max_stock_level'),
+                    unit_cost=validated_data.get('unit_cost', 0),
+                    is_active=validated_data.get('is_active', True),
+                    created_by=self.context['request'].user,
+                    updated_by=self.context['request'].user
                 )
 
-            # Set audit fields
-            validated_data['item'] = item
-            validated_data['created_by'] = self.context['request'].user
-            validated_data['updated_by'] = self.context['request'].user
+                return inventory
 
-            # Create inventory directly
-            inventory = CentralStoreInventory._base_manager.create(**validated_data)
-            return inventory
+        except serializers.ValidationError:
+            raise
+        except Exception as e:
+            logger.error(f"Inventory creation error: {str(e)}", exc_info=True)
+            raise serializers.ValidationError({'error': str(e)})
 
     def to_representation(self, instance):
         """Return full representation using list serializer"""
