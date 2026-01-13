@@ -55,13 +55,16 @@ class IsCEOOrFinance(BasePermission):
 
 
 class CanApproveIndent(BasePermission):
-    """College admin can approve indents for their college"""
+    """Super admin and college admin can approve indents"""
     def has_permission(self, request, view):
         user = request.user
         if not user or not user.is_authenticated:
             return False
-        # College admin or super admin can approve
-        return user.is_superuser or (hasattr(user, 'college_id') and user.college_id)
+        # Super admin has full access
+        if user.is_superuser:
+            return True
+        # College admin or central manager can approve
+        return user.user_type in ['college_admin', 'central_manager'] or (hasattr(user, 'college_id') and user.college_id)
 
 
 class CanReceiveMaterials(BasePermission):

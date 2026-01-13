@@ -585,11 +585,12 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])
     def college_admin_approve(self, request, pk=None):
-        """College admin approves and forwards to super admin"""
+        """College admin/Super admin approves and forwards to super admin"""
         indent = self.get_object()
-        # Verify user is college admin for this college
-        if not request.user.is_superuser and indent.college_id != getattr(request.user, 'college_id', None):
-            return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+        # Super admin can approve anything, others must match college
+        if not request.user.is_superuser:
+            if indent.college_id != getattr(request.user, 'college_id', None):
+                return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
         try:
             indent.college_admin_approve(user=request.user)
             indent.refresh_from_db()
@@ -606,10 +607,12 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])
     def college_admin_reject(self, request, pk=None):
-        """College admin rejects the indent"""
+        """College admin/Super admin rejects the indent"""
         indent = self.get_object()
-        if not request.user.is_superuser and indent.college_id != getattr(request.user, 'college_id', None):
-            return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+        # Super admin can reject anything, others must match college
+        if not request.user.is_superuser:
+            if indent.college_id != getattr(request.user, 'college_id', None):
+                return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
         try:
             indent.college_admin_reject(user=request.user, reason=request.data.get('reason'))
             indent.refresh_from_db()
