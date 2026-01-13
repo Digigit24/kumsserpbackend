@@ -946,26 +946,25 @@ class StoreIndent(CollegeScopedModel):
             })
 
     def submit(self):
-        """College store submits request to super admin"""
-        # Set to submitted first, then to pending_super_admin
-        if self.status == 'draft':
-            self.status = 'submitted'
-            self.save(update_fields=['status', 'updated_at'])
-        # Move to pending_super_admin
-        if self.status in ['draft', 'submitted']:
-            self.status = 'pending_super_admin'
-            self.save(update_fields=['status', 'updated_at'])
+        """Store manager submits indent to college admin for approval"""
+        if self.status != 'draft':
+            raise ValidationError('Only draft indents can be submitted')
+        self.status = 'pending_college_approval'
+        self.save(update_fields=['status', 'updated_at'])
 
     def college_admin_approve(self, user=None):
-        """College admin approves and sends to super admin"""
-        # Set status to college_approved first, then to pending_super_admin
+        """College admin approves and forwards to super admin"""
+        if self.status != 'pending_college_approval':
+            raise ValidationError('Indent must be pending college approval')
         self.status = 'pending_super_admin'
         if user:
             self.updated_by = user
         self.save(update_fields=['status', 'updated_at', 'updated_by'])
 
     def college_admin_reject(self, user=None, reason=None):
-        """College admin rejects the request"""
+        """College admin rejects the indent"""
+        if self.status != 'pending_college_approval':
+            raise ValidationError('Indent must be pending college approval')
         self.status = 'rejected_by_college'
         self.rejection_reason = reason
         if user:
@@ -973,7 +972,9 @@ class StoreIndent(CollegeScopedModel):
         self.save(update_fields=['status', 'rejection_reason', 'updated_at', 'updated_by'])
 
     def super_admin_approve(self, user=None):
-        """Super admin approves - status set to approved"""
+        """Super admin approves - status becomes approved"""
+        if self.status != 'pending_super_admin':
+            raise ValidationError('Indent must be pending super admin approval')
         self.status = 'approved'
         self.approved_by = user
         self.approved_date = timezone.now()
@@ -982,7 +983,9 @@ class StoreIndent(CollegeScopedModel):
         self.save(update_fields=['status', 'approved_by', 'approved_date', 'updated_at', 'updated_by'])
 
     def super_admin_reject(self, user=None, reason=None):
-        """Super admin rejects the request"""
+        """Super admin rejects the indent"""
+        if self.status != 'pending_super_admin':
+            raise ValidationError('Indent must be pending super admin approval')
         self.status = 'rejected_by_super_admin'
         self.rejection_reason = reason
         self.approved_by = user
@@ -1005,11 +1008,21 @@ class StoreIndent(CollegeScopedModel):
         self.save(update_fields=['status', 'rejection_reason', 'approved_by', 'updated_at'])
 
     def check_fulfillment(self):
+        """Check and update fulfillment status based on issued quantities"""
+        if self.status not in ['approved', 'partially_fulfilled']:
+            return
+
         items = self.items.all()
-        if items and all((line.pending_quantity or 0) == 0 for line in items):
+        if not items:
+            return
+
+        # Check if all items are fully issued
+        if all((line.pending_quantity or 0) == 0 and (line.issued_quantity or 0) > 0 for line in items):
             self.status = 'fulfilled'
+        # Check if any items have been issued
         elif any((line.issued_quantity or 0) > 0 for line in items):
             self.status = 'partially_fulfilled'
+
         self.save(update_fields=['status', 'updated_at'])
 
 
