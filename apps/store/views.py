@@ -535,8 +535,8 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'college', 'priority', 'indent_date']
     search_fields = ['indent_number']
-    ordering_fields = ['indent_date', 'created_at']
-    ordering = ['-indent_date']
+    ordering_fields = ['indent_date', 'created_at', 'id']
+    ordering = ['-created_at', '-id']
 
     def _with_issue_flags(self, qs):
         from django.db.models import Q, Count, Case, When, IntegerField
