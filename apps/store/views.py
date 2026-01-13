@@ -598,6 +598,11 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         except ValidationError as exc:
             detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
             return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error approving indent {pk}: {str(e)}")
+            return Response({'detail': f'Error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])
     def college_admin_reject(self, request, pk=None):
@@ -613,6 +618,11 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         except ValidationError as exc:
             detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
             return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error rejecting indent {pk}: {str(e)}")
+            return Response({'detail': f'Error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
     def super_admin_approve(self, request, pk=None):
@@ -626,6 +636,11 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         except ValidationError as exc:
             detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
             return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error super admin approving indent {pk}: {str(e)}")
+            return Response({'detail': f'Error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'], permission_classes=[IsCentralStoreManager])
     def super_admin_reject(self, request, pk=None):
@@ -639,6 +654,11 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
         except ValidationError as exc:
             detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
             return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error super admin rejecting indent {pk}: {str(e)}")
+            return Response({'detail': f'Error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])
     def approve(self, request, pk=None):

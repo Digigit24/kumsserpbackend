@@ -954,11 +954,10 @@ class StoreIndent(CollegeScopedModel):
 
     def college_admin_approve(self, user=None):
         """College admin approves and sends to super admin"""
-        # Set status to college_approved first, then to pending_super_admin
         self.status = 'pending_super_admin'
         if user:
             self.updated_by = user
-        self.save(update_fields=['status', 'updated_at', 'updated_by'])
+        self.save()
 
     def college_admin_reject(self, user=None, reason=None):
         """College admin rejects the request"""
@@ -966,7 +965,7 @@ class StoreIndent(CollegeScopedModel):
         self.rejection_reason = reason
         if user:
             self.updated_by = user
-        self.save(update_fields=['status', 'rejection_reason', 'updated_at', 'updated_by'])
+        self.save()
 
     def super_admin_approve(self, user=None):
         """Super admin approves - status set to approved"""
@@ -975,7 +974,7 @@ class StoreIndent(CollegeScopedModel):
         self.approved_date = timezone.now()
         if user:
             self.updated_by = user
-        self.save(update_fields=['status', 'approved_by', 'approved_date', 'updated_at', 'updated_by'])
+        self.save()
 
     def super_admin_reject(self, user=None, reason=None):
         """Super admin rejects the request"""
@@ -984,7 +983,7 @@ class StoreIndent(CollegeScopedModel):
         self.approved_by = user
         if user:
             self.updated_by = user
-        self.save(update_fields=['status', 'rejection_reason', 'approved_by', 'updated_at', 'updated_by'])
+        self.save()
 
     def approve(self, user=None, approved_items=None):
         """Legacy approve method - keeping for compatibility"""
