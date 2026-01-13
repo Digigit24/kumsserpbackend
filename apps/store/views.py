@@ -868,11 +868,37 @@ class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
         return CentralStoreInventorySerializer
 
     def create(self, request, *args, **kwargs):
-        """Create central inventory"""
-        if not (request.user.is_superuser or request.user.user_type == 'central_manager'):
-            return Response({'detail': 'Only super admin can add central inventory items'},
-                          status=status.HTTP_403_FORBIDDEN)
-        return super().create(request, *args, **kwargs)
+        """Create central inventory - with detailed error reporting"""
+        import traceback
+        import logging
+        logger = logging.getLogger(__name__)
+
+        try:
+            if not (request.user.is_superuser or request.user.user_type == 'central_manager'):
+                return Response({'detail': 'Only super admin can add central inventory items'},
+                              status=status.HTTP_403_FORBIDDEN)
+
+            # Remove 'item' field if sent as empty string from frontend
+            data = request.data.copy()
+            if 'item' in data and not data['item']:
+                data.pop('item')
+
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+        except Exception as e:
+            error_trace = traceback.format_exc()
+            logger.error(f"Central inventory error: {str(e)}\n{error_trace}")
+
+            # Return detailed error to frontend for debugging
+            return Response({
+                'error': str(e),
+                'error_type': type(e).__name__,
+                'detail': error_trace
+            }, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['get'])
     def low_stock(self, request):
