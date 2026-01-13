@@ -785,35 +785,37 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
                         'item_name': f'Item "{item_name}" already exists in this central store inventory.'
                     })
 
-                # Find or create item
-                item = StoreItem.objects.filter(
+                # Find or create item - use _base_manager to bypass college filtering
+                item = StoreItem._base_manager.filter(
                     name__iexact=item_name,
                     college_id=college_id
                 ).first()
 
                 if not item:
-                    # Get or create category
-                    try:
-                        category = StoreCategory.objects.get(
-                            name='General',
-                            college_id=college_id
-                        )
-                    except StoreCategory.DoesNotExist:
-                        category = StoreCategory.objects.create(
+                    # Get or create category - use _base_manager
+                    category = StoreCategory._base_manager.filter(
+                        name='General',
+                        college_id=college_id
+                    ).first()
+
+                    if not category:
+                        category = StoreCategory._base_manager.create(
                             name='General',
                             code='GEN',
-                            college_id=college_id
+                            college_id=college_id,
+                            is_active=True
                         )
 
                     # Create item
-                    item = StoreItem.objects.create(
+                    item = StoreItem._base_manager.create(
                         name=item_name,
                         code=item_name.upper().replace(' ', '_')[:20],
                         category=category,
                         unit='unit',
                         price=0,
                         managed_by='central',
-                        college_id=college_id
+                        college_id=college_id,
+                        is_active=True
                     )
 
                 validated_data['item'] = item
