@@ -26,6 +26,7 @@ from .serializers import (
     AttendanceNotificationSerializer,
     BulkDeleteSerializer,
     BulkAttendanceSerializer,
+    StudentWithAttendanceSerializer,
 )
 from apps.core.mixins import CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
 
@@ -213,6 +214,99 @@ class StudentAttendanceViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
 
         output_serializer = StudentAttendanceSerializer(attendance_records, many=True)
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        summary="Get class attendance list",
+        description="Get all students in a class/section with their attendance status for a specific date",
+        parameters=[
+            OpenApiParameter(name='class_obj', type=OpenApiTypes.INT, description='Class ID', required=True),
+            OpenApiParameter(name='section', type=OpenApiTypes.INT, description='Section ID', required=True),
+            OpenApiParameter(name='date', type=OpenApiTypes.DATE, description='Attendance date', required=True),
+        ],
+        responses={200: StudentWithAttendanceSerializer(many=True)},
+        tags=['Attendance - Students']
+    )
+    @action(detail=False, methods=['get'])
+    def class_attendance(self, request):
+        """Get all students in a class/section with their attendance status for a specific date."""
+        class_obj_id = request.query_params.get('class_obj')
+        section_id = request.query_params.get('section')
+        date = request.query_params.get('date')
+
+        # Validate required parameters
+        if not all([class_obj_id, section_id, date]):
+            return Response(
+                {'detail': 'class_obj, section, and date are required parameters'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        from apps.students.models import Student
+        from django.db.models import OuterRef, Subquery, F, Value, CharField
+        from django.db.models.functions import Concat
+
+        # Get all students in the specified class and section
+        students = Student.objects.filter(
+            current_class_id=class_obj_id,
+            current_section_id=section_id
+        ).select_related('user')
+
+        # Apply college scoping
+        college_id = self.get_college_id(required=False)
+        user = getattr(request, 'user', None)
+        is_global_user = (
+            user and (
+                user.is_superuser or
+                user.is_staff or
+                getattr(user, 'user_type', None) == 'central_manager'
+            )
+        )
+
+        if college_id != 'all' and not (is_global_user and not college_id):
+            if not college_id:
+                college_id = self.get_college_id(required=True)
+            students = students.filter(college_id=college_id)
+
+        # Subquery to get attendance records for the specified date
+        attendance_subquery = StudentAttendance.objects.filter(
+            student_id=OuterRef('id'),
+            date=date
+        ).values('id', 'status', 'check_in_time', 'check_out_time', 'remarks', 'marked_by__id', 'marked_by__first_name', 'marked_by__last_name')[:1]
+
+        # Annotate students with attendance data
+        students_with_attendance = students.annotate(
+            attendance_id=Subquery(attendance_subquery.values('id')),
+            attendance_status=Subquery(attendance_subquery.values('status')),
+            attendance_check_in=Subquery(attendance_subquery.values('check_in_time')),
+            attendance_check_out=Subquery(attendance_subquery.values('check_out_time')),
+            attendance_remarks=Subquery(attendance_subquery.values('remarks')),
+            attendance_marked_by_id=Subquery(attendance_subquery.values('marked_by__id')),
+            attendance_marked_by_fname=Subquery(attendance_subquery.values('marked_by__first_name')),
+            attendance_marked_by_lname=Subquery(attendance_subquery.values('marked_by__last_name'))
+        ).order_by('roll_number', 'first_name')
+
+        # Build response data
+        result = []
+        for student in students_with_attendance:
+            marked_by_name = None
+            if student.attendance_marked_by_fname:
+                marked_by_name = f"{student.attendance_marked_by_fname} {student.attendance_marked_by_lname or ''}".strip()
+
+            result.append({
+                'student_id': student.id,
+                'admission_number': student.admission_number,
+                'roll_number': student.roll_number,
+                'student_name': student.get_full_name(),
+                'attendance_id': student.attendance_id,
+                'status': student.attendance_status,
+                'check_in_time': student.attendance_check_in,
+                'check_out_time': student.attendance_check_out,
+                'remarks': student.attendance_remarks,
+                'marked_by': student.attendance_marked_by_id,
+                'marked_by_name': marked_by_name,
+            })
+
+        serializer = StudentWithAttendanceSerializer(result, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # ============================================================================

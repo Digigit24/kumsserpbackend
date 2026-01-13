@@ -170,3 +170,18 @@ class BulkAttendanceSerializer(serializers.Serializer):
     class_obj = serializers.IntegerField(help_text="Class ID")
     section = serializers.IntegerField(help_text="Section ID")
     remarks = serializers.CharField(required=False, allow_null=True, allow_blank=True, help_text="Remarks")
+
+
+class StudentWithAttendanceSerializer(serializers.Serializer):
+    """Serializer for student with their attendance status."""
+    student_id = serializers.IntegerField(read_only=True)
+    admission_number = serializers.CharField(read_only=True)
+    roll_number = serializers.CharField(read_only=True)
+    student_name = serializers.CharField(read_only=True)
+    attendance_id = serializers.IntegerField(read_only=True, allow_null=True)
+    status = serializers.CharField(read_only=True, allow_null=True)
+    check_in_time = serializers.TimeField(read_only=True, allow_null=True)
+    check_out_time = serializers.TimeField(read_only=True, allow_null=True)
+    remarks = serializers.CharField(read_only=True, allow_null=True)
+    marked_by = serializers.IntegerField(read_only=True, allow_null=True)
+    marked_by_name = serializers.CharField(read_only=True, allow_null=True)
