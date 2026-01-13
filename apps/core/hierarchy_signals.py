@@ -2,9 +2,24 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from apps.accounts.models import UserRole as AccountUserRole
 from .models import OrganizationNode, RolePermission, HierarchyUserRole
 from .hierarchy_services import TeamAutoAssignmentService, PermissionChecker
+
+
+def _clear_hierarchy_cache():
+    """Clear all hierarchy-related caches."""
+    try:
+        # Try to clear specific keys
+        cache.delete('org_hierarchy_tree')
+        # If using Redis with delete_many or delete_pattern
+        if hasattr(cache, 'delete_pattern'):
+            cache.delete_pattern('org_hierarchy_*')
+            cache.delete_pattern('user_org_nodes_*')
+    except Exception:
+        # Silently fail if cache operations fail
+        pass
 
 
 @receiver(post_save, sender=OrganizationNode)
