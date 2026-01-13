@@ -91,6 +91,16 @@ class CollegeScopedModel(AuditModel):
         if hasattr(self, 'college_id') and not self.college_id:
             college_id = get_current_college_id()
             if not college_id:
+                # Bypass validation for global users (superadmins/central managers)
+                from .utils import get_current_request
+                request = get_current_request()
+                user = getattr(request, 'user', None)
+                if user and user.is_authenticated and (
+                    getattr(user, 'is_superadmin', False) or 
+                    getattr(user, 'is_superuser', False) or 
+                    getattr(user, 'user_type', None) == 'central_manager'
+                ):
+                    return
                 raise ValidationError("College is required. Provide X-College-ID header or include 'college' in the payload.")
             self.college_id = college_id
 

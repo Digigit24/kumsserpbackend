@@ -28,6 +28,18 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
+
+# Force console logging in development for easier debugging.
+LOG_TO_FILE = False
+LOGGING['handlers']['console']['level'] = 'DEBUG'
+LOGGING['loggers']['apps']['level'] = 'DEBUG'
+LOGGING['loggers']['django.request']['level'] = 'DEBUG'
+LOGGING['loggers']['django.server'] = {
+    'handlers': ['console'],
+    'level': 'INFO',
+    'propagate': False,
+}
+
 # Disable some security features for easier development
 SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False

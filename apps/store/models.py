@@ -103,7 +103,9 @@ class StoreCategory(CollegeScopedModel):
         College,
         on_delete=models.CASCADE,
         related_name='store_categories',
-        help_text="College reference"
+        null=True,
+        blank=True,
+        help_text="College reference (null for central items)"
     )
     name = models.CharField(max_length=100, help_text="Category name")
     code = models.CharField(max_length=20, help_text="Category code")
@@ -126,7 +128,9 @@ class StoreItem(CollegeScopedModel):
         College,
         on_delete=models.CASCADE,
         related_name='store_items',
-        help_text="College reference"
+        null=True,
+        blank=True,
+        help_text="College reference (null for central items)"
     )
     category = models.ForeignKey(
         StoreCategory,

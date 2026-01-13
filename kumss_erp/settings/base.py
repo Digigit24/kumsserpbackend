@@ -104,6 +104,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'apps.core.middleware.CollegeMiddleware',  # Multi-college support
+    'apps.core.middleware.RequestResponseLoggingMiddleware',
 
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 
@@ -360,27 +361,28 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
+            'level': 'DEBUG',
         },
     },
     'loggers': {
         'django': {
             'handlers': DEFAULT_LOG_HANDLERS,
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': True,
         },
         'django.request': {
             'handlers': DEFAULT_LOG_HANDLERS,
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': False,
         },
         'apps': { # Capture logs from all apps within the 'apps' directory
             'handlers': DEFAULT_LOG_HANDLERS,
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': True,
         },
         'corsheaders': { # Specifically log corsheaders middleware
             'handlers': DEFAULT_LOG_HANDLERS,
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': True,
         },
         'django.db.backends': { # Log SQL queries
@@ -391,7 +393,7 @@ LOGGING = {
     },
     'root': {
         'handlers': DEFAULT_LOG_HANDLERS,
-        'level': 'INFO',
+        'level': 'DEBUG',
     },
 }
 

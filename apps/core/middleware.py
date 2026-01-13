@@ -1,6 +1,8 @@
 """
 Middleware for college identification and request context management.
 """
+import logging
+import time
 from django.utils.deprecation import MiddlewareMixin
 from .models import College
 from .utils import (
@@ -84,6 +86,39 @@ class CollegeMiddleware(MiddlewareMixin):
         """
         clear_current_college_id()
         clear_current_request()
+
+
+class RequestResponseLoggingMiddleware(MiddlewareMixin):
+    """
+    Log basic request/response details to the console.
+    """
+
+    def process_request(self, request):
+        request._request_start_time = time.monotonic()
+
+    def process_response(self, request, response):
+        start = getattr(request, '_request_start_time', None)
+        if start is not None:
+            duration_ms = (time.monotonic() - start) * 1000
+        else:
+            duration_ms = 0
+
+        user = getattr(request, 'user', None)
+        if user and getattr(user, 'is_authenticated', False):
+            user_label = getattr(user, 'username', None) or str(getattr(user, 'id', 'user'))
+        else:
+            user_label = 'anon'
+
+        logger = logging.getLogger('apps')
+        logger.info(
+            "HTTP %s %s %s user=%s %0.1fms",
+            request.method,
+            request.get_full_path(),
+            response.status_code,
+            user_label,
+            duration_ms,
+        )
+        return response
 
 
 # Backward-compatibility alias
