@@ -306,10 +306,23 @@ class SupplierQuotationDetailSerializer(serializers.ModelSerializer):
     supplier_name = serializers.CharField(source='supplier.name', read_only=True)
     requirement_number = serializers.CharField(source='requirement.requirement_number', read_only=True)
     requirement_title = serializers.CharField(source='requirement.title', read_only=True)
+    item_description = serializers.CharField(source='requirement.item_description', read_only=True)
+    quantity = serializers.IntegerField(source='requirement.quantity', read_only=True)
+    unit = serializers.CharField(source='requirement.unit', read_only=True)
+    estimated_unit_price = serializers.DecimalField(source='requirement.estimated_unit_price', max_digits=12, decimal_places=2, read_only=True)
+    estimated_total = serializers.DecimalField(source='requirement.estimated_total', max_digits=12, decimal_places=2, read_only=True)
+    specifications = serializers.CharField(source='requirement.specifications', read_only=True)
+    quotation_file_url = serializers.SerializerMethodField()
 
     class Meta:
         model = SupplierQuotation
         fields = '__all__'
+
+    def get_quotation_file_url(self, obj):
+        if not obj.quotation_file:
+            return None
+        request = self.context.get('request')
+        return request.build_absolute_uri(obj.quotation_file.url) if request else obj.quotation_file.url
 
     def validate_quotation_file(self, value):
         return _validate_quotation_file(value)
@@ -331,6 +344,13 @@ class SupplierQuotationCreateSerializer(serializers.ModelSerializer):
 
     def validate_quotation_file(self, value):
         return _validate_quotation_file(value)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if instance.quotation_file:
+            request = self.context.get('request')
+            data['quotation_file'] = request.build_absolute_uri(instance.quotation_file.url) if request else instance.quotation_file.url
+        return data
 
     def create(self, validated_data):
         if not validated_data.get('quotation_date'):
