@@ -297,7 +297,9 @@ class SupplierQuotationListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SupplierQuotation
         fields = ['id', 'quotation_number', 'requirement', 'requirement_number', 'supplier', 'supplier_name',
-                  'quotation_date', 'status', 'is_selected', 'quotation_file_url']
+                  'quotation_date', 'supplier_reference_number', 'valid_until', 'total_amount', 'tax_amount',
+                  'grand_total', 'payment_terms', 'delivery_time_days', 'warranty_terms',
+                  'status', 'is_selected', 'quotation_file_url']
 
 
 class SupplierQuotationDetailSerializer(serializers.ModelSerializer):
@@ -306,16 +308,30 @@ class SupplierQuotationDetailSerializer(serializers.ModelSerializer):
     supplier_name = serializers.CharField(source='supplier.name', read_only=True)
     requirement_number = serializers.CharField(source='requirement.requirement_number', read_only=True)
     requirement_title = serializers.CharField(source='requirement.title', read_only=True)
+    item_description = serializers.CharField(source='requirement.item_description', read_only=True)
+    quantity = serializers.IntegerField(source='requirement.quantity', read_only=True)
+    unit = serializers.CharField(source='requirement.unit', read_only=True)
+    estimated_unit_price = serializers.DecimalField(source='requirement.estimated_unit_price', max_digits=12, decimal_places=2, read_only=True)
+    estimated_total = serializers.DecimalField(source='requirement.estimated_total', max_digits=12, decimal_places=2, read_only=True)
+    specifications = serializers.CharField(source='requirement.specifications', read_only=True)
+    quotation_file_url = serializers.SerializerMethodField()
 
     class Meta:
         model = SupplierQuotation
         fields = '__all__'
+
+    def get_quotation_file_url(self, obj):
+        if not obj.quotation_file:
+            return None
+        request = self.context.get('request')
+        return request.build_absolute_uri(obj.quotation_file.url) if request else obj.quotation_file.url
 
     def validate_quotation_file(self, value):
         return _validate_quotation_file(value)
 
 
 class SupplierQuotationCreateSerializer(serializers.ModelSerializer):
+    requirement = serializers.PrimaryKeyRelatedField(queryset=ProcurementRequirement.objects.all(), required=False, allow_null=True)
     quotation_date = serializers.DateField(required=False, allow_null=True)
     valid_until = serializers.DateField(required=False, allow_null=True)
     total_amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
@@ -330,6 +346,13 @@ class SupplierQuotationCreateSerializer(serializers.ModelSerializer):
 
     def validate_quotation_file(self, value):
         return _validate_quotation_file(value)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if instance.quotation_file:
+            request = self.context.get('request')
+            data['quotation_file'] = request.build_absolute_uri(instance.quotation_file.url) if request else instance.quotation_file.url
+        return data
 
     def create(self, validated_data):
         if not validated_data.get('quotation_date'):
@@ -347,6 +370,14 @@ class SupplierQuotationCreateSerializer(serializers.ModelSerializer):
             validated_data['tax_amount'] = 0
         if grand_total is None:
             validated_data['grand_total'] = (validated_data.get('total_amount') or 0) + (validated_data.get('tax_amount') or 0)
+
+        if not validated_data.get('requirement'):
+            requirement = ProcurementRequirement.objects.filter(status='approved').first()
+            if not requirement:
+                requirement = ProcurementRequirement.objects.first()
+            if not requirement:
+                raise serializers.ValidationError({'requirement': 'No procurement requirement available. Create one first.'})
+            validated_data['requirement'] = requirement
 
         if not validated_data.get('supplier'):
             supplier = SupplierMaster.objects.filter(is_active=True).first()
