@@ -1,7 +1,6 @@
 from rest_framework import filters, viewsets
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
-from apps.core.cache_mixins import CachedReadOnlyMixin
 
 from apps.core.mixins import CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
 from .models import (
@@ -24,7 +23,7 @@ from .serializers import (
 )
 
 
-class QuestionBankViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class QuestionBankViewSet(CollegeScopedModelViewSet):
     queryset = QuestionBank.objects.all_colleges()
     serializer_class = QuestionBankSerializer
     permission_classes = [IsAuthenticated]
@@ -35,7 +34,7 @@ class QuestionBankViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     ordering = ['name']
 
 
-class QuestionViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+class QuestionViewSet(RelatedCollegeScopedModelViewSet):
     queryset = Question.objects.select_related('bank')
     serializer_class = QuestionSerializer
     permission_classes = [IsAuthenticated]
@@ -47,7 +46,7 @@ class QuestionViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
     related_college_lookup = 'bank__college_id'
 
 
-class QuestionOptionViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+class QuestionOptionViewSet(RelatedCollegeScopedModelViewSet):
     queryset = QuestionOption.objects.select_related('question__bank')
     serializer_class = QuestionOptionSerializer
     permission_classes = [IsAuthenticated]
@@ -58,7 +57,7 @@ class QuestionOptionViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSe
     related_college_lookup = 'question__bank__college_id'
 
 
-class OnlineExamViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class OnlineExamViewSet(CollegeScopedModelViewSet):
     queryset = OnlineExam.objects.all_colleges()
     serializer_class = OnlineExamSerializer
     permission_classes = [IsAuthenticated]
@@ -69,7 +68,7 @@ class OnlineExamViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     ordering = ['-start_datetime']
 
 
-class ExamQuestionViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+class ExamQuestionViewSet(RelatedCollegeScopedModelViewSet):
     queryset = ExamQuestion.objects.select_related('exam', 'question__bank')
     serializer_class = ExamQuestionSerializer
     permission_classes = [IsAuthenticated]
@@ -80,7 +79,7 @@ class ExamQuestionViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet)
     related_college_lookup = 'exam__college_id'
 
 
-class StudentExamAttemptViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+class StudentExamAttemptViewSet(RelatedCollegeScopedModelViewSet):
     queryset = StudentExamAttempt.objects.select_related('exam', 'student')
     serializer_class = StudentExamAttemptSerializer
     permission_classes = [IsAuthenticated]
@@ -91,7 +90,7 @@ class StudentExamAttemptViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelVi
     related_college_lookup = 'exam__college_id'
 
 
-class StudentAnswerViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+class StudentAnswerViewSet(RelatedCollegeScopedModelViewSet):
     queryset = StudentAnswer.objects.select_related('attempt__exam', 'question__bank', 'selected_option')
     serializer_class = StudentAnswerSerializer
     permission_classes = [IsAuthenticated]

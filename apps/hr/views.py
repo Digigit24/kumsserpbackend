@@ -1,7 +1,6 @@
 from rest_framework import filters, viewsets
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
-from apps.core.cache_mixins import CachedReadOnlyMixin
 
 from apps.core.mixins import (
     CollegeScopedMixin, CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
@@ -32,7 +31,7 @@ from .serializers import (
 )
 
 
-class LeaveTypeViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class LeaveTypeViewSet(CollegeScopedModelViewSet):
     queryset = LeaveType.objects.all_colleges()
     serializer_class = LeaveTypeSerializer
     permission_classes = [IsAuthenticated]
@@ -88,7 +87,7 @@ class SalaryComponentViewSet(RelatedCollegeScopedModelViewSet):
     ordering = ['component_name']
 
 
-class DeductionViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class DeductionViewSet(CollegeScopedModelViewSet):
     queryset = Deduction.objects.all_colleges()
     serializer_class = DeductionSerializer
     permission_classes = [IsAuthenticated]

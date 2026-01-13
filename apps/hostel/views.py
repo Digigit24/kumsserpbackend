@@ -1,7 +1,6 @@
 from rest_framework import filters, viewsets
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
-from apps.core.cache_mixins import CachedReadOnlyMixin
 
 from apps.core.mixins import CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
 from .models import Hostel, RoomType, Room, Bed, HostelAllocation, HostelFee

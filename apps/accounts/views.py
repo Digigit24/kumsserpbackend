@@ -1,5 +1,4 @@
 """
-from apps.core.cache_mixins import CachedReadOnlyMixin, CachedStaticMixin
 DRF ViewSets for Accounts app with comprehensive API documentation.
 """
 from rest_framework import status, filters

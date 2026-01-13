@@ -1,7 +1,6 @@
 from rest_framework import filters, viewsets
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
-from apps.core.cache_mixins import CachedReadOnlyMixin
 
 from apps.core.mixins import CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
 from .models import (
@@ -26,7 +25,7 @@ from .serializers import (
 )
 
 
-class IncomeCategoryViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class IncomeCategoryViewSet(CollegeScopedModelViewSet):
     queryset = IncomeCategory.objects.all_colleges()
     serializer_class = IncomeCategorySerializer
     permission_classes = [IsAuthenticated]
@@ -37,7 +36,7 @@ class IncomeCategoryViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     ordering = ['name']
 
 
-class ExpenseCategoryViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class ExpenseCategoryViewSet(CollegeScopedModelViewSet):
     queryset = ExpenseCategory.objects.all_colleges()
     serializer_class = ExpenseCategorySerializer
     permission_classes = [IsAuthenticated]
@@ -48,7 +47,7 @@ class ExpenseCategoryViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     ordering = ['name']
 
 
-class AccountViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class AccountViewSet(CollegeScopedModelViewSet):
     queryset = Account.objects.all_colleges()
     serializer_class = AccountSerializer
     permission_classes = [IsAuthenticated]
@@ -59,7 +58,7 @@ class AccountViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     ordering = ['account_name']
 
 
-class FinancialYearViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class FinancialYearViewSet(CollegeScopedModelViewSet):
     queryset = FinancialYear.objects.all_colleges()
     serializer_class = FinancialYearSerializer
     permission_classes = [IsAuthenticated]
@@ -69,7 +68,7 @@ class FinancialYearViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     ordering = ['-start_date']
 
 
-class IncomeViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class IncomeViewSet(CollegeScopedModelViewSet):
     queryset = Income.objects.all_colleges()
     serializer_class = IncomeSerializer
     permission_classes = [IsAuthenticated]
@@ -81,7 +80,7 @@ class IncomeViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     related_college_lookup = 'account__college_id'
 
 
-class ExpenseViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class ExpenseViewSet(CollegeScopedModelViewSet):
     queryset = Expense.objects.all_colleges()
     serializer_class = ExpenseSerializer
     permission_classes = [IsAuthenticated]
@@ -92,7 +91,7 @@ class ExpenseViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     ordering = ['-date']
 
 
-class VoucherViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class VoucherViewSet(CollegeScopedModelViewSet):
     queryset = Voucher.objects.all_colleges()
     serializer_class = VoucherSerializer
     permission_classes = [IsAuthenticated]
@@ -103,7 +102,7 @@ class VoucherViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     ordering = ['-date']
 
 
-class AccountTransactionViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+class AccountTransactionViewSet(RelatedCollegeScopedModelViewSet):
     queryset = AccountTransaction.objects.select_related('account')
     serializer_class = AccountTransactionSerializer
     permission_classes = [IsAuthenticated]

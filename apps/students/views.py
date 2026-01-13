@@ -13,7 +13,6 @@ from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiResponse,
 )
-from apps.core.cache_mixins import CachedReadOnlyMixin
 from drf_spectacular.types import OpenApiTypes
 
 from .models import (
@@ -207,7 +206,7 @@ class StudentGroupViewSet(CollegeScopedModelViewSet):
         tags=['Students']
     ),
 )
-class StudentViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class StudentViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing students."""
     queryset = Student.objects.all_colleges()
     serializer_class = StudentSerializer

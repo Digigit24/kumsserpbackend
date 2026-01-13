@@ -946,14 +946,10 @@ class StoreIndent(CollegeScopedModel):
             })
 
     def submit(self):
-        """College store submits request to super admin"""
-        # Set to submitted first, then to pending_super_admin
+        """College store submits request to college admin"""
+        # Move from draft to pending college approval
         if self.status == 'draft':
-            self.status = 'submitted'
-            self.save(update_fields=['status', 'updated_at'])
-        # Move to pending_super_admin
-        if self.status in ['draft', 'submitted']:
-            self.status = 'pending_super_admin'
+            self.status = 'pending_college_approval'
             self.save(update_fields=['status', 'updated_at'])
 
     def college_admin_approve(self, user=None):

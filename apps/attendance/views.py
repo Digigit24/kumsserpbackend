@@ -1,7 +1,6 @@
 """
 DRF ViewSets for Attendance app with comprehensive API documentation.
 """
-from apps.core.cache_mixins import CachedReadOnlyMixin
 from rest_framework import status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -78,7 +77,7 @@ from apps.core.mixins import CollegeScopedModelViewSet, RelatedCollegeScopedMode
         tags=['Attendance - Students']
     ),
 )
-class StudentAttendanceViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class StudentAttendanceViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing student attendance."""
     queryset = StudentAttendance.objects.all_colleges()
     serializer_class = StudentAttendanceSerializer
@@ -326,7 +325,7 @@ class SubjectAttendanceViewSet(RelatedCollegeScopedModelViewSet):
         tags=['Attendance - Staff']
     ),
 )
-class StaffAttendanceViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class StaffAttendanceViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing staff attendance."""
     queryset = StaffAttendance.objects.all_colleges()
     serializer_class = StaffAttendanceSerializer
@@ -390,7 +389,7 @@ class StaffAttendanceViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
         tags=['Attendance - Notifications']
     ),
 )
-class AttendanceNotificationViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class AttendanceNotificationViewSet(CollegeScopedModelViewSet):
     """ViewSet for managing attendance notifications."""
     queryset = AttendanceNotification.objects.all_colleges()
     serializer_class = AttendanceNotificationSerializer

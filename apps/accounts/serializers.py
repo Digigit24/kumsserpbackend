@@ -5,7 +5,6 @@ from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.core.cache import cache
 from django.db import transaction
 from django.utils import timezone
 from dj_rest_auth.serializers import TokenSerializer as DRATokenSerializer
@@ -301,18 +300,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
             created_by=actor,
             updated_by=actor,
         )
-        # Use selective cache invalidation for student data
-        try:
-            patterns = ['*student*', '*user*', '*account*']
-            for pattern in patterns:
-                try:
-                    keys = cache.keys(pattern)
-                    if keys:
-                        cache.delete_many(keys)
-                except:
-                    pass
-        except Exception:
-            pass
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):

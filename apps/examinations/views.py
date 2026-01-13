@@ -1,7 +1,6 @@
 from rest_framework import filters, viewsets
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
-from apps.core.cache_mixins import CachedReadOnlyMixin
 
 from apps.core.mixins import CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
 from .models import (
@@ -34,7 +33,7 @@ from .serializers import (
 )
 
 
-class MarksGradeViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class MarksGradeViewSet(CollegeScopedModelViewSet):
     queryset = MarksGrade.objects.all_colleges()
     serializer_class = MarksGradeSerializer
     permission_classes = [IsAuthenticated]
@@ -45,7 +44,7 @@ class MarksGradeViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     ordering = ['grade']
 
 
-class ExamTypeViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class ExamTypeViewSet(CollegeScopedModelViewSet):
     queryset = ExamType.objects.all_colleges()
     serializer_class = ExamTypeSerializer
     permission_classes = [IsAuthenticated]
@@ -56,7 +55,7 @@ class ExamTypeViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     ordering = ['name']
 
 
-class ExamViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class ExamViewSet(CollegeScopedModelViewSet):
     queryset = Exam.objects.all_colleges()
     serializer_class = ExamSerializer
     permission_classes = [IsAuthenticated]
@@ -67,7 +66,7 @@ class ExamViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     ordering = ['-start_date']
 
 
-class ExamScheduleViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+class ExamScheduleViewSet(RelatedCollegeScopedModelViewSet):
     queryset = ExamSchedule.objects.select_related('exam', 'subject', 'classroom', 'invigilator')
     serializer_class = ExamScheduleSerializer
     permission_classes = [IsAuthenticated]
@@ -78,7 +77,7 @@ class ExamScheduleViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet)
     related_college_lookup = 'exam__college_id'
 
 
-class ExamAttendanceViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+class ExamAttendanceViewSet(RelatedCollegeScopedModelViewSet):
     queryset = ExamAttendance.objects.select_related('exam_schedule__exam', 'student')
     serializer_class = ExamAttendanceSerializer
     permission_classes = [IsAuthenticated]
@@ -89,7 +88,7 @@ class ExamAttendanceViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSe
     related_college_lookup = 'exam_schedule__exam__college_id'
 
 
-class AdmitCardViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+class AdmitCardViewSet(RelatedCollegeScopedModelViewSet):
     queryset = AdmitCard.objects.select_related('student', 'exam')
     serializer_class = AdmitCardSerializer
     permission_classes = [IsAuthenticated]
@@ -101,7 +100,7 @@ class AdmitCardViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
     related_college_lookup = 'exam__college_id'
 
 
-class MarksRegisterViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+class MarksRegisterViewSet(RelatedCollegeScopedModelViewSet):
     queryset = MarksRegister.objects.select_related('exam', 'subject', 'section')
     serializer_class = MarksRegisterSerializer
     permission_classes = [IsAuthenticated]
@@ -112,7 +111,7 @@ class MarksRegisterViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet
     related_college_lookup = 'exam__college_id'
 
 
-class StudentMarksViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+class StudentMarksViewSet(RelatedCollegeScopedModelViewSet):
     queryset = StudentMarks.objects.select_related('register__exam', 'student')
     serializer_class = StudentMarksSerializer
     permission_classes = [IsAuthenticated]
@@ -123,7 +122,7 @@ class StudentMarksViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet)
     related_college_lookup = 'register__exam__college_id'
 
 
-class ExamResultViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+class ExamResultViewSet(RelatedCollegeScopedModelViewSet):
     queryset = ExamResult.objects.select_related('student', 'exam')
     serializer_class = ExamResultSerializer
     permission_classes = [IsAuthenticated]
@@ -134,7 +133,7 @@ class ExamResultViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
     related_college_lookup = 'exam__college_id'
 
 
-class ProgressCardViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+class ProgressCardViewSet(RelatedCollegeScopedModelViewSet):
     queryset = ProgressCard.objects.select_related('student', 'exam')
     serializer_class = ProgressCardSerializer
     permission_classes = [IsAuthenticated]
@@ -145,7 +144,7 @@ class ProgressCardViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet)
     related_college_lookup = 'exam__college_id'
 
 
-class MarkSheetViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+class MarkSheetViewSet(RelatedCollegeScopedModelViewSet):
     queryset = MarkSheet.objects.select_related('student', 'exam')
     serializer_class = MarkSheetSerializer
     permission_classes = [IsAuthenticated]
@@ -157,7 +156,7 @@ class MarkSheetViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
     related_college_lookup = 'exam__college_id'
 
 
-class TabulationSheetViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
+class TabulationSheetViewSet(RelatedCollegeScopedModelViewSet):
     queryset = TabulationSheet.objects.select_related('exam', 'class_obj', 'section')
     serializer_class = TabulationSheetSerializer
     permission_classes = [IsAuthenticated]
