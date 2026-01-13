@@ -316,6 +316,7 @@ class SupplierQuotationDetailSerializer(serializers.ModelSerializer):
 
 
 class SupplierQuotationCreateSerializer(serializers.ModelSerializer):
+    requirement = serializers.PrimaryKeyRelatedField(queryset=ProcurementRequirement.objects.all(), required=False, allow_null=True)
     quotation_date = serializers.DateField(required=False, allow_null=True)
     valid_until = serializers.DateField(required=False, allow_null=True)
     total_amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
@@ -347,6 +348,14 @@ class SupplierQuotationCreateSerializer(serializers.ModelSerializer):
             validated_data['tax_amount'] = 0
         if grand_total is None:
             validated_data['grand_total'] = (validated_data.get('total_amount') or 0) + (validated_data.get('tax_amount') or 0)
+
+        if not validated_data.get('requirement'):
+            requirement = ProcurementRequirement.objects.filter(status='approved').first()
+            if not requirement:
+                requirement = ProcurementRequirement.objects.first()
+            if not requirement:
+                raise serializers.ValidationError({'requirement': 'No procurement requirement available. Create one first.'})
+            validated_data['requirement'] = requirement
 
         if not validated_data.get('supplier'):
             supplier = SupplierMaster.objects.filter(is_active=True).first()
