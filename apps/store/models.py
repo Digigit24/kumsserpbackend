@@ -947,10 +947,9 @@ class StoreIndent(CollegeScopedModel):
 
     def submit(self):
         """College store submits request to college admin"""
-        # Move from draft to pending college approval
         if self.status == 'draft':
             self.status = 'pending_college_approval'
-            self.save(update_fields=['status', 'updated_at'])
+            self.save()
 
     def college_admin_approve(self, user=None):
         """College admin approves and sends to super admin"""
@@ -1146,14 +1145,14 @@ class MaterialIssueNote(AuditModel):
         # Update status to in_transit/dispatched
         self.status = 'in_transit'
         self.dispatch_date = timezone.now()
-        self.save(update_fields=['status', 'dispatch_date', 'updated_at'])
+        self.save()
 
     def confirm_receipt(self, user=None, notes=None):
         self.status = 'received'
         self.receipt_date = timezone.now()
         self.receipt_confirmation_notes = notes or ''
         self.received_by = user
-        self.save(update_fields=['status', 'receipt_date', 'receipt_confirmation_notes', 'received_by', 'updated_at'])
+        self.save()
 
 
 class MaterialIssueItem(AuditModel):

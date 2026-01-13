@@ -567,13 +567,13 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def submit(self, request, pk=None):
-        """College store manager submits indent to super admin"""
+        """College store manager submits indent to college admin"""
         try:
             indent = self.get_object()
             indent.submit()
-            indent.refresh_from_db()  # Ensure status is fresh
+            indent.refresh_from_db()
             serializer = self.get_serializer(indent)
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except ValidationError as exc:
             detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
             return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
@@ -581,7 +581,7 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
             import logging
             logger = logging.getLogger(__name__)
             logger.error(f"Error submitting indent {pk}: {str(e)}")
-            return Response({'detail': 'An error occurred while submitting the indent'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'detail': f'Error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'], permission_classes=[CanApproveIndent])
     def college_admin_approve(self, request, pk=None):
@@ -856,16 +856,34 @@ class MaterialIssueNoteViewSet(viewsets.ModelViewSet):
         min_note = self.get_object()
         try:
             min_note.dispatch()
+            min_note.refresh_from_db()
+            serializer = self.get_serializer(min_note)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except ValidationError as exc:
             detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
             return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'status': min_note.status})
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error dispatching material issue {pk}: {str(e)}")
+            return Response({'detail': f'Error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'])
     def confirm_receipt(self, request, pk=None):
         min_note = self.get_object()
-        min_note.confirm_receipt(user=request.user, notes=request.data.get('notes'))
-        return Response({'status': min_note.status})
+        try:
+            min_note.confirm_receipt(user=request.user, notes=request.data.get('notes'))
+            min_note.refresh_from_db()
+            serializer = self.get_serializer(min_note)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ValidationError as exc:
+            detail = exc.message_dict if hasattr(exc, 'message_dict') else exc.messages
+            return Response({'detail': detail}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error confirming receipt {pk}: {str(e)}")
+            return Response({'detail': f'Error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
