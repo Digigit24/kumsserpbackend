@@ -791,12 +791,15 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({'central_store': 'Required'})
 
             with transaction.atomic():
-                college_id = central_store.college_id
+                # Central stores are not college-specific, use first college or None
+                from apps.core.models import College
+                college = College.objects.first()
+                college_id = college.id if college else None
 
-                # Find or create item
+                # Find or create item for central management
                 item = StoreItem._base_manager.filter(
                     name__iexact=item_name,
-                    college_id=college_id
+                    managed_by='central'
                 ).first()
 
                 if not item:
@@ -806,7 +809,7 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
                         college_id=college_id
                     ).first()
 
-                    if not category:
+                    if not category and college_id:
                         category = StoreCategory._base_manager.create(
                             name='General',
                             code='GEN',
@@ -815,16 +818,19 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
                         )
 
                     # Create item
-                    item = StoreItem._base_manager.create(
-                        name=item_name,
-                        code=item_name.upper().replace(' ', '_')[:20],
-                        category=category,
-                        unit='unit',
-                        price=0,
-                        managed_by='central',
-                        college_id=college_id,
-                        is_active=True
-                    )
+                    if college_id and category:
+                        item = StoreItem._base_manager.create(
+                            name=item_name,
+                            code=item_name.upper().replace(' ', '_')[:20],
+                            category=category,
+                            unit='unit',
+                            price=0,
+                            managed_by='central',
+                            college_id=college_id,
+                            is_active=True
+                        )
+                    else:
+                        raise serializers.ValidationError({'error': 'No college found. Create a college first.'})
 
                 # Create inventory
                 inventory = CentralStoreInventory._base_manager.create(
