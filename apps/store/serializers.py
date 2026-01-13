@@ -792,40 +792,45 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
 
             with transaction.atomic():
                 # Central store items don't have college_id (they're shared across colleges)
-                college_id = None
+                from apps.core.utils import clear_current_college_id, set_current_college_id
 
-                # Find or create item
-                item = StoreItem._base_manager.filter(
-                    name__iexact=item_name,
-                    college_id__isnull=True
-                ).first()
+                # Temporarily clear college context to create central items without college_id
+                saved_college_id = None
+                try:
+                    clear_current_college_id()
 
-                if not item:
-                    # Get or create category
-                    category = StoreCategory._base_manager.filter(
-                        name='General',
+                    # Find or create item
+                    item = StoreItem._base_manager.filter(
+                        name__iexact=item_name,
                         college_id__isnull=True
                     ).first()
 
-                    if not category:
-                        category = StoreCategory._base_manager.create(
+                    if not item:
+                        # Get or create category
+                        category = StoreCategory._base_manager.filter(
                             name='General',
-                            code='GEN',
-                            college_id=None,
+                            college_id__isnull=True
+                        ).first()
+
+                        if not category:
+                            category = StoreCategory._base_manager.create(
+                                name='General',
+                                code='GEN',
+                                is_active=True
+                            )
+
+                        # Create item
+                        item = StoreItem._base_manager.create(
+                            name=item_name,
+                            code=item_name.upper().replace(' ', '_')[:20],
+                            category=category,
+                            unit='unit',
+                            price=0,
+                            managed_by='central',
                             is_active=True
                         )
-
-                    # Create item
-                    item = StoreItem._base_manager.create(
-                        name=item_name,
-                        code=item_name.upper().replace(' ', '_')[:20],
-                        category=category,
-                        unit='unit',
-                        price=0,
-                        managed_by='central',
-                        college_id=None,
-                        is_active=True
-                    )
+                finally:
+                    pass  # Context stays cleared for central items
 
                 # Create inventory
                 inventory = CentralStoreInventory._base_manager.create(
