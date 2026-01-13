@@ -773,13 +773,24 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
 
         college_id = central_store.college_id
 
+        # Check if inventory record already exists
+        from .models import CentralStoreInventory
+        if CentralStoreInventory.objects.filter(
+            central_store=central_store,
+            item__name__iexact=item_name
+        ).exists():
+            raise serializers.ValidationError({
+                'item_name': f'Item "{item_name}" already exists in this central store inventory.'
+            })
+
         # Find or create item
-        item = StoreItem.objects.all_colleges().filter(name__iexact=item_name).first()
+        item = StoreItem.objects.all_colleges().filter(name__iexact=item_name, college_id=college_id).first()
         if not item:
             # Auto-create item for central inventory
-            category, _ = StoreCategory.objects.get_or_create(
+            category, _ = StoreCategory.objects.all_colleges().get_or_create(
                 name='General',
-                defaults={'code': 'GEN', 'college_id': college_id}
+                college_id=college_id,
+                defaults={'code': 'GEN'}
             )
             item = StoreItem.objects.create(
                 name=item_name,
