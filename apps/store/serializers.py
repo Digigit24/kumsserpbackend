@@ -766,13 +766,20 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
         item_name = validated_data.pop('item_name')
         from .models import StoreItem, StoreCategory
 
+        # Get central store to determine college
+        central_store = validated_data.get('central_store')
+        if not central_store:
+            raise serializers.ValidationError({'central_store': 'This field is required.'})
+
+        college_id = central_store.college_id
+
         # Find or create item
         item = StoreItem.objects.all_colleges().filter(name__iexact=item_name).first()
         if not item:
             # Auto-create item for central inventory
             category, _ = StoreCategory.objects.get_or_create(
                 name='General',
-                defaults={'code': 'GEN', 'college_id': 1}
+                defaults={'code': 'GEN', 'college_id': college_id}
             )
             item = StoreItem.objects.create(
                 name=item_name,
@@ -781,7 +788,7 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
                 unit='unit',
                 price=0,
                 managed_by='central',
-                college_id=1
+                college_id=college_id
             )
         validated_data['item'] = item
         return super().create(validated_data)
