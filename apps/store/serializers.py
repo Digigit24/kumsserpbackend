@@ -791,26 +791,27 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({'central_store': 'Required'})
 
             with transaction.atomic():
-                college_id = central_store.college_id
+                # Central store items don't have college_id (they're shared across colleges)
+                college_id = None
 
                 # Find or create item
                 item = StoreItem._base_manager.filter(
                     name__iexact=item_name,
-                    college_id=college_id
+                    college_id__isnull=True
                 ).first()
 
                 if not item:
                     # Get or create category
                     category = StoreCategory._base_manager.filter(
                         name='General',
-                        college_id=college_id
+                        college_id__isnull=True
                     ).first()
 
                     if not category:
                         category = StoreCategory._base_manager.create(
                             name='General',
                             code='GEN',
-                            college_id=college_id,
+                            college_id=None,
                             is_active=True
                         )
 
@@ -822,7 +823,7 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
                         unit='unit',
                         price=0,
                         managed_by='central',
-                        college_id=college_id,
+                        college_id=None,
                         is_active=True
                     )
 
