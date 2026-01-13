@@ -852,15 +852,13 @@ class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
     serializer_class = CentralStoreInventorySerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['central_store', 'item']
-    search_fields = ['item__name', 'item__code']
+    filterset_fields = ['central_store']
+    search_fields = ['item__name']
     ordering = ['-id']
 
     def get_queryset(self):
-        """Use _base_manager to bypass college filtering"""
-        return CentralStoreInventory._base_manager.select_related(
-            'central_store', 'item', 'item__category'
-        ).all()
+        """ALWAYS use _base_manager to bypass ALL filtering"""
+        return CentralStoreInventory._base_manager.filter(is_active=True).order_by('-id')
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -868,36 +866,40 @@ class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
         return CentralStoreInventorySerializer
 
     def create(self, request, *args, **kwargs):
-        """Create central inventory - with detailed error reporting"""
+        """Create central inventory"""
         import traceback
         import logging
         logger = logging.getLogger(__name__)
 
         try:
+            # Check permission
             if not (request.user.is_superuser or request.user.user_type == 'central_manager'):
-                return Response({'detail': 'Only super admin can add central inventory items'},
+                return Response({'detail': 'Permission denied'},
                               status=status.HTTP_403_FORBIDDEN)
 
-            # Remove 'item' field if sent as empty string from frontend
+            # Clean data
             data = request.data.copy()
             if 'item' in data and not data['item']:
-                data.pop('item')
+                del data['item']
+            if 'quantity_available' in data:
+                del data['quantity_available']
 
+            # Create inventory
             serializer = self.get_serializer(data=data)
             serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            instance = serializer.save()
+
+            # Return response with full data
+            response_serializer = CentralStoreInventorySerializer(instance, context={'request': request})
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             error_trace = traceback.format_exc()
-            logger.error(f"Central inventory error: {str(e)}\n{error_trace}")
-
-            # Return detailed error to frontend for debugging
+            logger.error(f"Inventory create error: {str(e)}\n{error_trace}")
             return Response({
                 'error': str(e),
-                'error_type': type(e).__name__,
-                'detail': error_trace
+                'type': type(e).__name__,
+                'trace': error_trace
             }, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['get'])
