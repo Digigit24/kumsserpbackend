@@ -40,34 +40,34 @@ def clear_user_permission_cache_on_role_change(sender, instance, **kwargs):
 @receiver(post_save, sender=HierarchyUserRole)
 def invalidate_tree_cache_on_hierarchy_role_change(sender, instance, **kwargs):
     """Clear organization tree cache when hierarchy role is assigned/updated."""
-    _clear_hierarchy_cache()
+    pass
 
 
 @receiver(post_delete, sender=HierarchyUserRole)
 def invalidate_tree_cache_on_hierarchy_role_delete(sender, instance, **kwargs):
     """Clear organization tree cache when hierarchy role is deleted."""
-    _clear_hierarchy_cache()
+    pass
 
 
 @receiver(post_save, sender=AccountUserRole)
 def invalidate_tree_cache_on_account_role_change(sender, instance, **kwargs):
     """Clear organization tree cache when account role is assigned/updated."""
-    _clear_hierarchy_cache()
+    pass
 
 
 @receiver(post_delete, sender=AccountUserRole)
 def invalidate_tree_cache_on_account_role_delete(sender, instance, **kwargs):
     """Clear organization tree cache when account role is deleted."""
-    _clear_hierarchy_cache()
+    pass
 
 
 @receiver(post_save, sender=get_user_model())
 def invalidate_tree_cache_on_user_change(sender, instance, **kwargs):
     """Clear organization tree cache when user is created or updated."""
-    _clear_hierarchy_cache()
+    pass
 
 
 @receiver(post_delete, sender=get_user_model())
 def invalidate_tree_cache_on_user_delete(sender, instance, **kwargs):
     """Clear organization tree cache when user is deleted."""
-    _clear_hierarchy_cache()
+    pass
