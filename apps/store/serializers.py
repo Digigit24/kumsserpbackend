@@ -764,45 +764,64 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         item_name = validated_data.pop('item_name')
-        from .models import StoreItem, StoreCategory
+        from .models import StoreItem, StoreCategory, CentralStoreInventory
+        from django.db import transaction
 
-        # Get central store to determine college
+        # Get central store
         central_store = validated_data.get('central_store')
         if not central_store:
             raise serializers.ValidationError({'central_store': 'This field is required.'})
 
-        college_id = central_store.college_id
+        try:
+            with transaction.atomic():
+                college_id = central_store.college_id
 
-        # Check if inventory record already exists
-        from .models import CentralStoreInventory
-        if CentralStoreInventory.objects.filter(
-            central_store=central_store,
-            item__name__iexact=item_name
-        ).exists():
-            raise serializers.ValidationError({
-                'item_name': f'Item "{item_name}" already exists in this central store inventory.'
-            })
+                # Check if inventory record already exists
+                if CentralStoreInventory.objects.filter(
+                    central_store=central_store,
+                    item__name__iexact=item_name
+                ).exists():
+                    raise serializers.ValidationError({
+                        'item_name': f'Item "{item_name}" already exists in this central store inventory.'
+                    })
 
-        # Find or create item
-        item = StoreItem.objects.all_colleges().filter(name__iexact=item_name, college_id=college_id).first()
-        if not item:
-            # Auto-create item for central inventory
-            category, _ = StoreCategory.objects.all_colleges().get_or_create(
-                name='General',
-                college_id=college_id,
-                defaults={'code': 'GEN'}
-            )
-            item = StoreItem.objects.create(
-                name=item_name,
-                code=item_name.upper()[:20],
-                category=category,
-                unit='unit',
-                price=0,
-                managed_by='central',
-                college_id=college_id
-            )
-        validated_data['item'] = item
-        return super().create(validated_data)
+                # Find or create item
+                item = StoreItem.objects.filter(
+                    name__iexact=item_name,
+                    college_id=college_id
+                ).first()
+
+                if not item:
+                    # Get or create category
+                    try:
+                        category = StoreCategory.objects.get(
+                            name='General',
+                            college_id=college_id
+                        )
+                    except StoreCategory.DoesNotExist:
+                        category = StoreCategory.objects.create(
+                            name='General',
+                            code='GEN',
+                            college_id=college_id
+                        )
+
+                    # Create item
+                    item = StoreItem.objects.create(
+                        name=item_name,
+                        code=item_name.upper().replace(' ', '_')[:20],
+                        category=category,
+                        unit='unit',
+                        price=0,
+                        managed_by='central',
+                        college_id=college_id
+                    )
+
+                validated_data['item'] = item
+                return super().create(validated_data)
+        except serializers.ValidationError:
+            raise
+        except Exception as e:
+            raise serializers.ValidationError({'detail': f'Error creating inventory: {str(e)}'})
 
 
 class CentralStoreInventorySerializer(CentralStoreInventoryListSerializer):

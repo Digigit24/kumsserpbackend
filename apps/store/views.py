@@ -867,7 +867,7 @@ class MaterialIssueNoteViewSet(viewsets.ModelViewSet):
 
 
 class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
-    queryset = CentralStoreInventory.objects.select_related('central_store__manager', 'item__category', 'item__central_store')
+    queryset = CentralStoreInventory.objects.select_related('central_store__manager', 'item__category', 'item__central_store').all()
     serializer_class = CentralStoreInventorySerializer
     permission_classes = [IsAuthenticated]
     resource_name = 'store'
@@ -877,14 +877,6 @@ class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
     search_fields = ['item__name', 'item__code']
     ordering_fields = ['quantity_available', 'updated_at']
     ordering = ['quantity_available']
-
-    @method_decorator(cache_page(60 * 2))  # 2 minutes - frequent updates
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @method_decorator(cache_page(60 * 2))
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -913,27 +905,7 @@ class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
         if not (request.user.is_superuser or request.user.user_type == 'central_manager'):
             return Response({'detail': 'Only super admin can add central inventory items'},
                           status=status.HTTP_403_FORBIDDEN)
-        response = super().create(request, *args, **kwargs)
-        # Use selective cache invalidation
-        try:
-            if hasattr(cache, 'delete_pattern'):
-                cache.delete_pattern('*centralstoreinventory*')
-                cache.delete_pattern('*store*inventory*')
-            else:
-                # Fallback to selective key deletion
-                patterns = ['*centralstoreinventory*', '*store*inventory*', '*inventory*list*']
-                for pattern in patterns:
-                    try:
-                        keys = cache.keys(pattern)
-                        if keys:
-                            cache.delete_many(keys)
-                    except:
-                        pass
-        except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.warning(f"Inventory cache invalidation failed: {e}")
-        return response
+        return super().create(request, *args, **kwargs)
 
     @action(detail=False, methods=['get'])
     def low_stock(self, request):
