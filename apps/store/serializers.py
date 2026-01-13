@@ -720,8 +720,8 @@ class MaterialIssueNoteCreateSerializer(serializers.ModelSerializer):
 class CentralStoreInventoryListSerializer(serializers.ModelSerializer):
     """For GET - returns item ID and name"""
     id = serializers.IntegerField(source='item_id', read_only=True)
-    item_display = serializers.CharField(source='item.name', read_only=True)
-    central_store_name = serializers.CharField(source='central_store.name', read_only=True)
+    item_display = serializers.SerializerMethodField()
+    central_store_name = serializers.SerializerMethodField()
 
     class Meta:
         model = CentralStoreInventory
@@ -730,6 +730,21 @@ class CentralStoreInventoryListSerializer(serializers.ModelSerializer):
                   'min_stock_level', 'reorder_point', 'max_stock_level',
                   'last_stock_update', 'unit_cost', 'is_active',
                   'created_at', 'updated_at']
+
+    def get_item_display(self, obj):
+        try:
+            # Use _base_manager to bypass filtering
+            from .models import StoreItem
+            item = StoreItem._base_manager.filter(id=obj.item_id).first()
+            return item.name if item else 'Unknown'
+        except:
+            return 'Unknown'
+
+    def get_central_store_name(self, obj):
+        try:
+            return obj.central_store.name
+        except:
+            return 'Unknown'
 
 
 class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
@@ -827,6 +842,10 @@ class CentralStoreInventoryCreateSerializer(serializers.ModelSerializer):
             # Create inventory directly
             inventory = CentralStoreInventory._base_manager.create(**validated_data)
             return inventory
+
+    def to_representation(self, instance):
+        """Return full representation using list serializer"""
+        return CentralStoreInventoryListSerializer(instance, context=self.context).data
 
 
 class CentralStoreInventorySerializer(CentralStoreInventoryListSerializer):

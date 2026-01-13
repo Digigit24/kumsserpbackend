@@ -849,14 +849,18 @@ class MaterialIssueNoteViewSet(viewsets.ModelViewSet):
 
 
 class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
-    queryset = CentralStoreInventory.objects.all()
     serializer_class = CentralStoreInventorySerializer
     permission_classes = [IsAuthenticated]
-    resource_name = 'store'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['central_store', 'item']
     search_fields = ['item__name', 'item__code']
     ordering = ['-id']
+
+    def get_queryset(self):
+        """Use _base_manager to bypass college filtering"""
+        return CentralStoreInventory._base_manager.select_related(
+            'central_store', 'item', 'item__category'
+        ).all()
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -864,7 +868,7 @@ class CentralStoreInventoryViewSet(viewsets.ModelViewSet):
         return CentralStoreInventorySerializer
 
     def create(self, request, *args, **kwargs):
-        """Only super admin can create central inventory"""
+        """Create central inventory"""
         if not (request.user.is_superuser or request.user.user_type == 'central_manager'):
             return Response({'detail': 'Only super admin can add central inventory items'},
                           status=status.HTTP_403_FORBIDDEN)
