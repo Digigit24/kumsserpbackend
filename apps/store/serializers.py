@@ -453,6 +453,19 @@ class PurchaseOrderDetailSerializer(serializers.ModelSerializer):
 
 class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
     items = PurchaseOrderItemCreateSerializer(many=True, required=False)
+    
+    # Make fields optional for input as we'll pull them from requirement/quotation
+    supplier = serializers.PrimaryKeyRelatedField(queryset=SupplierMaster.objects.all(), required=False)
+    central_store = serializers.PrimaryKeyRelatedField(queryset=CentralStore.objects.all(), required=False)
+    po_date = serializers.DateField(required=False)
+    expected_delivery_date = serializers.DateField(required=False)
+    delivery_address_line1 = serializers.CharField(required=False)
+    delivery_city = serializers.CharField(required=False)
+    delivery_state = serializers.CharField(required=False)
+    delivery_pincode = serializers.CharField(required=False)
+    total_amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
+    tax_amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
+    payment_terms = serializers.CharField(required=False)
 
     class Meta:
         model = PurchaseOrder
@@ -460,9 +473,76 @@ class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         items_data = validated_data.pop('items', [])
+        requirement = validated_data.get('requirement')
+        quotation = validated_data.get('quotation')
+        
+        # Automatically populate fields from requirement and quotation if not provided
+        if not validated_data.get('supplier') and quotation:
+            validated_data['supplier'] = quotation.supplier
+            
+        if not validated_data.get('central_store') and requirement:
+            validated_data['central_store'] = requirement.central_store
+            
+        if not validated_data.get('po_date'):
+            validated_data['po_date'] = timezone.now().date()
+            
+        if not validated_data.get('expected_delivery_date'):
+            if quotation and quotation.delivery_time_days:
+                validated_data['expected_delivery_date'] = validated_data['po_date'] + timezone.timedelta(days=quotation.delivery_time_days)
+            else:
+                validated_data['expected_delivery_date'] = validated_data['po_date'] + timezone.timedelta(days=7)
+                
+        # Use central store address if delivery address is missing
+        cs = validated_data.get('central_store')
+        if cs:
+            if not validated_data.get('delivery_address_line1'):
+                validated_data['delivery_address_line1'] = cs.address_line1
+            if not validated_data.get('delivery_city'):
+                validated_data['delivery_city'] = cs.city
+            if not validated_data.get('delivery_state'):
+                validated_data['delivery_state'] = cs.state
+            if not validated_data.get('delivery_pincode'):
+                validated_data['delivery_pincode'] = cs.pincode
+                
+        if not validated_data.get('total_amount') and quotation:
+            validated_data['total_amount'] = quotation.total_amount
+            
+        if not validated_data.get('tax_amount') and quotation:
+            validated_data['tax_amount'] = quotation.tax_amount
+            
+        if not validated_data.get('payment_terms'):
+            if quotation and quotation.payment_terms:
+                validated_data['payment_terms'] = quotation.payment_terms
+            else:
+                validated_data['payment_terms'] = 'Standard'
+
         po = PurchaseOrder.objects.create(**validated_data)
-        for item_data in items_data:
-            PurchaseOrderItem.objects.create(purchase_order=po, **item_data)
+        
+        # If no items provided, copy items from quotation
+        if not items_data and quotation:
+            for q_item in quotation.items.all():
+                PurchaseOrderItem.objects.create(
+                    purchase_order=po,
+                    quotation_item=q_item,
+                    item_description=q_item.item_description,
+                    hsn_code=q_item.hsn_code,
+                    quantity=q_item.quantity,
+                    unit=q_item.unit,
+                    unit_price=q_item.unit_price,
+                    tax_rate=q_item.tax_rate,
+                    tax_amount=q_item.tax_amount,
+                    total_amount=q_item.total_amount,
+                    specifications=q_item.specifications
+                )
+        else:
+            for item_data in items_data:
+                PurchaseOrderItem.objects.create(purchase_order=po, **item_data)
+        
+        # Update requirement status
+        if requirement:
+            requirement.status = 'po_created'
+            requirement.save(update_fields=['status', 'updated_at'])
+            
         return po
 
 
