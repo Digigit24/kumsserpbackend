@@ -38,6 +38,7 @@ PROCUREMENT_STATUS_CHOICES = [
     ('submitted', 'Submitted'),
     ('pending_approval', 'Pending Approval'),
     ('approved', 'Approved'),
+    ('received', 'Received'),
     ('quotations_received', 'Quotations Received'),
     ('po_created', 'PO Created'),
     ('fulfilled', 'Fulfilled'),
@@ -735,7 +736,7 @@ class PurchaseOrder(AuditModel):
                     })
 
         # Phase 12.1: Cannot create PO without approved requirement
-        if self.requirement and self.requirement.status not in ['approved', 'po_created']:
+        if self.requirement and self.requirement.status not in ['approved', 'received', 'po_created']:
             raise ValidationError({
                 'requirement': 'Cannot create PO without approved requirement'
             })
