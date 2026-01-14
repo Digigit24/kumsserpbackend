@@ -233,7 +233,7 @@ class ProcurementRequirementListSerializer(serializers.ModelSerializer):
                   'required_by_date', 'central_store', 'central_store_name', 'is_draft_submitted', 'is_quotation_approved', 'is_po_created']
 
     def get_is_draft_submitted(self, obj):
-        return obj.status in ['submitted', 'pending_approval', 'approved', 'received', 'quotations_received', 'po_created', 'fulfilled']
+        return obj.status in ['submitted', 'pending_approval', 'approved', 'quotations_received', 'po_created', 'fulfilled']
 
     def get_is_quotation_approved(self, obj):
         return obj.quotations.filter(is_selected=True).exists()
@@ -387,10 +387,10 @@ class SupplierQuotationCreateSerializer(serializers.ModelSerializer):
 
         quotation = super().create(validated_data)
         
-        # Update requirement status to 'received'
+        # Update requirement status to 'quotations_received'
         requirement = quotation.requirement
         if requirement and requirement.status == 'approved':
-            requirement.status = 'received'
+            requirement.status = 'quotations_received'
             requirement.save(update_fields=['status', 'updated_at'])
             
         return quotation
