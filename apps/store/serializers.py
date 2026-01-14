@@ -557,6 +557,13 @@ class GoodsReceiptItemCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = GoodsReceiptItem
         exclude = ['grn']
+        extra_kwargs = {
+            'po_item': {'required': False},
+            'item_description': {'required': False},
+            'ordered_quantity': {'required': False},
+            'received_quantity': {'required': False},
+            'unit': {'required': False},
+        }
 
 
 class GoodsReceiptNoteListSerializer(serializers.ModelSerializer):
@@ -580,6 +587,15 @@ class GoodsReceiptNoteDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = GoodsReceiptNote
         fields = '__all__'
+        extra_kwargs = {
+            'purchase_order': {'required': False},
+            'supplier': {'required': False},
+            'central_store': {'required': False},
+            'receipt_date': {'required': False},
+            'invoice_number': {'required': False},
+            'invoice_date': {'required': False},
+            'invoice_amount': {'required': False},
+        }
 
 
 class GoodsReceiptNoteCreateSerializer(serializers.ModelSerializer):
@@ -588,12 +604,70 @@ class GoodsReceiptNoteCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = GoodsReceiptNote
         fields = '__all__'
+        extra_kwargs = {
+            'purchase_order': {'required': False},
+            'supplier': {'required': False},
+            'central_store': {'required': False},
+            'receipt_date': {'required': False},
+            'invoice_number': {'required': False},
+            'invoice_date': {'required': False},
+            'invoice_amount': {'required': False},
+        }
 
     def create(self, validated_data):
         items_data = validated_data.pop('items', [])
+        po = validated_data.get('purchase_order')
+        
+        # Pull defaults from PO if provided
+        if po:
+            validated_data.setdefault('supplier', po.supplier)
+            validated_data.setdefault('central_store', po.central_store)
+            validated_data.setdefault('invoice_amount', po.grand_total)
+            if not validated_data.get('invoice_number'):
+                validated_data['invoice_number'] = f"INV-{po.po_number}"
+        
+        # Set absolute defaults for required model fields
+        validated_data.setdefault('receipt_date', timezone.now().date())
+        validated_data.setdefault('invoice_date', timezone.now().date())
+        if not validated_data.get('invoice_number'):
+            validated_data['invoice_number'] = f"INV-{timezone.now().strftime('%Y%m%d%H%M')}"
+        validated_data.setdefault('invoice_amount', 0)
+
         grn = GoodsReceiptNote.objects.create(**validated_data)
-        for item_data in items_data:
-            GoodsReceiptItem.objects.create(grn=grn, **item_data)
+        
+        # Handle linked items
+        if not items_data and po:
+            for po_item in po.items.all():
+                GoodsReceiptItem.objects.create(
+                    grn=grn,
+                    po_item=po_item,
+                    item_description=po_item.item_description,
+                    ordered_quantity=po_item.quantity,
+                    received_quantity=po_item.quantity,
+                    accepted_quantity=po_item.quantity,
+                    unit=po_item.unit
+                )
+        else:
+            for item_data in items_data:
+                poi = item_data.get('po_item')
+                if poi:
+                    item_data.setdefault('item_description', poi.item_description)
+                    item_data.setdefault('ordered_quantity', poi.quantity)
+                    item_data.setdefault('received_quantity', poi.quantity)
+                    item_data.setdefault('unit', poi.unit)
+                
+                # Model-level required fallbacks
+                item_data.setdefault('item_description', 'Goods Receipt Item')
+                item_data.setdefault('unit', 'Unit')
+                item_data.setdefault('ordered_quantity', 0)
+                item_data.setdefault('received_quantity', 0)
+                
+                # Satisfy model clean requirements
+                received = item_data.get('received_quantity', 0)
+                if received > 0 and not item_data.get('accepted_quantity') and not item_data.get('rejected_quantity'):
+                    item_data['accepted_quantity'] = received
+                
+                GoodsReceiptItem.objects.create(grn=grn, **item_data)
         return grn
 
 

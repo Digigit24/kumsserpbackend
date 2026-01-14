@@ -83,7 +83,7 @@ class ProgramSerializer(TenantAuditMixin, serializers.ModelSerializer):
 
 class ClassListSerializer(serializers.ModelSerializer):
     """Serializer for listing classes (minimal fields)."""
-    college_name = serializers.CharField(source='college.short_name', read_only=True)
+    college_name = serializers.CharField(source='college.name', read_only=True)
     program_name = serializers.CharField(source='program.short_name', read_only=True)
     session_name = serializers.CharField(source='academic_session.name', read_only=True)
 
@@ -266,7 +266,7 @@ class SubjectAssignmentSerializer(TenantAuditMixin, serializers.ModelSerializer)
 
 class ClassroomListSerializer(serializers.ModelSerializer):
     """Serializer for listing classrooms (minimal fields)."""
-    college_name = serializers.CharField(source='college.short_name', read_only=True)
+    college_name = serializers.CharField(source='college.name', read_only=True)
 
     class Meta:
         model = Classroom
@@ -295,7 +295,7 @@ class ClassroomSerializer(TenantAuditMixin, serializers.ModelSerializer):
 
 class ClassTimeSerializer(TenantAuditMixin, serializers.ModelSerializer):
     """Serializer for ClassTime model."""
-    college_name = serializers.CharField(source='college.short_name', read_only=True)
+    college_name = serializers.CharField(source='college.name', read_only=True)
 
     class Meta:
         model = ClassTime
@@ -305,6 +305,30 @@ class ClassTimeSerializer(TenantAuditMixin, serializers.ModelSerializer):
             'created_by', 'updated_by', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'college_name', 'created_by', 'updated_by', 'created_at', 'updated_at']
+
+    def validate(self, attrs):
+        start = attrs.get('start_time')
+        end = attrs.get('end_time')
+        college = attrs.get('college') or (self.instance.college if self.instance else None)
+
+        if start and end and start >= end:
+            raise serializers.ValidationError("End time must be after start time.")
+
+        if college and start and end:
+            # Check for overlapping periods in the same college
+            overlapping = ClassTime.objects.filter(
+                college=college,
+                is_active=True,
+                start_time__lt=end,
+                end_time__gt=start
+            )
+            if self.instance:
+                overlapping = overlapping.exclude(pk=self.instance.pk)
+            
+            if overlapping.exists():
+                raise serializers.ValidationError("This time slot overlaps with an existing period.")
+        
+        return attrs
 
 
 # ============================================================================
@@ -346,6 +370,56 @@ class TimetableSerializer(TenantAuditMixin, serializers.ModelSerializer):
             'created_by', 'updated_by', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'class_name', 'section_name', 'subject_details', 'teacher_details', 'classroom_details', 'time_details', 'created_by', 'updated_by', 'created_at', 'updated_at']
+
+    def validate(self, attrs):
+        section = attrs.get('section') or (self.instance.section if self.instance else None)
+        day = attrs.get('day_of_week') if 'day_of_week' in attrs else (self.instance.day_of_week if self.instance else None)
+        time_slot = attrs.get('class_time') or (self.instance.class_time if self.instance else None)
+        subject_assignment = attrs.get('subject_assignment') or (self.instance.subject_assignment if self.instance else None)
+        classroom = attrs.get('classroom') or (self.instance.classroom if self.instance else None)
+        
+        if section and day is not None and time_slot:
+            # 1. Section Conflict
+            section_conflict = Timetable.objects.filter(
+                section=section,
+                day_of_week=day,
+                class_time=time_slot,
+                is_active=True
+            )
+            if self.instance:
+                section_conflict = section_conflict.exclude(pk=self.instance.pk)
+            if section_conflict.exists():
+                raise serializers.ValidationError("This section already has a lecture assigned to this period.")
+
+            # 2. Teacher Conflict
+            if subject_assignment and subject_assignment.teacher:
+                teacher_conflict = Timetable.objects.filter(
+                    subject_assignment__teacher=subject_assignment.teacher,
+                    day_of_week=day,
+                    class_time=time_slot,
+                    is_active=True
+                )
+                if self.instance:
+                    teacher_conflict = teacher_conflict.exclude(pk=self.instance.pk)
+                if teacher_conflict.exists():
+                    raise serializers.ValidationError(
+                        f"Teacher {subject_assignment.teacher.get_full_name()} is already assigned to another class in this period."
+                    )
+
+            # 3. Classroom Conflict
+            if classroom:
+                room_conflict = Timetable.objects.filter(
+                    classroom=classroom,
+                    day_of_week=day,
+                    class_time=time_slot,
+                    is_active=True
+                )
+                if self.instance:
+                    room_conflict = room_conflict.exclude(pk=self.instance.pk)
+                if room_conflict.exists():
+                    raise serializers.ValidationError("This classroom is already occupied in this period.")
+                    
+        return attrs
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
