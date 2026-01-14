@@ -558,11 +558,11 @@ class GoodsReceiptItemCreateSerializer(serializers.ModelSerializer):
         model = GoodsReceiptItem
         exclude = ['grn']
         extra_kwargs = {
-            'po_item': {'required': False},
-            'item_description': {'required': False},
-            'ordered_quantity': {'required': False},
-            'received_quantity': {'required': False},
-            'unit': {'required': False},
+            'po_item': {'required': False, 'allow_null': True},
+            'item_description': {'required': False, 'allow_null': True},
+            'ordered_quantity': {'required': False, 'allow_null': True},
+            'received_quantity': {'required': False, 'allow_null': True},
+            'unit': {'required': False, 'allow_null': True},
         }
 
 
@@ -588,13 +588,13 @@ class GoodsReceiptNoteDetailSerializer(serializers.ModelSerializer):
         model = GoodsReceiptNote
         fields = '__all__'
         extra_kwargs = {
-            'purchase_order': {'required': False},
-            'supplier': {'required': False},
-            'central_store': {'required': False},
-            'receipt_date': {'required': False},
-            'invoice_number': {'required': False},
-            'invoice_date': {'required': False},
-            'invoice_amount': {'required': False},
+            'purchase_order': {'required': False, 'allow_null': True},
+            'supplier': {'required': False, 'allow_null': True},
+            'central_store': {'required': False, 'allow_null': True},
+            'receipt_date': {'required': False, 'allow_null': True},
+            'invoice_number': {'required': False, 'allow_null': True},
+            'invoice_date': {'required': False, 'allow_null': True},
+            'invoice_amount': {'required': False, 'allow_null': True},
         }
 
 
@@ -605,13 +605,13 @@ class GoodsReceiptNoteCreateSerializer(serializers.ModelSerializer):
         model = GoodsReceiptNote
         fields = '__all__'
         extra_kwargs = {
-            'purchase_order': {'required': False},
-            'supplier': {'required': False},
-            'central_store': {'required': False},
-            'receipt_date': {'required': False},
-            'invoice_number': {'required': False},
-            'invoice_date': {'required': False},
-            'invoice_amount': {'required': False},
+            'purchase_order': {'required': False, 'allow_null': True},
+            'supplier': {'required': False, 'allow_null': True},
+            'central_store': {'required': False, 'allow_null': True},
+            'receipt_date': {'required': False, 'allow_null': True},
+            'invoice_number': {'required': False, 'allow_null': True},
+            'invoice_date': {'required': False, 'allow_null': True},
+            'invoice_amount': {'required': False, 'allow_null': True},
         }
 
     def create(self, validated_data):
