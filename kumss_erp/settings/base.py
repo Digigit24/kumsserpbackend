@@ -196,6 +196,12 @@ USE_I18N = True
 USE_TZ = True
 
 
+# Datetime formats
+DATETIME_FORMAT = 'Y-m-d h:i A'
+TIME_FORMAT = 'h:i A'
+SHORT_DATETIME_FORMAT = 'Y-m-d h:i A'
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
@@ -237,6 +243,8 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',  # Use Spectacular for schema generation
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DATETIME_FORMAT': "%Y-%m-%d %I:%M %p",
+    'TIME_FORMAT': "%I:%M %p",
 }
 
 # dj-rest-auth
@@ -334,6 +342,7 @@ SPECTACULAR_SETTINGS = {
 
 # Logging Configuration
 # https://docs.djangoproject.com/en/5.0/topics/logging/
+LOG_LEVEL = config('DJANGO_LOG_LEVEL', default='DEBUG')
 LOG_TO_FILE = config('LOG_TO_FILE', default=False, cast=bool)
 DEFAULT_LOG_HANDLERS = ['console']
 if LOG_TO_FILE:
@@ -361,22 +370,27 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': DEFAULT_LOG_HANDLERS,
-            'level': 'INFO',
+            'level': LOG_LEVEL,
             'propagate': True,
         },
         'django.request': {
             'handlers': DEFAULT_LOG_HANDLERS,
-            'level': 'INFO',
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': DEFAULT_LOG_HANDLERS,
+            'level': LOG_LEVEL,
             'propagate': False,
         },
         'apps': { # Capture logs from all apps within the 'apps' directory
             'handlers': DEFAULT_LOG_HANDLERS,
-            'level': 'INFO',
+            'level': LOG_LEVEL,
             'propagate': True,
         },
         'corsheaders': { # Specifically log corsheaders middleware
             'handlers': DEFAULT_LOG_HANDLERS,
-            'level': 'INFO',
+            'level': LOG_LEVEL,
             'propagate': True,
         },
         'django.db.backends': { # Log SQL queries
@@ -387,7 +401,7 @@ LOGGING = {
     },
     'root': {
         'handlers': DEFAULT_LOG_HANDLERS,
-        'level': 'INFO',
+        'level': LOG_LEVEL,
     },
 }
 
