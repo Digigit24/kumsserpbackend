@@ -417,16 +417,19 @@ class ClassTeacherSerializer(TenantAuditMixin, serializers.ModelSerializer):
     class_name = serializers.CharField(source='class_obj.name', read_only=True)
     section_name = serializers.CharField(source='section.name', read_only=True)
     teacher_details = UserBasicSerializer(source='teacher', read_only=True)
+    academic_session = serializers.IntegerField(source='class_obj.academic_session.id', read_only=True)
+    academic_session_name = serializers.CharField(source='class_obj.academic_session.name', read_only=True)
 
     class Meta:
         model = ClassTeacher
         fields = [
             'id', 'class_obj', 'class_name', 'section', 'section_name',
+            'academic_session', 'academic_session_name',
             'teacher', 'teacher_details', 'assigned_from', 'assigned_to',
             'is_current', 'is_active',
             'created_by', 'updated_by', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'class_name', 'section_name', 'teacher_details', 'created_by', 'updated_by', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'class_name', 'section_name', 'teacher_details', 'academic_session', 'academic_session_name', 'created_by', 'updated_by', 'created_at', 'updated_at']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
