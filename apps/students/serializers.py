@@ -109,6 +109,12 @@ class StudentSerializer(TenantAuditMixin, serializers.ModelSerializer):
             }
         }
 
+    def update(self, instance, validated_data):
+        # Remove user from validated_data to prevent changing it
+        # This avoids IntegrityError if the user ID is the same or conflicts
+        validated_data.pop('user', None)
+        return super().update(instance, validated_data)
+
 
 # ============================================================================
 # GUARDIAN SERIALIZERS

@@ -115,7 +115,36 @@ class StudentAttendanceViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
         if not college_id:
             college_id = self.get_college_id(required=True)
 
-        return queryset.filter(class_obj__college_id=college_id)
+        queryset = queryset.filter(class_obj__college_id=college_id)
+
+        # Handle filtering by 'subject'
+        subject_id = self.request.query_params.get('subject')
+        if subject_id:
+            from django.db.models import Q, Exists, OuterRef
+            from apps.academic.models import SubjectAssignment
+            # Filter students who have this subject assigned (either mandatory or optional)
+            # Mandatory: SubjectAssignment exists for student's class/section for this subject AND is_optional=False
+            # Optional: Student has this subject in optional_subjects
+            
+            # Since StudentAttendance has a FK to Student, we can filter on student field.
+            # But filtering M2M + complex logic in a filter() call on StudentAttendance might be heavy.
+            # Simple approach: Filter students who have this subject.
+            
+            # We want StudentAttendance where:
+            # (student's class/section has a mandatory assignment for this subject) OR 
+            # (student has this subject in their optional_subjects)
+
+            queryset = queryset.filter(
+                Q(
+                    student__current_class__subject_assignments__subject_id=subject_id,
+                    student__current_class__subject_assignments__is_optional=False,
+                    # Ensure assignment matches student's section if section is assigned
+                    # Note: SubjectAssignment logic can be complex (section nullable). If section is null, applies to all sections.
+                ) |
+                Q(student__optional_subjects__id=subject_id)
+            ).distinct()
+
+        return queryset
 
 
     def create(self, request, *args, **kwargs):
