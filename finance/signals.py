@@ -67,7 +67,7 @@ def update_finance_totals(month):
     )
 
 
-def log_transaction(app, trans_type, amount, description, reference_id, reference_model, trans_date):
+def log_transaction(app, trans_type, amount, description, reference_id, reference_model, trans_date, payment_method='cash'):
     """Log transaction in FinanceTransaction"""
     from .models import FinanceTransaction
 
@@ -76,6 +76,7 @@ def log_transaction(app, trans_type, amount, description, reference_id, referenc
         type=trans_type,
         amount=amount,
         description=description,
+        payment_method=payment_method,
         reference_id=reference_id,
         reference_model=reference_model,
         date=trans_date
@@ -401,7 +402,8 @@ def sync_other_expense(sender, instance, created, **kwargs):
                 description=instance.title,
                 reference_id=instance.id,
                 reference_model='OtherExpense',
-                trans_date=instance.date
+                trans_date=instance.date,
+                payment_method=instance.payment_method
             )
 
         # Update totals

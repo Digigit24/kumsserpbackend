@@ -143,6 +143,14 @@ class OtherExpense(models.Model):
         ('miscellaneous', 'Miscellaneous'),
     ]
 
+    PAYMENT_METHOD_CHOICES = [
+        ('cash', 'Cash'),
+        ('bank', 'Bank Transfer'),
+        ('online', 'Online Payment'),
+        ('cheque', 'Cheque'),
+        ('upi', 'UPI'),
+    ]
+
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     amount = models.DecimalField(
@@ -151,6 +159,7 @@ class OtherExpense(models.Model):
         validators=[MinValueValidator(Decimal('0.01'))]
     )
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='cash')
     date = models.DateField()
     receipt = models.FileField(upload_to='finance/receipts/%Y/%m/', blank=True, null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='other_expenses')
@@ -186,10 +195,19 @@ class FinanceTransaction(models.Model):
         ('other', 'Other'),
     ]
 
+    PAYMENT_METHOD_CHOICES = [
+        ('cash', 'Cash'),
+        ('bank', 'Bank Transfer'),
+        ('online', 'Online Payment'),
+        ('cheque', 'Cheque'),
+        ('upi', 'UPI'),
+    ]
+
     app = models.CharField(max_length=50, choices=APP_CHOICES)
     type = models.CharField(max_length=10, choices=TYPE_CHOICES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.CharField(max_length=500)
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='cash')
     reference_id = models.IntegerField(null=True, blank=True, help_text="ID from source app")
     reference_model = models.CharField(max_length=100, blank=True, help_text="Source model name")
     date = models.DateField()

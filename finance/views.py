@@ -262,3 +262,140 @@ class FinanceReportViewSet(viewsets.ViewSet):
             'top_income_sources': top_income,
             'top_expense_sources': top_expense
         })
+
+    @action(detail=False, methods=['get'])
+    def projections(self, request):
+        """Calculate financial projections for 1, 3, 5 years"""
+        # Get average monthly income/expense from all available data
+        avg_income = AppIncome.objects.aggregate(
+            avg=Sum('amount')
+        )['avg'] or Decimal('0.00')
+
+        avg_expense = AppExpense.objects.aggregate(
+            avg=Sum('amount')
+        )['avg'] or Decimal('0.00')
+
+        # Count total months with data
+        total_months = AppIncome.objects.values('month').distinct().count()
+        if total_months == 0:
+            total_months = 1
+
+        # Calculate monthly average
+        monthly_income = avg_income / total_months
+        monthly_expense = avg_expense / total_months
+        monthly_net = monthly_income - monthly_expense
+
+        # Calculate projections
+        projections = {}
+        for years in [1, 3, 5]:
+            months = years * 12
+            projections[f'{years}_year'] = {
+                'income': {
+                    'min': float(monthly_income * months * Decimal('0.8')),
+                    'avg': float(monthly_income * months),
+                    'max': float(monthly_income * months * Decimal('1.2'))
+                },
+                'expense': {
+                    'min': float(monthly_expense * months * Decimal('0.8')),
+                    'avg': float(monthly_expense * months),
+                    'max': float(monthly_expense * months * Decimal('1.2'))
+                },
+                'net': {
+                    'min': float(monthly_net * months * Decimal('0.8')),
+                    'avg': float(monthly_net * months),
+                    'max': float(monthly_net * months * Decimal('1.2'))
+                }
+            }
+
+        return Response({
+            'based_on_months': total_months,
+            'monthly_average': {
+                'income': float(monthly_income),
+                'expense': float(monthly_expense),
+                'net': float(monthly_net)
+            },
+            'projections': projections
+        })
+
+    @action(detail=False, methods=['get'])
+    def export_summary(self, request):
+        """Export app summary as JSON for Excel/PDF conversion"""
+        apps = ['fees', 'library', 'hostel', 'hr', 'store', 'other']
+        data = []
+
+        for app in apps:
+            income = AppIncome.objects.filter(app_name=app).aggregate(
+                total=Sum('amount')
+            )['total'] or Decimal('0.00')
+
+            expense = AppExpense.objects.filter(app_name=app).aggregate(
+                total=Sum('amount')
+            )['total'] or Decimal('0.00')
+
+            data.append({
+                'app': app.upper(),
+                'income': float(income),
+                'expense': float(expense),
+                'net': float(income - expense)
+            })
+
+        return Response({
+            'filename': f'finance_summary_{date.today().strftime("%Y%m%d")}',
+            'data': data,
+            'totals': {
+                'income': sum(d['income'] for d in data),
+                'expense': sum(d['expense'] for d in data),
+                'net': sum(d['net'] for d in data)
+            }
+        })
+
+    @action(detail=False, methods=['get'])
+    def export_transactions(self, request):
+        """Export transactions as JSON for Excel/PDF conversion"""
+        from_date = request.query_params.get('from_date')
+        to_date = request.query_params.get('to_date')
+
+        queryset = FinanceTransaction.objects.all()
+
+        if from_date:
+            queryset = queryset.filter(date__gte=from_date)
+        if to_date:
+            queryset = queryset.filter(date__lte=to_date)
+
+        data = []
+        for txn in queryset[:1000]:  # Limit to 1000 rows
+            data.append({
+                'date': txn.date.strftime('%Y-%m-%d'),
+                'app': txn.app,
+                'type': txn.type,
+                'amount': float(txn.amount),
+                'payment_method': txn.payment_method,
+                'description': txn.description
+            })
+
+        return Response({
+            'filename': f'transactions_{date.today().strftime("%Y%m%d")}',
+            'data': data,
+            'count': len(data)
+        })
+
+    @action(detail=False, methods=['get'])
+    def payment_methods(self, request):
+        """Get breakdown by payment methods"""
+        from django.db.models import Count
+
+        methods = FinanceTransaction.objects.values('payment_method').annotate(
+            count=Count('id'),
+            total=Sum('amount')
+        )
+
+        return Response({
+            'breakdown': [
+                {
+                    'method': m['payment_method'],
+                    'count': m['count'],
+                    'total': float(m['total'] or 0)
+                }
+                for m in methods
+            ]
+        })
