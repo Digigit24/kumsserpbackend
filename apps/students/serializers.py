@@ -103,6 +103,11 @@ class StudentSerializer(TenantAuditMixin, serializers.ModelSerializer):
             'current_section_name', 'academic_year_name', 'category_name', 'group_name', 'user_details',
             'created_by', 'updated_by', 'created_at', 'updated_at'
         ]
+        extra_kwargs = {
+            'user': {
+                'validators': []  # Disable uniqueness validation on updates
+            }
+        }
 
 
 # ============================================================================
