@@ -38,6 +38,7 @@ urlpatterns = [
     path('api/v1/library/', include('apps.library.urls')),
     path('api/v1/store/', include('apps.store.urls')),
     path('api/v1/hr/', include('apps.hr.urls')),
+    path('api/v1/finance/', include('finance.urls')),
     path('api/v1/communication/', include('apps.communication.urls')),
     path('api/v1/approvals/', include('apps.approvals.urls', namespace='approvals')),
     path('api/v1/reports/', include('apps.reports.urls')),

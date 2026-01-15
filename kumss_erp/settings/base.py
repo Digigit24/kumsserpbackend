@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'apps.library',
     'apps.store',
     'apps.hr',
+    'finance',
     'apps.communication',
     'apps.approvals',  # Approval and notification system
     'apps.reports',
