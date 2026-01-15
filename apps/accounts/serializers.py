@@ -182,6 +182,10 @@ class UserCreateSerializer(serializers.ModelSerializer):
                 self._create_student_profile(user, student_profile)
         return user
 
+    def to_representation(self, instance):
+        """Return the full user details in the response."""
+        return UserSerializer(instance, context=self.context).data
+
     def _create_student_profile(self, user, student_profile):
         from apps.students.models import Student
         from apps.academic.models import Program

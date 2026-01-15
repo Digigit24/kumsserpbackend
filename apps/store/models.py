@@ -40,6 +40,7 @@ PROCUREMENT_STATUS_CHOICES = [
     ('approved', 'Approved'),
     ('quotations_received', 'Quotations Received'),
     ('po_created', 'PO Created'),
+    ('partially_received', 'Partially Received'),
     ('fulfilled', 'Fulfilled'),
     ('cancelled', 'Cancelled'),
 ]
@@ -657,7 +658,7 @@ class SupplierQuotation(AuditModel):
 
 class QuotationItem(AuditModel):
     quotation = models.ForeignKey(SupplierQuotation, on_delete=models.CASCADE, related_name='items')
-    requirement_item = models.ForeignKey(RequirementItem, on_delete=models.CASCADE, related_name='quotation_items')
+    requirement_item = models.ForeignKey(RequirementItem, on_delete=models.CASCADE, related_name='quotation_items', null=True, blank=True)
     item_description = models.CharField(max_length=500)
     quantity = models.IntegerField()
     unit = models.CharField(max_length=20)
@@ -753,17 +754,28 @@ class PurchaseOrder(AuditModel):
     def check_fulfillment_status(self):
         """Phase 3.1: Check if all items received, update status accordingly"""
         items = self.items.all()
-        if not items:
-            return
-
+        
+        # If all items are fully received (or if there are no items), mark as fulfilled
         if all(item.pending_quantity == 0 for item in items):
             self.status = 'fulfilled'
             self.completed_date = timezone.now()
             self.save(update_fields=['status', 'completed_date', 'updated_at'])
+            
+            # Phase 12.2: If PO is fulfilled, check if all POs for the requirement are fulfilled
+            if self.requirement:
+                other_pos = self.requirement.purchase_orders.all()
+                if all(po.status == 'fulfilled' for po in other_pos):
+                    self.requirement.status = 'fulfilled'
+                    self.requirement.save(update_fields=['status', 'updated_at'])
         elif any(item.received_quantity > 0 for item in items):
             if self.status not in ['partially_received', 'fulfilled']:
                 self.status = 'partially_received'
                 self.save(update_fields=['status', 'updated_at'])
+            
+            # Update requirement status to partially_received
+            if self.requirement and self.requirement.status != 'partially_received':
+                self.requirement.status = 'partially_received'
+                self.requirement.save(update_fields=['status', 'updated_at'])
 
 
 class PurchaseOrderItem(AuditModel):
@@ -849,10 +861,106 @@ class GoodsReceiptNote(AuditModel):
         self.save(update_fields=['status', 'updated_at'])
 
     def post_to_inventory(self):
-        """Post GRN to inventory - simplified to always work"""
-        self.status = 'posted_to_inventory'
-        self.posted_to_inventory_date = timezone.now()
-        self.save(update_fields=['status', 'posted_to_inventory_date', 'updated_at'])
+        """Post GRN to inventory and update PO status"""
+        from apps.core.models import College
+        from .models import StoreItem, StoreCategory, CentralStoreInventory, StockReceive
+        import logging
+        logger = logging.getLogger(__name__)
+
+        with transaction.atomic():
+            # 1. Update GRN Status
+            self.status = 'posted_to_inventory'
+            self.posted_to_inventory_date = timezone.now()
+            self.save(update_fields=['status', 'posted_to_inventory_date', 'updated_at'])
+
+            # 2. Process each item
+            for grn_item in self.items.all():
+                po_item = grn_item.po_item
+                if not po_item:
+                    continue
+
+                # A. Update PO Item quantities
+                po_item.received_quantity = (po_item.received_quantity or 0) + (grn_item.accepted_quantity or 0)
+                po_item.save(update_fields=['received_quantity', 'pending_quantity', 'updated_at'])
+
+                # B. Find/Create the Central Store Item
+                item_name = po_item.item_description
+                # Use all_colleges to bypass any session-based scoping
+                central_item = StoreItem.objects.all_colleges().filter(
+                    name__iexact=item_name,
+                    managed_by='central'
+                ).first()
+
+                if not central_item:
+                    # Fallback to loose match
+                    central_item = StoreItem.objects.all_colleges().filter(
+                        name__icontains=item_name.split()[0],
+                        managed_by='central'
+                    ).first()
+
+                # If still not found, create a placeholder centrally managed item
+                if not central_item:
+                    # Default to the first college's ID as the owner
+                    college = College.objects.all_colleges().first()
+                    college_id = college.id if college else 1
+                    
+                    category = None
+                    if po_item.quotation_item and po_item.quotation_item.requirement_item:
+                        category = po_item.quotation_item.requirement_item.category
+                    if not category:
+                        category = StoreCategory.objects.all_colleges().filter(name='General').first()
+                    if not category:
+                        category = StoreCategory.objects.all_colleges().first()
+
+                    central_item = StoreItem.objects.all_colleges().create(
+                        college_id=college_id,
+                        name=item_name,
+                        code=f"CEN-{item_name[:10].upper()}-{timezone.now().strftime('%m%d')}",
+                        category=category,
+                        unit=po_item.unit or 'unit',
+                        price=po_item.unit_price or 0,
+                        managed_by='central',
+                        central_store=self.central_store,
+                        is_active=True
+                    )
+                    logger.info(f"Created new central item: {central_item.name}")
+
+                # C. Update/Create Inventory record
+                inventory, _ = CentralStoreInventory.objects.get_or_create(
+                    central_store=self.central_store,
+                    item=central_item,
+                    defaults={'unit_cost': po_item.unit_price or 0}
+                )
+
+                if (po_item.unit_price or 0) > 0:
+                    inventory.unit_cost = po_item.unit_price
+                    inventory.save(update_fields=['unit_cost', 'updated_at'])
+
+                # D. Add stock and create transaction record
+                inventory.update_stock(
+                    delta=int(grn_item.accepted_quantity or 0),
+                    transaction_type='receipt',
+                    reference=grn_item,
+                    performed_by=self.received_by
+                )
+
+                # Update the general StoreItem stock as well for visibility
+                central_item.adjust_stock(int(grn_item.accepted_quantity or 0))
+
+                # E. Legacy StockReceive record
+                StockReceive.objects.create(
+                    item=central_item,
+                    quantity=grn_item.accepted_quantity or 0,
+                    unit_price=po_item.unit_price or 0,
+                    total_amount=(grn_item.accepted_quantity or 0) * (po_item.unit_price or 0),
+                    receive_date=self.receipt_date or timezone.now().date(),
+                    invoice_number=self.invoice_number,
+                    remarks=f'Posted from GRN {self.grn_number}'
+                )
+
+            # 3. Finalize PO and Requirement status
+            if self.purchase_order:
+                self.purchase_order.check_fulfillment_status()
 
 
 class GoodsReceiptItem(AuditModel):

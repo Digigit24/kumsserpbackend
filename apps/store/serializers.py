@@ -278,7 +278,8 @@ class QuotationItemSerializer(serializers.ModelSerializer):
 class QuotationItemCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuotationItem
-        exclude = ['quotation']
+        fields = '__all__'
+        extra_kwargs = {'quotation': {'required': False}}
 
 
 class SupplierQuotationListSerializer(serializers.ModelSerializer):
@@ -338,6 +339,7 @@ class SupplierQuotationCreateSerializer(serializers.ModelSerializer):
     tax_amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
     grand_total = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
     supplier = serializers.PrimaryKeyRelatedField(queryset=SupplierMaster.objects.all(), required=False, allow_null=True)
+    items = QuotationItemCreateSerializer(many=True, required=False)
 
     class Meta:
         model = SupplierQuotation
@@ -348,17 +350,17 @@ class SupplierQuotationCreateSerializer(serializers.ModelSerializer):
         return _validate_quotation_file(value)
 
     def to_representation(self, instance):
-        data = super().to_representation(instance)
-        if instance.quotation_file:
-            request = self.context.get('request')
-            data['quotation_file'] = request.build_absolute_uri(instance.quotation_file.url) if request else instance.quotation_file.url
-        return data
+        # Use DetailSerializer for full response after creation
+        return SupplierQuotationDetailSerializer(instance, context=self.context).data
 
     def create(self, validated_data):
         if not validated_data.get('quotation_date'):
             validated_data['quotation_date'] = timezone.now().date()
         if not validated_data.get('valid_until'):
             validated_data['valid_until'] = validated_data['quotation_date']
+        
+        # Ensure new quotations are active by default
+        validated_data['is_active'] = True
 
         total_amount = validated_data.get('total_amount')
         tax_amount = validated_data.get('tax_amount')
@@ -385,7 +387,48 @@ class SupplierQuotationCreateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({'supplier': 'No active supplier available to use as default.'})
             validated_data['supplier'] = supplier
 
+        items_data = validated_data.pop('items', [])
+        
+        # If items provided, calculate totals if they are zero/None
+        if items_data:
+            calc_total = 0
+            calc_tax = 0
+            for item in items_data:
+                qty = item.get('quantity', 0)
+                price = item.get('unit_price', 0)
+                tax_rate = item.get('tax_rate', 0)
+                
+                line_total = qty * price
+                line_tax = (line_total * tax_rate) / 100
+                
+                item['total_amount'] = line_total + line_tax
+                item['tax_amount'] = line_tax
+                
+                calc_total += line_total
+                calc_tax += line_tax
+                
+                # Attempt to find requirement_item by description if not provided
+                if not item.get('requirement_item') and validated_data.get('requirement'):
+                    from .models import RequirementItem
+                    match = RequirementItem.objects.filter(
+                        requirement=validated_data['requirement'],
+                        item_description__iexact=item.get('item_description')
+                    ).first()
+                    if match:
+                        item['requirement_item'] = match.id
+
+            if not validated_data.get('total_amount'):
+                validated_data['total_amount'] = calc_total
+            if not validated_data.get('tax_amount'):
+                validated_data['tax_amount'] = calc_tax
+            if not validated_data.get('grand_total'):
+                validated_data['grand_total'] = calc_total + calc_tax
+
         quotation = super().create(validated_data)
+        
+        # Create items
+        for item_data in items_data:
+            QuotationItem.objects.create(quotation=quotation, **item_data)
         
         # Update requirement status to 'quotations_received'
         requirement = quotation.requirement
@@ -410,6 +453,61 @@ class SupplierQuotationUpdateSerializer(serializers.ModelSerializer):
             'tax_amount': {'required': False},
             'grand_total': {'required': False},
         }
+
+    items = QuotationItemCreateSerializer(many=True, required=False)
+
+    def to_representation(self, instance):
+        return SupplierQuotationDetailSerializer(instance, context=self.context).data
+
+    def update(self, instance, validated_data):
+        items_data = validated_data.pop('items', None)
+        
+        # If items are provided, handles recalculation of totals if they are not explicitly updated
+        if items_data is not None:
+            calc_total = 0
+            calc_tax = 0
+            requirement = validated_data.get('requirement', instance.requirement)
+
+            for item in items_data:
+                qty = item.get('quantity', 0)
+                price = item.get('unit_price', 0)
+                tax_rate = item.get('tax_rate', 0)
+                
+                line_total = qty * price
+                line_tax = (line_total * tax_rate) / 100
+                
+                item['total_amount'] = line_total + line_tax
+                item['tax_amount'] = line_tax
+                
+                calc_total += line_total
+                calc_tax += line_tax
+                
+                # Auto-link requirement item
+                if not item.get('requirement_item') and requirement:
+                    from .models import RequirementItem
+                    match = RequirementItem.objects.filter(
+                        requirement=requirement,
+                        item_description__iexact=item.get('item_description')
+                    ).first()
+                    if match:
+                        item['requirement_item'] = match
+
+            if 'total_amount' not in validated_data:
+                validated_data['total_amount'] = calc_total
+            if 'tax_amount' not in validated_data:
+                validated_data['tax_amount'] = calc_tax
+            if 'grand_total' not in validated_data:
+                validated_data['grand_total'] = calc_total + calc_tax
+
+        instance = super().update(instance, validated_data)
+        
+        if items_data is not None:
+            # Simple replacement logic for items
+            instance.items.all().delete()
+            for item_data in items_data:
+                QuotationItem.objects.create(quotation=instance, **item_data)
+                
+        return instance
 
     def validate_quotation_file(self, value):
         return _validate_quotation_file(value)
@@ -911,8 +1009,7 @@ class MaterialIssueNoteCreateSerializer(serializers.ModelSerializer):
 
 
 class CentralStoreInventoryListSerializer(serializers.ModelSerializer):
-    """For GET - returns item ID and name"""
-    id = serializers.IntegerField(source='item_id', read_only=True)
+    """For GET - returns inventory ID and item details"""
     item_display = serializers.SerializerMethodField()
     central_store_name = serializers.SerializerMethodField()
 

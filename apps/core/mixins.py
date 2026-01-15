@@ -146,6 +146,52 @@ class CollegeScopedMixin:
         save_kwargs.update(self._audit_kwargs(serializer, include_created=include_created))
         return save_kwargs
 
+    def get_serializer(self, *args, **kwargs):
+        """
+        Overwrite get_serializer to dynamically handle college field requirements.
+        Sets 'college' as optional and injects it from context if missing.
+        """
+        # 1. Determine the college ID from context
+        context_college_id = self.get_college_id(required=False)
+        
+        # 2. Inject college ID into data for creation/update if missing
+        if self.request.method in ['POST', 'PUT', 'PATCH'] and 'data' in kwargs:
+            data = kwargs.get('data')
+            if data is not None:
+                # If 'all' is provided, we need a specific college for creation.
+                # For superadmins/central managers, we fallback to the first college if unspecified.
+                target_id = context_college_id
+                if target_id == 'all':
+                    user = getattr(self.request, 'user', None)
+                    if user and (user.is_superuser or user.user_type == 'central_manager'):
+                        # Fallback to the first active college for global users in 'all' mode
+                        from apps.core.models import College
+                        first_college = College.objects.all_colleges().filter(is_active=True).first()
+                        if first_college:
+                            target_id = first_college.id
+                
+                if target_id and target_id != 'all':
+                    # Convert QueryDict to mutable dict if necessary
+                    if hasattr(data, 'copy'):
+                        if 'college' not in data or not data.get('college'):
+                            data = data.copy()
+                            data['college'] = str(target_id)
+                            kwargs['data'] = data
+                    elif isinstance(data, dict):
+                        if 'college' not in data or not data.get('college'):
+                            data['college'] = target_id
+                            kwargs['data'] = data
+
+        # 3. Instantiate the serializer
+        serializer = super().get_serializer(*args, **kwargs)
+        
+        # 4. Make college field optional in the serializer instance to bypass DRF validation
+        if hasattr(serializer, 'fields') and 'college' in serializer.fields:
+             serializer.fields['college'].required = False
+             serializer.fields['college'].allow_null = True
+                 
+        return serializer
+
 
 class CollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet):
     """
@@ -320,4 +366,12 @@ class RelatedCollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet
             return queryset.none()
 
         return queryset.filter(**{self.related_college_lookup: college_id})
+
+    def perform_create(self, serializer):
+        """Handle audit fields during creation."""
+        serializer.save(**self._audit_kwargs(serializer, include_created=True))
+
+    def perform_update(self, serializer):
+        """Handle audit fields during update."""
+        serializer.save(**self._audit_kwargs(serializer))
 

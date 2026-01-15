@@ -183,86 +183,8 @@ def procurement_requirement_post_save(sender, instance, created, **kwargs):
 def goods_receipt_post_save(sender, instance, created, **kwargs):
     """Phase 11.1: GRN signal to create StockReceive, update inventory, create transactions"""
     if instance.status == 'posted_to_inventory':
-        # Prevent duplicate processing
-        if hasattr(instance, '_inventory_posted') and instance._inventory_posted:
-            return
-
-        instance._inventory_posted = True
-
-        for grn_item in instance.items.all():
-            try:
-                po_item = grn_item.po_item
-
-                # 1. Update PurchaseOrderItem received_quantity
-                po_item.received_quantity = (po_item.received_quantity or 0) + (grn_item.accepted_quantity or 0)
-                po_item.save(update_fields=['received_quantity', 'pending_quantity', 'updated_at'])
-
-                # 2. Find or create the StoreItem for central store
-                # This is simplified - in production, you'd need proper item matching logic
-                central_item = None
-                if po_item.quotation_item and po_item.quotation_item.requirement_item:
-                    req_item = po_item.quotation_item.requirement_item
-                    if req_item.category:
-                        # Try to find existing item in central store's college
-                        central_item = StoreItem.objects.filter(
-                            name__icontains=po_item.item_description.split()[0],
-                            category=req_item.category,
-                            managed_by='central'
-                        ).first()
-
-                # If no item found, we need to create one or skip (based on business logic)
-                # For now, we'll skip if no matching item found
-                if not central_item:
-                    print(f"[Store] No central item found for GRN item {grn_item.id}, skipping inventory update")
-                    continue
-
-                # 3. Update/Create CentralStoreInventory
-                if po_item.unit_price is not None and po_item.unit_price > 0 and central_item.price != po_item.unit_price:
-                    central_item.price = po_item.unit_price
-                    central_item.save(update_fields=['price', 'updated_at'])
-
-                inventory, _ = CentralStoreInventory.objects.get_or_create(
-                    central_store=instance.central_store,
-                    item=central_item,
-                    defaults={'unit_cost': po_item.unit_price}
-                )
-
-                if po_item.unit_price is not None and po_item.unit_price > 0 and inventory.unit_cost != po_item.unit_price:
-                    inventory.unit_cost = po_item.unit_price
-                    inventory.save(update_fields=['unit_cost', 'updated_at'])
-
-                # Update stock using the model method (creates transaction automatically)
-                inventory.update_stock(
-                    grn_item.accepted_quantity,
-                    'receipt',
-                    reference=grn_item,
-                    performed_by=instance.received_by
-                )
-
-                # 4. Create StockReceive for tracking (legacy compatibility)
-                StockReceive.objects.create(
-                    item=central_item,
-                    vendor=None,  # Using SupplierMaster now, not Vendor
-                    quantity=grn_item.accepted_quantity,
-                    unit_price=po_item.unit_price,
-                    total_amount=grn_item.accepted_quantity * po_item.unit_price,
-                    receive_date=instance.receipt_date,
-                    invoice_number=instance.invoice_number,
-                    remarks=f'From GRN {instance.grn_number}, PO {instance.purchase_order.po_number}'
-                )
-
-                print(f"[Store] Posted GRN item {grn_item.id} to inventory: {grn_item.accepted_quantity} units")
-
-            except Exception as exc:
-                print(f"[Store] Failed to post GRN item {grn_item.id} to inventory: {exc}")
-                import traceback
-                traceback.print_exc()
-
-        # Check PO fulfillment after all items processed
-        try:
-            instance.purchase_order.check_fulfillment_status()
-        except Exception as exc:
-            print(f"[Store] Failed to check PO fulfillment: {exc}")
+        # Logic moved to GoodsReceiptNote.post_to_inventory() model method for reliability
+        pass
 
 
 @receiver(post_save, sender=StoreIndent)
