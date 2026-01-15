@@ -58,16 +58,20 @@ class StudentAttendanceSerializer(serializers.ModelSerializer):
 class SubjectAttendanceListSerializer(serializers.ModelSerializer):
     """Serializer for listing subject attendance (minimal fields)."""
     student_name = serializers.CharField(source='student.get_full_name', read_only=True)
-    subject_name = serializers.CharField(source='subject_assignment.subject.short_name', read_only=True)
+    subject_name = serializers.CharField(source='subject_assignment.subject.name', read_only=True)
+    subject_code = serializers.CharField(source='subject_assignment.subject.code', read_only=True)
+    class_name = serializers.CharField(source='subject_assignment.class_obj.name', read_only=True)
+    section_name = serializers.CharField(source='subject_assignment.section.name', read_only=True)
     period_time = serializers.CharField(source='period.__str__', read_only=True)
 
     class Meta:
         model = SubjectAttendance
         fields = [
-            'id', 'student', 'student_name', 'subject_assignment', 'subject_name',
+            'id', 'student', 'student_name', 'subject_assignment', 'subject_name', 'subject_code',
+            'class_name', 'section_name',
             'date', 'period', 'period_time', 'status'
         ]
-        read_only_fields = ['id', 'student_name', 'subject_name', 'period_time']
+        read_only_fields = ['id', 'student_name', 'subject_name', 'subject_code', 'class_name', 'section_name', 'period_time']
 
 
 class SubjectAttendanceSerializer(serializers.ModelSerializer):
@@ -173,7 +177,7 @@ class BulkAttendanceSerializer(serializers.Serializer):
 
 
 class StudentWithAttendanceSerializer(serializers.Serializer):
-    """Serializer for student with their attendance status."""
+    """Serializer for student with their daily attendance status."""
     student_id = serializers.IntegerField(read_only=True)
     admission_number = serializers.CharField(read_only=True)
     roll_number = serializers.CharField(read_only=True)
@@ -182,6 +186,19 @@ class StudentWithAttendanceSerializer(serializers.Serializer):
     status = serializers.CharField(read_only=True, allow_null=True)
     check_in_time = serializers.TimeField(read_only=True, allow_null=True)
     check_out_time = serializers.TimeField(read_only=True, allow_null=True)
+    remarks = serializers.CharField(read_only=True, allow_null=True)
+    marked_by = serializers.IntegerField(read_only=True, allow_null=True)
+    marked_by_name = serializers.CharField(read_only=True, allow_null=True)
+
+
+class StudentWithSubjectAttendanceSerializer(serializers.Serializer):
+    """Serializer for student with their subject attendance status."""
+    student_id = serializers.IntegerField(read_only=True)
+    admission_number = serializers.CharField(read_only=True)
+    roll_number = serializers.CharField(read_only=True)
+    student_name = serializers.CharField(read_only=True)
+    attendance_id = serializers.IntegerField(read_only=True, allow_null=True)
+    status = serializers.CharField(read_only=True, allow_null=True)
     remarks = serializers.CharField(read_only=True, allow_null=True)
     marked_by = serializers.IntegerField(read_only=True, allow_null=True)
     marked_by_name = serializers.CharField(read_only=True, allow_null=True)

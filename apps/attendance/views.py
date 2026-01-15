@@ -27,6 +27,7 @@ from .serializers import (
     BulkDeleteSerializer,
     BulkAttendanceSerializer,
     StudentWithAttendanceSerializer,
+    StudentWithSubjectAttendanceSerializer,
 )
 from apps.core.mixins import CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
 
@@ -373,6 +374,169 @@ class SubjectAttendanceViewSet(RelatedCollegeScopedModelViewSet):
             return SubjectAttendanceListSerializer
         return SubjectAttendanceSerializer
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+        defaults = {
+            'status': data['status'],
+            'remarks': data.get('remarks', ''),
+            'marked_by': data.get('marked_by') or (request.user.teacher_profile if hasattr(request.user, 'teacher_profile') else None),
+        }
+
+        try:
+            with transaction.atomic():
+                attendance, created = SubjectAttendance.objects.all_colleges().update_or_create(
+                    student=data['student'],
+                    subject_assignment=data['subject_assignment'],
+                    date=data['date'],
+                    period=data.get('period'),
+                    defaults=defaults
+                )
+        except IntegrityError:
+            attendance = SubjectAttendance.objects.all_colleges().get(
+                student=data['student'],
+                subject_assignment=data['subject_assignment'],
+                date=data['date'],
+                period=data.get('period')
+            )
+            for key, value in defaults.items():
+                setattr(attendance, key, value)
+            attendance.save()
+            created = False
+
+        output_serializer = self.get_serializer(attendance)
+        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        return Response(output_serializer.data, status=status_code)
+
+    @extend_schema(
+        summary="Bulk mark subject attendance",
+        responses={201: SubjectAttendanceSerializer(many=True)},
+        tags=['Attendance - Subjects']
+    )
+    @action(detail=False, methods=['post'])
+    def bulk_mark(self, request):
+        """Bulk mark subject attendance for multiple students."""
+        student_ids = request.data.get('student_ids', [])
+        subject_assignment_id = request.data.get('subject_assignment')
+        date = request.data.get('date')
+        period_id = request.data.get('period')
+        status_value = request.data.get('status')
+        remarks = request.data.get('remarks', '')
+
+        if not all([student_ids, subject_assignment_id, date, status_value]):
+            return Response({'detail': 'Missing required fields.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        from apps.students.models import Student
+        from apps.academic.models import SubjectAssignment, ClassTime
+
+        try:
+            students = Student.objects.filter(id__in=student_ids)
+            subject_assignment = SubjectAssignment.objects.get(id=subject_assignment_id)
+            period = ClassTime.objects.get(id=period_id) if period_id else None
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        marked_by = request.user.teacher_profile if hasattr(request.user, 'teacher_profile') else None
+
+        attendance_records = []
+        for student in students:
+            attendance, created = SubjectAttendance.objects.all_colleges().update_or_create(
+                student=student,
+                subject_assignment=subject_assignment,
+                date=date,
+                period=period,
+                defaults={
+                    'status': status_value,
+                    'remarks': remarks,
+                    'marked_by': marked_by,
+                }
+            )
+            attendance_records.append(attendance)
+
+        output_serializer = SubjectAttendanceSerializer(attendance_records, many=True)
+        return Response(output_serializer.data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        summary="Get subject attendance list for marking",
+        description="Get all students assigned to a subject with their attendance status for a specific date/period",
+        parameters=[
+            OpenApiParameter(name='subject_assignment', type=OpenApiTypes.INT, description='Subject Assignment ID', required=True),
+            OpenApiParameter(name='date', type=OpenApiTypes.DATE, description='Attendance date', required=True),
+            OpenApiParameter(name='period', type=OpenApiTypes.INT, description='Period ID', required=False),
+        ],
+        responses={200: StudentWithSubjectAttendanceSerializer(many=True)},
+        tags=['Attendance - Subjects']
+    )
+    @action(detail=False, methods=['get'])
+    def subject_attendance(self, request):
+        """Get all students in a subject assignment with their attendance status."""
+        subject_assignment_id = request.query_params.get('subject_assignment')
+        date = request.query_params.get('date')
+        period_id = request.query_params.get('period')
+
+        if not all([subject_assignment_id, date]):
+            return Response({'detail': 'subject_assignment and date are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        from apps.academic.models import SubjectAssignment
+        from apps.students.models import Student
+        from django.db.models import OuterRef, Subquery
+
+        try:
+            sa = SubjectAssignment.objects.get(id=subject_assignment_id)
+        except SubjectAssignment.DoesNotExist:
+            return Response({'detail': 'Invalid subject assignment.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get students in the class/section of this subject assignment
+        students = Student.objects.filter(
+            current_class=sa.class_obj,
+            current_section=sa.section
+        ).select_related('user')
+
+        # Subquery for attendance
+        attendance_filters = {
+            'student_id': OuterRef('id'),
+            'subject_assignment_id': subject_assignment_id,
+            'date': date
+        }
+        if period_id:
+            attendance_filters['period_id'] = period_id
+
+        attendance_subquery = SubjectAttendance.objects.filter(**attendance_filters).values(
+            'id', 'status', 'remarks', 'marked_by__id', 'marked_by__first_name', 'marked_by__last_name'
+        )[:1]
+
+        students_with_attendance = students.annotate(
+            attendance_id=Subquery(attendance_subquery.values('id')),
+            attendance_status=Subquery(attendance_subquery.values('status')),
+            attendance_remarks=Subquery(attendance_subquery.values('remarks')),
+            attendance_marked_by_id=Subquery(attendance_subquery.values('marked_by__id')),
+            attendance_marked_by_fname=Subquery(attendance_subquery.values('marked_by__first_name')),
+            attendance_marked_by_lname=Subquery(attendance_subquery.values('marked_by__last_name'))
+        ).order_by('roll_number', 'first_name')
+
+        result = []
+        for student in students_with_attendance:
+            marked_by_name = None
+            if student.attendance_marked_by_fname:
+                marked_by_name = f"{student.attendance_marked_by_fname} {student.attendance_marked_by_lname or ''}".strip()
+
+            result.append({
+                'student_id': student.id,
+                'admission_number': student.admission_number,
+                'roll_number': student.roll_number,
+                'student_name': student.get_full_name(),
+                'attendance_id': student.attendance_id,
+                'status': student.attendance_status,
+                'remarks': student.attendance_remarks,
+                'marked_by': student.attendance_marked_by_id,
+                'marked_by_name': marked_by_name,
+            })
+
+        serializer = StudentWithSubjectAttendanceSerializer(result, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 # ============================================================================
 # STAFF ATTENDANCE VIEWSET
@@ -420,11 +584,12 @@ class SubjectAttendanceViewSet(RelatedCollegeScopedModelViewSet):
         tags=['Attendance - Staff']
     ),
 )
-class StaffAttendanceViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class StaffAttendanceViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
     """ViewSet for managing staff attendance."""
     queryset = StaffAttendance.objects.all_colleges()
     serializer_class = StaffAttendanceSerializer
     permission_classes = [IsAuthenticated]
+    related_college_lookup = 'teacher__college_id'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['teacher', 'date', 'status', 'marked_by']
     search_fields = ['teacher__first_name', 'teacher__last_name', 'teacher__employee_id']
@@ -484,11 +649,12 @@ class StaffAttendanceViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
         tags=['Attendance - Notifications']
     ),
 )
-class AttendanceNotificationViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class AttendanceNotificationViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
     """ViewSet for managing attendance notifications."""
     queryset = AttendanceNotification.objects.all_colleges()
     serializer_class = AttendanceNotificationSerializer
     permission_classes = [IsAuthenticated]
+    related_college_lookup = 'attendance__student__college_id'
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['attendance', 'recipient', 'status', 'notification_type', 'recipient_type']
     ordering_fields = ['sent_at', 'created_at']
