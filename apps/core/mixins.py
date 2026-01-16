@@ -210,6 +210,15 @@ class CollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet):
         if hasattr(self, 'resource_name') and self.resource_name:
             queryset = self._apply_permission_scope_filter(queryset)
 
+        # Apply default is_active filter for list action if not specified
+        if self.action == 'list':
+            # Check if model has is_active field
+            has_is_active = any(field.name == 'is_active' for field in queryset.model._meta.fields)
+            if has_is_active:
+                is_active_param = self.request.query_params.get('is_active')
+                if is_active_param is None:
+                    queryset = queryset.filter(is_active=True)
+
         return queryset
 
     def _apply_permission_scope_filter(self, queryset):
@@ -304,6 +313,15 @@ class CollegeScopedReadOnlyModelViewSet(CollegeScopedMixin, viewsets.ReadOnlyMod
         if hasattr(self, 'resource_name') and self.resource_name:
             queryset = self._apply_permission_scope_filter(queryset)
 
+        # Apply default is_active filter for list action if not specified
+        if self.action == 'list':
+            # Check if model has is_active field
+            has_is_active = any(field.name == 'is_active' for field in queryset.model._meta.fields)
+            if has_is_active:
+                is_active_param = self.request.query_params.get('is_active')
+                if is_active_param is None:
+                    queryset = queryset.filter(is_active=True)
+
         return queryset
 
     def _apply_permission_scope_filter(self, queryset):
@@ -365,7 +383,18 @@ class RelatedCollegeScopedModelViewSet(CollegeScopedMixin, viewsets.ModelViewSet
         if not self.related_college_lookup:
             return queryset.none()
 
-        return queryset.filter(**{self.related_college_lookup: college_id})
+        queryset = queryset.filter(**{self.related_college_lookup: college_id})
+
+        # Apply default is_active filter for list action if not specified
+        if self.action == 'list':
+            # Check if model has is_active field
+            has_is_active = any(field.name == 'is_active' for field in queryset.model._meta.fields)
+            if has_is_active:
+                is_active_param = self.request.query_params.get('is_active')
+                if is_active_param is None:
+                    queryset = queryset.filter(is_active=True)
+
+        return queryset
 
     def perform_create(self, serializer):
         """Handle audit fields during creation."""
