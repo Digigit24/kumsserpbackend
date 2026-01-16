@@ -977,29 +977,36 @@ class MaterialIssueItemSerializer(serializers.ModelSerializer):
 
 
 class MaterialIssueItemCreateSerializer(serializers.ModelSerializer):
-    item = serializers.IntegerField(write_only=True, source=None)
+    item = serializers.IntegerField(write_only=True, source=None, required=False)
 
     class Meta:
         model = MaterialIssueItem
         exclude = ['material_issue']
 
     def validate(self, attrs):
-        """Convert CentralStoreInventory ID to StoreItem instance."""
+        """Auto-set item from indent_item's central_store_item."""
         from .models import CentralStoreInventory, StoreItem
 
-        inventory_id = attrs.pop('item', None)
-        if inventory_id:
-            inventory = CentralStoreInventory.objects.filter(id=inventory_id).first()
-            if inventory and inventory.item:
-                attrs['item'] = inventory.item
-            else:
-                item = StoreItem._base_manager.filter(id=inventory_id).first()
-                if item:
-                    attrs['item'] = item
+        indent_item = attrs.get('indent_item')
+
+        # If indent_item provided, use its central_store_item
+        if indent_item:
+            attrs['item'] = indent_item.central_store_item
+        else:
+            # Fallback: convert inventory ID to StoreItem
+            inventory_id = attrs.pop('item', None)
+            if inventory_id:
+                inventory = CentralStoreInventory.objects.filter(id=inventory_id).first()
+                if inventory and inventory.item:
+                    attrs['item'] = inventory.item
                 else:
-                    raise serializers.ValidationError({
-                        'item': f"Invalid item ID {inventory_id} - not found in inventory or items."
-                    })
+                    item = StoreItem._base_manager.filter(id=inventory_id).first()
+                    if item:
+                        attrs['item'] = item
+                    else:
+                        raise serializers.ValidationError({
+                            'item': f"Invalid item ID {inventory_id} - not found in inventory or items."
+                        })
 
         return super().validate(attrs)
 
