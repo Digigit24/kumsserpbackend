@@ -942,6 +942,13 @@ class ClassTeacherViewSet(CollegeScopedModelViewSet):
     def get_queryset(self):
         """Override to filter class teachers by college through class_obj relationship."""
         queryset = ClassTeacher.objects.all()
+        
+        # Apply is_active filter by default for list action
+        if self.action == 'list':
+            is_active_param = self.request.query_params.get('is_active')
+            if is_active_param is None:
+                queryset = queryset.filter(is_active=True)
+
         college_id = self.get_college_id(required=False)
 
         if college_id == 'all':
