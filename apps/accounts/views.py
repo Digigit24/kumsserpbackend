@@ -207,9 +207,20 @@ class UserViewSet(CollegeScopedModelViewSet):
     ordering = ['-date_joined']
 
     def get_queryset(self):
-        """Add select_related for teacher_profile and student_profile."""
+        """
+        Add select_related for teacher_profile and student_profile.
+        Default to showing only active users unless is_active param is provided.
+        """
         queryset = super().get_queryset()
-        return queryset.select_related('teacher_profile', 'student_profile', 'college')
+        queryset = queryset.select_related('teacher_profile', 'student_profile', 'college')
+
+        # Default to active users only for list action if filter not specified
+        if self.action == 'list':
+            is_active_param = self.request.query_params.get('is_active')
+            if is_active_param is None:
+                queryset = queryset.filter(is_active=True)
+
+        return queryset
 
     def get_serializer_class(self):
         """Use different serializers for different actions."""
