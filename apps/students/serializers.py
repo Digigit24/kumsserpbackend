@@ -129,17 +129,18 @@ class GuardianSerializer(serializers.ModelSerializer):
     """Serializer for Guardian model."""
     students = serializers.SerializerMethodField()
     student = serializers.IntegerField(write_only=True, required=False, help_text="ID of the student to link this guardian to")
+    full_name = serializers.CharField(source='get_full_name', read_only=True)
 
     class Meta:
         model = Guardian
         fields = [
-            'id', 'user', 'user_details', 'first_name', 'middle_name', 'last_name',
+            'id', 'user', 'first_name', 'middle_name', 'last_name',
             'full_name', 'relation', 'email', 'phone', 'alternate_phone',
             'occupation', 'annual_income', 'address', 'photo',
             'students', 'student',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'full_name', 'user_details', 'created_at', 'updated_at', 'students']
+        read_only_fields = ['id', 'full_name', 'created_at', 'updated_at', 'students']
 
     def get_students(self, obj):
         """Return list of students associated with this guardian."""
