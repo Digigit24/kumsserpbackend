@@ -401,6 +401,7 @@ class HolidayViewSet(CollegeScopedModelViewSet):
         description="Retrieve weekend day configurations for colleges.",
         parameters=[
             OpenApiParameter(name='college', type=OpenApiTypes.INT, description='Filter by college ID'),
+            OpenApiParameter(name='search', type=OpenApiTypes.STR, description='Search by day name (e.g., Sunday) or college'),
         ],
         responses={200: WeekendSerializer(many=True)},
         tags=['Weekends']
@@ -443,6 +444,37 @@ class WeekendViewSet(CollegeScopedModelViewSet):
     filterset_fields = ['college', 'day', 'is_active']
     ordering_fields = ['day']
     ordering = ['day']
+
+    def get_queryset(self):
+        """
+        Extend queryset to support search by day name.
+        """
+        queryset = super().get_queryset()
+        search_query = self.request.query_params.get('search')
+
+        if search_query:
+            query = Q()
+            
+            # 1. Search by day name
+            days = {
+                'monday': 0, 'tuesday': 1, 'wednesday': 2, 'thursday': 3,
+                'friday': 4, 'saturday': 5, 'sunday': 6
+            }
+            # Find all days that match the search string (partial match)
+            matched_days = [
+                val for name, val in days.items() 
+                if search_query.lower() in name
+            ]
+            if matched_days:
+                query |= Q(day__in=matched_days)
+
+            # 2. Search by College Name/Code
+            query |= Q(college__name__icontains=search_query)
+            query |= Q(college__code__icontains=search_query)
+
+            queryset = queryset.filter(query)
+
+        return queryset
 
 
 # ============================================================================
