@@ -366,6 +366,40 @@ class UserViewSet(CollegeScopedModelViewSet):
         serializer = UserListSerializer(users, many=True)
         return Response(serializer.data)
 
+    @extend_schema(
+        summary="Export users",
+        description="Export filtered list of users as CSV.",
+        responses={200: OpenApiTypes.BINARY},
+        tags=['Users']
+    )
+    @action(detail=False, methods=['get'])
+    def export(self, request):
+        """Export users to CSV."""
+        import csv
+        from django.http import HttpResponse
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="users_export_{timezone.now().strftime("%Y%m%d%H%M%S")}.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['ID', 'Username', 'Email', 'Full Name', 'Type', 'College', 'Is Active', 'Date Joined'])
+
+        users = self.filter_queryset(self.get_queryset())
+        
+        for user in users:
+            writer.writerow([
+                str(user.id),
+                user.username,
+                user.email,
+                user.get_full_name(),
+                user.get_user_type_display(),
+                user.college.name if user.college else 'N/A',
+                'Yes' if user.is_active else 'No',
+                user.date_joined.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+
+        return response
+
 
 # ============================================================================
 # ROLE VIEWSET
