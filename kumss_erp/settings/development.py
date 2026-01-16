@@ -6,7 +6,7 @@ from .base import *
 # Debug mode enabled for development
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]',"https://kumsserp2.celiyo.com"]
 
 # Development-specific installed apps
 # INSTALLED_APPS += [
