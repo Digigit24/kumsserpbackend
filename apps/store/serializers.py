@@ -803,27 +803,33 @@ class IndentItemSerializer(serializers.ModelSerializer):
 
 class IndentItemCreateSerializer(serializers.ModelSerializer):
     # Accept CentralStoreInventory ID (what frontend sends) and resolve to StoreItem
-    central_store_item = serializers.IntegerField()
+    central_store_item = serializers.IntegerField(write_only=True, source=None)
 
     class Meta:
         model = IndentItem
         exclude = ['indent']
 
-    def validate_central_store_item(self, value):
+    def validate(self, attrs):
         """Convert CentralStoreInventory ID to StoreItem instance."""
         from .models import CentralStoreInventory, StoreItem
-        
-        # First try to find by CentralStoreInventory ID
-        inventory = CentralStoreInventory.objects.filter(id=value).first()
-        if inventory and inventory.item:
-            return inventory.item
-        
-        # Fallback: check if it's a direct StoreItem ID
-        item = StoreItem._base_manager.filter(id=value).first()
-        if item:
-            return item
-        
-        raise serializers.ValidationError(f"Invalid item ID {value} - not found in inventory or items.")
+
+        inventory_id = attrs.pop('central_store_item', None)
+        if inventory_id:
+            # First try to find by CentralStoreInventory ID
+            inventory = CentralStoreInventory.objects.filter(id=inventory_id).first()
+            if inventory and inventory.item:
+                attrs['central_store_item'] = inventory.item
+            else:
+                # Fallback: check if it's a direct StoreItem ID
+                item = StoreItem._base_manager.filter(id=inventory_id).first()
+                if item:
+                    attrs['central_store_item'] = item
+                else:
+                    raise serializers.ValidationError({
+                        'central_store_item': f"Invalid item ID {inventory_id} - not found in inventory or items."
+                    })
+
+        return super().validate(attrs)
 
 
 
