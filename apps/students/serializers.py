@@ -156,6 +156,22 @@ class StudentGuardianSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'student_name', 'guardian_details', 'created_at', 'updated_at']
 
+    def to_internal_value(self, data):
+        """
+        Handle nested guardian creation if data is passed as a dict.
+        """
+        if 'guardian' in data and isinstance(data['guardian'], dict):
+            # Nested creation logic
+            guardian_data = data['guardian']
+            guardian_serializer = GuardianSerializer(data=guardian_data)
+            if guardian_serializer.is_valid(raise_exception=True):
+                guardian = guardian_serializer.save()
+                # Use a mutable copy of data
+                data = data.copy()
+                data['guardian'] = guardian.id
+        
+        return super().to_internal_value(data)
+
 
 # ============================================================================
 # STUDENT ADDRESS SERIALIZERS
