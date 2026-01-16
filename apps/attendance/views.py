@@ -110,12 +110,14 @@ class StudentAttendanceViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
         )
 
         if college_id == 'all' or (is_global_user and not college_id):
-            return queryset
+            return queryset.select_related('student', 'class_obj', 'section')
 
         if not college_id:
             college_id = self.get_college_id(required=True)
 
-        queryset = queryset.filter(class_obj__college_id=college_id)
+        queryset = queryset.filter(class_obj__college_id=college_id).select_related(
+            'student', 'class_obj', 'section'
+        )
 
         # Handle filtering by 'subject'
         subject_id = self.request.query_params.get('subject')

@@ -22,62 +22,13 @@ class StudentAttendanceListSerializer(serializers.ModelSerializer):
     class_name = serializers.CharField(source='class_obj.name', read_only=True)
     section_name = serializers.CharField(source='section.name', read_only=True)
 
-    subjects = serializers.SerializerMethodField()
-
     class Meta:
         model = StudentAttendance
         fields = [
             'id', 'student', 'student_name', 'class_obj', 'class_name',
-            'section', 'section_name', 'date', 'status', 'check_in_time', 'check_out_time',
-            'subjects'
+            'section', 'section_name', 'date', 'status', 'check_in_time', 'check_out_time'
         ]
-        read_only_fields = ['id', 'student_name', 'class_name', 'section_name', 'subjects']
-
-    def get_subjects(self, obj):
-        """
-        Return list of subjects for the student.
-        Combined logic:
-        1. Subjects assigned to student's class/section (mandatory).
-        2. Optional subjects chosen by the student.
-        """
-        student = obj.student
-        class_obj = obj.class_obj
-        section = obj.section
-        
-        # 1. Get mandatory subjects (SubjectAssignments for class/section where is_optional=False)
-        from apps.academic.models import SubjectAssignment
-        mandatory_assignments = SubjectAssignment.objects.filter(
-            class_obj=class_obj,
-            section=section,
-            is_optional=False
-        ).select_related('subject')
-
-        subjects_data = []
-        seen_subject_ids = set()
-
-        for assignment in mandatory_assignments:
-            if assignment.subject.id not in seen_subject_ids:
-                subjects_data.append({
-                    'id': assignment.subject.id,
-                    'name': assignment.subject.name,
-                    'code': assignment.subject.code,
-                    'is_optional': False
-                })
-                seen_subject_ids.add(assignment.subject.id)
-        
-        # 2. Add student's specifically chosen optional subjects
-        # Note: We look at student.optional_subjects which is M2M to Subject
-        for subject in student.optional_subjects.all():
-             if subject.id not in seen_subject_ids:
-                 subjects_data.append({
-                     'id': subject.id,
-                     'name': subject.name,
-                     'code': subject.code,
-                     'is_optional': True
-                 })
-                 seen_subject_ids.add(subject.id)
-
-        return subjects_data
+        read_only_fields = ['id', 'student_name', 'class_name', 'section_name']
 
 
 class StudentAttendanceSerializer(serializers.ModelSerializer):
