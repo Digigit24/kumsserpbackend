@@ -36,24 +36,6 @@ class StudentCategorySerializer(TenantAuditMixin, serializers.ModelSerializer):
 # ============================================================================
 
 
-class StudentGroupSerializer(TenantAuditMixin, serializers.ModelSerializer):
-    """Serializer for StudentGroup model."""
-    college_name = serializers.CharField(source='college.short_name', read_only=True)
-
-    class Meta:
-        model = StudentGroup
-        fields = [
-            'id', 'college', 'college_name', 'name', 'description', 'is_active',
-            'created_by', 'updated_by', 'created_at', 'updated_at'
-        ]
-        read_only_fields = ['id', 'college_name', 'created_by', 'updated_by', 'created_at', 'updated_at']
-
-
-# ============================================================================
-# STUDENT SERIALIZERS
-# ============================================================================
-
-
 class StudentListSerializer(serializers.ModelSerializer):
     """Serializer for listing students (minimal fields)."""
     college_name = serializers.CharField(source='college.name', read_only=True)
@@ -69,6 +51,28 @@ class StudentListSerializer(serializers.ModelSerializer):
             'current_class', 'current_class_name', 'is_active', 'is_alumni'
         ]
         read_only_fields = ['id', 'full_name', 'college_name', 'program_name', 'current_class_name']
+
+
+class StudentGroupSerializer(TenantAuditMixin, serializers.ModelSerializer):
+    """Serializer for StudentGroup model."""
+    college_name = serializers.CharField(source='college.short_name', read_only=True)
+    students = StudentListSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = StudentGroup
+        fields = [
+            'id', 'college', 'college_name', 'name', 'description', 'students', 'is_active',
+            'created_by', 'updated_by', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'college_name', 'created_by', 'updated_by', 'created_at', 'updated_at']
+
+
+# ============================================================================
+# STUDENT SERIALIZERS
+# ============================================================================
+
+
+
 
 
 class StudentSerializer(TenantAuditMixin, serializers.ModelSerializer):

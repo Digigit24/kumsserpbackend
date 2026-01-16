@@ -156,6 +156,27 @@ class StudentGroupViewSet(CollegeScopedModelViewSet):
     def perform_destroy(self, instance):
         instance.soft_delete()
 
+    @action(detail=True, methods=['post'], url_path='add-students')
+    def add_students(self, request, pk=None):
+        """Add students to this group."""
+        group = self.get_object()
+        student_ids = request.data.get('student_ids', [])
+        
+        if not student_ids:
+            return Response(
+                {"detail": "No student IDs provided."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        # Filter students relevant to the group's college to prevent cross-college additions
+        students = Student.objects.filter(id__in=student_ids, college=group.college)
+        updated_count = students.update(group=group)
+        
+        return Response(
+            {"detail": f"Successfully added {updated_count} students to group {group.name}."},
+            status=status.HTTP_200_OK
+        )
+
 
 # ============================================================================
 # STUDENT VIEWSET
@@ -289,7 +310,7 @@ class StudentViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
 )
 class GuardianViewSet(RelatedCollegeScopedModelViewSet):
     """ViewSet for managing guardians."""
-    queryset = Guardian.objects.select_related('user')
+    queryset = Guardian.objects.select_related('user').distinct()
     related_college_lookup = 'students__student__college_id'
     serializer_class = GuardianSerializer
     permission_classes = [IsAuthenticated]
