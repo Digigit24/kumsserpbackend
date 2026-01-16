@@ -90,11 +90,32 @@ class VendorSerializer(serializers.ModelSerializer):
 
 
 class StockReceiveSerializer(serializers.ModelSerializer):
+    item = serializers.IntegerField(write_only=True, source=None, required=False)
     item_name = serializers.CharField(source='item.name', read_only=True)
     vendor_name = serializers.CharField(source='vendor.name', read_only=True, allow_null=True)
+
     class Meta:
         model = StockReceive
         fields = '__all__'
+
+    def validate(self, attrs):
+        from .models import CentralStoreInventory, StoreItem
+
+        inventory_id = attrs.pop('item', None)
+        if inventory_id:
+            inventory = CentralStoreInventory.objects.filter(id=inventory_id).first()
+            if inventory and inventory.item:
+                attrs['item'] = inventory.item
+            else:
+                item = StoreItem._base_manager.filter(id=inventory_id).first()
+                if item:
+                    attrs['item'] = item
+                else:
+                    raise serializers.ValidationError({
+                        'item': f"Invalid item ID {inventory_id} - not found in inventory or items."
+                    })
+
+        return super().validate(attrs)
 
 
 class StoreSaleSerializer(serializers.ModelSerializer):
@@ -108,11 +129,30 @@ class StoreSaleSerializer(serializers.ModelSerializer):
 
 
 class SaleItemSerializer(serializers.ModelSerializer):
+    item = serializers.IntegerField(write_only=True, source=None, required=False)
+
     class Meta:
         model = SaleItem
         fields = '__all__'
 
     def validate(self, attrs):
+        from .models import CentralStoreInventory, StoreItem
+
+        # Convert inventory ID to StoreItem
+        inventory_id = attrs.pop('item', None)
+        if inventory_id:
+            inventory = CentralStoreInventory.objects.filter(id=inventory_id).first()
+            if inventory and inventory.item:
+                attrs['item'] = inventory.item
+            else:
+                item = StoreItem._base_manager.filter(id=inventory_id).first()
+                if item:
+                    attrs['item'] = item
+                else:
+                    raise serializers.ValidationError({
+                        'item': f"Invalid item ID {inventory_id} - not found in inventory or items."
+                    })
+
         attrs = super().validate(attrs)
         item = attrs.get('item')
         quantity = attrs.get('quantity')
@@ -937,9 +977,31 @@ class MaterialIssueItemSerializer(serializers.ModelSerializer):
 
 
 class MaterialIssueItemCreateSerializer(serializers.ModelSerializer):
+    item = serializers.IntegerField(write_only=True, source=None)
+
     class Meta:
         model = MaterialIssueItem
         exclude = ['material_issue']
+
+    def validate(self, attrs):
+        """Convert CentralStoreInventory ID to StoreItem instance."""
+        from .models import CentralStoreInventory, StoreItem
+
+        inventory_id = attrs.pop('item', None)
+        if inventory_id:
+            inventory = CentralStoreInventory.objects.filter(id=inventory_id).first()
+            if inventory and inventory.item:
+                attrs['item'] = inventory.item
+            else:
+                item = StoreItem._base_manager.filter(id=inventory_id).first()
+                if item:
+                    attrs['item'] = item
+                else:
+                    raise serializers.ValidationError({
+                        'item': f"Invalid item ID {inventory_id} - not found in inventory or items."
+                    })
+
+        return super().validate(attrs)
 
 
 class MaterialIssueNoteListSerializer(serializers.ModelSerializer):
@@ -1199,13 +1261,34 @@ class CentralStoreInventorySerializer(CentralStoreInventoryListSerializer):
 
 
 class InventoryTransactionSerializer(serializers.ModelSerializer):
+    item = serializers.IntegerField(write_only=True, source=None, required=False)
     central_store_name = serializers.CharField(source='central_store.name', read_only=True)
     item_name = serializers.CharField(source='item.name', read_only=True)
     performed_by_name = serializers.CharField(source='performed_by.get_full_name', read_only=True, allow_null=True)
     reference_type_name = serializers.CharField(source='reference_type.model', read_only=True, allow_null=True)
+
     class Meta:
         model = InventoryTransaction
         fields = '__all__'
+
+    def validate(self, attrs):
+        from .models import CentralStoreInventory, StoreItem
+
+        inventory_id = attrs.pop('item', None)
+        if inventory_id:
+            inventory = CentralStoreInventory.objects.filter(id=inventory_id).first()
+            if inventory and inventory.item:
+                attrs['item'] = inventory.item
+            else:
+                item = StoreItem._base_manager.filter(id=inventory_id).first()
+                if item:
+                    attrs['item'] = item
+                else:
+                    raise serializers.ValidationError({
+                        'item': f"Invalid item ID {inventory_id} - not found in inventory or items."
+                    })
+
+        return super().validate(attrs)
 
 
 class StockSummarySerializer(serializers.Serializer):
