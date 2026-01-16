@@ -123,8 +123,8 @@ class StudentSerializer(TenantAuditMixin, serializers.ModelSerializer):
 
 class GuardianSerializer(serializers.ModelSerializer):
     """Serializer for Guardian model."""
-    full_name = serializers.CharField(source='get_full_name', read_only=True)
-    user_details = UserBasicSerializer(source='user', read_only=True)
+    students = serializers.SerializerMethodField()
+    student = serializers.IntegerField(write_only=True, required=False, help_text="ID of the student to link this guardian to")
 
     class Meta:
         model = Guardian
@@ -132,9 +132,45 @@ class GuardianSerializer(serializers.ModelSerializer):
             'id', 'user', 'user_details', 'first_name', 'middle_name', 'last_name',
             'full_name', 'relation', 'email', 'phone', 'alternate_phone',
             'occupation', 'annual_income', 'address', 'photo',
+            'students', 'student',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'full_name', 'user_details', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'full_name', 'user_details', 'created_at', 'updated_at', 'students']
+
+    def get_students(self, obj):
+        """Return list of students associated with this guardian."""
+        # 'students' is the related_name on StudentGuardian for the guardian FK
+        # which returns a queryset of StudentGuardian objects.
+        # We need to fetch the actual Student objects from them.
+        student_guardians = obj.students.all().select_related('student')
+        return [
+            {
+                'id': sg.student.id,
+                'full_name': sg.student.get_full_name(),
+                'admission_number': sg.student.admission_number,
+                'relation': sg.guardian.relation  # Relation is stored on guardian, but logic might vary
+            }
+            for sg in student_guardians
+        ]
+
+    def create(self, validated_data):
+        student_id = validated_data.pop('student', None)
+        guardian = super().create(validated_data)
+
+        if student_id:
+            from .models import Student
+            try:
+                student = Student.objects.get(pk=student_id)
+                from .models import StudentGuardian
+                StudentGuardian.objects.create(
+                    student=student,
+                    guardian=guardian,
+                    is_primary=False  # Default or logic as needed
+                )
+            except Student.DoesNotExist:
+                pass  # Or raise validation error if strict
+
+        return guardian
 
 
 # ============================================================================
