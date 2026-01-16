@@ -160,6 +160,16 @@ class ProgramViewSet(CachedStaticMixin, CollegeScopedModelViewSet):
     ordering_fields = ['name', 'code', 'display_order', 'created_at']
     ordering = ['display_order', 'name']
 
+    def get_queryset(self):
+        """Default to active programs only for list action if filter not specified."""
+        queryset = super().get_queryset()
+        if self.action == 'list':
+            is_active_param = self.request.query_params.get('is_active')
+            if is_active_param is None:
+                queryset = queryset.filter(is_active=True)
+        return queryset
+
+
     def get_serializer_class(self):
         if self.action == 'list':
             return ProgramListSerializer
