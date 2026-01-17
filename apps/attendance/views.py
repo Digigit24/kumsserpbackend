@@ -80,9 +80,10 @@ from apps.core.mixins import CollegeScopedModelViewSet, RelatedCollegeScopedMode
         tags=['Attendance - Students']
     ),
 )
-class StudentAttendanceViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
+class StudentAttendanceViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
     """ViewSet for managing student attendance."""
-    queryset = StudentAttendance.objects.all_colleges()
+    queryset = StudentAttendance.objects.select_related('student__college', 'class_obj', 'section')
+    related_college_lookup = 'student__college_id'
     serializer_class = StudentAttendanceSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -390,7 +391,7 @@ class StudentAttendanceViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
 )
 class SubjectAttendanceViewSet(RelatedCollegeScopedModelViewSet):
     """ViewSet for managing subject attendance."""
-    queryset = SubjectAttendance.objects.all_colleges()
+    queryset = SubjectAttendance.objects.select_related('student__college', 'subject_assignment', 'marked_by')
     serializer_class = SubjectAttendanceSerializer
     permission_classes = [IsAuthenticated]
     related_college_lookup = 'student__college_id'
@@ -617,7 +618,7 @@ class SubjectAttendanceViewSet(RelatedCollegeScopedModelViewSet):
 )
 class StaffAttendanceViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
     """ViewSet for managing staff attendance."""
-    queryset = StaffAttendance.objects.all_colleges()
+    queryset = StaffAttendance.objects.select_related('teacher__college', 'marked_by')
     serializer_class = StaffAttendanceSerializer
     permission_classes = [IsAuthenticated]
     related_college_lookup = 'teacher__college_id'
@@ -682,7 +683,7 @@ class StaffAttendanceViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewS
 )
 class AttendanceNotificationViewSet(CachedReadOnlyMixin, RelatedCollegeScopedModelViewSet):
     """ViewSet for managing attendance notifications."""
-    queryset = AttendanceNotification.objects.all_colleges()
+    queryset = AttendanceNotification.objects.select_related('attendance__student__college', 'recipient')
     serializer_class = AttendanceNotificationSerializer
     permission_classes = [IsAuthenticated]
     related_college_lookup = 'attendance__student__college_id'
