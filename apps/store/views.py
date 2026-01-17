@@ -574,6 +574,14 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
 
     def get_queryset(self):
         qs = StoreIndent.objects.all_colleges().select_related('college', 'central_store', 'requesting_store_manager', 'approved_by')
+        
+        # Only filter by college for college_admin (principal) - NOT for superuser or central_manager
+        user = self.request.user
+        if not user.is_superuser and getattr(user, 'user_type', None) == 'college_admin':
+            college_id = getattr(user, 'college_id', None) or self.request.headers.get('X-College-Id')
+            if college_id:
+                qs = qs.filter(college_id=college_id)
+        
         if self.action == 'list':
             qs = self._with_issue_flags(qs)
         elif self.action == 'retrieve':
@@ -703,11 +711,13 @@ class StoreIndentViewSet(CollegeScopedModelViewSet):
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def pending_college_approvals(self, request):
-        """For college admin, list indents pending their approval"""
-        college_id = getattr(request.user, 'college_id', None)
+        """For college admin/principal, list indents pending their approval - only their college"""
+        # Get college_id from user attribute or X-College-Id header
+        college_id = getattr(request.user, 'college_id', None) or request.headers.get('X-College-Id')
         if request.user.is_superuser:
             indents = StoreIndent.objects.all_colleges().filter(status='pending_college_approval')
         elif college_id:
+            # Principal/college_admin only sees their own college's indents
             indents = StoreIndent.objects.all_colleges().filter(status='pending_college_approval', college_id=college_id)
         else:
             indents = self.get_queryset().none()
