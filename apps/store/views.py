@@ -329,6 +329,12 @@ class ProcurementRequirementViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = ProcurementRequirement.objects.all().select_related('central_store')
+
+        # College admins should not see procurement requirements (central store only)
+        user = self.request.user
+        if not user.is_superuser and getattr(user, 'user_type', None) == 'college_admin':
+            return ProcurementRequirement.objects.none()
+
         if self.action == 'list':
             qs = qs.prefetch_related('quotations')
         elif self.action == 'retrieve':
@@ -398,6 +404,12 @@ class SupplierQuotationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = SupplierQuotation.objects.all().select_related('requirement__central_store', 'supplier')
+
+        # College admins should not see supplier quotations (central store only)
+        user = self.request.user
+        if not user.is_superuser and getattr(user, 'user_type', None) == 'college_admin':
+            return SupplierQuotation.objects.none()
+
         if self.action in ['retrieve', 'compare_quotations']:
             qs = qs.prefetch_related('items')
         return qs
@@ -471,6 +483,12 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = PurchaseOrder.objects.all().select_related('requirement__central_store', 'supplier', 'central_store', 'quotation')
+
+        # College admins should not see purchase orders (central store only)
+        user = self.request.user
+        if not user.is_superuser and getattr(user, 'user_type', None) == 'college_admin':
+            return PurchaseOrder.objects.none()
+
         if self.action == 'retrieve':
             qs = qs.prefetch_related('items')
         return qs
@@ -515,6 +533,12 @@ class GoodsReceiptNoteViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = GoodsReceiptNote.objects.all().select_related('purchase_order__requirement', 'supplier', 'central_store', 'received_by')
+
+        # College admins should not see goods receipt notes (central store only)
+        user = self.request.user
+        if not user.is_superuser and getattr(user, 'user_type', None) == 'college_admin':
+            return GoodsReceiptNote.objects.none()
+
         if self.action == 'retrieve':
             qs = qs.prefetch_related('items__po_item__purchase_order', 'inspection')
         return qs
