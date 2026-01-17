@@ -239,6 +239,17 @@ class StudentViewSet(CachedReadOnlyMixin, CollegeScopedModelViewSet):
     ordering_fields = ['admission_number', 'first_name', 'admission_date', 'created_at']
     ordering = ['admission_number']
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        # Handle class_obj and section aliases
+        class_obj = self.request.query_params.get('class_obj')
+        section = self.request.query_params.get('section')
+        if class_obj:
+            qs = qs.filter(current_class_id=class_obj)
+        if section:
+            qs = qs.filter(current_section_id=section)
+        return qs
+
     def get_serializer_class(self):
         if self.action == 'list':
             return StudentListSerializer
