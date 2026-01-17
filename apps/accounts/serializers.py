@@ -52,7 +52,7 @@ class TenantAuditMixin(serializers.Serializer):
 class UserListSerializer(serializers.ModelSerializer):
     """Serializer for listing users (minimal fields)."""
     full_name = serializers.CharField(source='get_full_name', read_only=True)
-    college_name = serializers.CharField(source='college.short_name', read_only=True)
+    college_name = serializers.SerializerMethodField()
     user_type_display = serializers.CharField(source='get_user_type_display', read_only=True)
     teacher_id = serializers.SerializerMethodField()
 
@@ -74,11 +74,38 @@ class UserListSerializer(serializers.ModelSerializer):
             return obj.teacher_profile.id
         return None
 
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_college_name(self, obj):
+        """Get college name with robust fallbacks."""
+        # 1. Try direct relationship
+        if obj.college:
+            return obj.college.name
+            
+        # 2. Try fetching by college_id if it exists on the user object
+        if obj.college_id:
+            try:
+                from apps.core.models import College
+                return College.objects.values_list('name', flat=True).get(id=obj.college_id)
+            except (ValueError, Exception):
+                pass
+        
+        # 3. Fallback to context (X-College-Id header) as a last resort
+        request = self.context.get('request')
+        if request:
+            college_id = request.headers.get('X-College-Id')
+            if college_id and str(college_id).lower() != 'all':
+                try:
+                    from apps.core.models import College
+                    return College.objects.values_list('name', flat=True).get(id=college_id)
+                except (ValueError, Exception):
+                    pass
+        return None
+
 
 class UserSerializer(serializers.ModelSerializer):
     """Full serializer for User model with all fields."""
     full_name = serializers.CharField(source='get_full_name', read_only=True)
-    college_name = serializers.CharField(source='college.short_name', read_only=True)
+    college_name = serializers.SerializerMethodField()
     user_type_display = serializers.CharField(source='get_user_type_display', read_only=True)
     gender_display = serializers.CharField(source='get_gender_display', read_only=True)
 
@@ -108,6 +135,34 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True},
         }
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_college_name(self, obj):
+        """Get college name with robust fallbacks."""
+        # 1. Try direct relationship
+        if obj.college:
+            return obj.college.name
+            
+        # 2. Try fetching by college_id if it exists on the user object
+        if obj.college_id:
+            try:
+                from apps.core.models import College
+                return College.objects.values_list('name', flat=True).get(id=obj.college_id)
+            except (ValueError, Exception):
+                pass
+        
+        # 3. Fallback to context (X-College-Id header) as a last resort
+        # This is strictly for cases where user has NO college assigned but we are viewing them in a college context
+        request = self.context.get('request')
+        if request:
+            college_id = request.headers.get('X-College-Id')
+            if college_id and str(college_id).lower() != 'all':
+                try:
+                    from apps.core.models import College
+                    return College.objects.values_list('name', flat=True).get(id=college_id)
+                except (ValueError, Exception):
+                    pass
+        return None
 
     @extend_schema_field(serializers.UUIDField(allow_null=True))
     def get_teacher_id(self, obj):
