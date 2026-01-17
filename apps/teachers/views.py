@@ -28,7 +28,7 @@ from .serializers import (
     HomeworkSubmissionSerializer,
     BulkDeleteSerializer,
 )
-from apps.core.mixins import CollegeScopedModelViewSet
+from apps.core.mixins import CollegeScopedModelViewSet, RelatedCollegeScopedModelViewSet
 
 
 # ============================================================================
@@ -309,9 +309,10 @@ class AssignmentViewSet(CollegeScopedModelViewSet):
         tags=['Teachers - Assignment Submissions']
     ),
 )
-class AssignmentSubmissionViewSet(CollegeScopedModelViewSet):
+class AssignmentSubmissionViewSet(RelatedCollegeScopedModelViewSet):
     """ViewSet for managing assignment submissions."""
-    queryset = AssignmentSubmission.objects.all_colleges()
+    queryset = AssignmentSubmission.objects.select_related('assignment__class_obj__college', 'student__college')
+    related_college_lookup = 'student__college_id'
     serializer_class = AssignmentSubmissionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -440,9 +441,10 @@ class HomeworkViewSet(CollegeScopedModelViewSet):
         tags=['Teachers - Homework Submissions']
     ),
 )
-class HomeworkSubmissionViewSet(CollegeScopedModelViewSet):
+class HomeworkSubmissionViewSet(RelatedCollegeScopedModelViewSet):
     """ViewSet for managing homework submissions."""
-    queryset = HomeworkSubmission.objects.all_colleges()
+    queryset = HomeworkSubmission.objects.select_related('homework__class_obj__college', 'student__college')
+    related_college_lookup = 'student__college_id'
     serializer_class = HomeworkSubmissionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
